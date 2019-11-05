@@ -23,11 +23,14 @@ public class Main {
             LOG.error("The game loop unexpectedly stopped.");
             LOG.error("\tCause: {}", (e.getCause() != null ? e.getCause().toString() : "Not defined."));
             LOG.error("\tMessage: {}", e.getMessage());
-            LOG.error("\tStackTrace:\n{}",
-                    Arrays.stream(e.getStackTrace())
-                            .map(StackTraceElement::toString)
-                            .reduce(e.toString(),
-                                    (accumulator, element) -> String.format("%s\n\t%s", accumulator, element)));
+
+            if (debugStackTraces) {
+                LOG.error("\tStackTrace:\n{}",
+                        Arrays.stream(e.getStackTrace())
+                                .map(StackTraceElement::toString)
+                                .reduce(e.toString(),
+                                        (accumulator, element) -> String.format("%s\n\t%s", accumulator, element)));
+            }
         }
     }
 }
