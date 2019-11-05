@@ -21,6 +21,18 @@ public abstract class GameRunner<
         TInput extends InputProvider>
         implements AutoCloseable {
     /**
+     * Should the game loop continue running
+     *
+     * @param game game to check running status for
+     *
+     * @return <code>true</code> if runner should continue with the game loop. <code>false</code> to
+     * break from the loop.
+     */
+    protected boolean shouldContinueLoop(@NonNull TGame game) {
+        return !game.isFinished();
+    }
+
+    /**
      * Runs the game. The main entry-point for the game, the first and only call launcher should
      * need to make on the instance.
      *
@@ -37,11 +49,11 @@ public abstract class GameRunner<
         // Create NOP-renderer if provided renderer is null
         GameRenderer<TGame> actualRenderer = renderer != null
                 ? renderer
-                : (g, d) -> {/* NOP */};
+                : new NOPRenderer();
 
         // Loop
         var previousFrameTime = game.getTime().getCurrentTime();
-        while (!game.isFinished()) {
+        while (shouldContinueLoop(game)) {
             if (game.isDisposed()) {
                 throw new IllegalStateException("Running the loop for already disposed game!");
             }
@@ -75,5 +87,17 @@ public abstract class GameRunner<
      */
     public void presentGameState(TGame game, GameRenderer<TGame> renderer, double delta) {
         renderer.render(game, delta);
+    }
+
+    private class NOPRenderer implements GameRenderer<TGame> {
+        @Override
+        public void render(TGame game, double delta) {
+
+        }
+
+        @Override
+        public void close() throws Exception {
+
+        }
     }
 }

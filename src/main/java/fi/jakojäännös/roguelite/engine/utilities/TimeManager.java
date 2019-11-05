@@ -1,4 +1,4 @@
-package fi.jakojäännös.roguelite.utilities;
+package fi.jakojäännös.roguelite.engine.utilities;
 
 public interface TimeManager {
     long getCurrentTime();
