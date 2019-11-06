@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Slf4j
 public class Main {
@@ -22,9 +23,9 @@ public class Main {
             }
         } catch (Exception e) {
             LOG.error("The game loop unexpectedly stopped.");
-            LOG.error("\tException:\t{}", e.toString());
+            LOG.error("\tException:\t{}", e.getClass().getName());
             LOG.error("\tAt:\t\t{}:{}", e.getStackTrace()[0].getFileName(), e.getStackTrace()[0].getLineNumber());
-            LOG.error("\tCause:\t\t{}", (e.getCause() != null ? e.getCause().toString() : "Not defined."));
+            LOG.error("\tCause:\t\t{}", Optional.ofNullable(e.getCause()).map(Throwable::toString).orElse("Cause not defined."));
             LOG.error("\tMessage:\t{}", e.getMessage());
 
             if (debugStackTraces) {
