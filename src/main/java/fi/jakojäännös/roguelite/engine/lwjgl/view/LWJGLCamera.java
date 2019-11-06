@@ -13,7 +13,7 @@ public class LWJGLCamera extends Camera {
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
     private int viewportWidth;
     private int viewportHeight;
-    private int pixelsPerUnit;
+    private float pixelsPerUnit;
 
     private final Matrix4f projectionMatrix;
     private final float[] cachedProjectionMatrixArray;
@@ -56,6 +56,8 @@ public class LWJGLCamera extends Camera {
     public LWJGLCamera() {
         super(new Vector2f(0f, 0.0f));
 
+        this.pixelsPerUnit = 5.0f;
+
         this.projectionMatrix = new Matrix4f();
         this.cachedProjectionMatrixArray = new float[16];
         this.projectionMatrixDirty = true;
@@ -81,7 +83,7 @@ public class LWJGLCamera extends Camera {
     private void refreshViewMatrixIfDirty() {
         if (this.viewMatrixDirty) {
             this.viewMatrix.identity()
-                    .translate(getX(), getY(), 0.0f)
+                    .translate(getX(), getY(), -1.0f)
                     //.scale(this.zoom);
                     .invert();
             this.viewMatrix.get(this.cachedViewMatrixArray);
