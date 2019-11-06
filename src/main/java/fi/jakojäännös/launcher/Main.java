@@ -15,12 +15,11 @@ public class Main {
         val debugStackTraces = true;
         val enableForceClose = true;
 
-        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>();
-            val game = new Roguelite();
-            val renderer = new RogueliteGameRenderer()
-        ) {
-            val inputProvider = new LWJGLInputProvider(runner.getWindowId(), enableForceClose);
-            runner.run(game, inputProvider, renderer);
+        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>()) {
+            try (val renderer = new RogueliteGameRenderer(runner.getWindow()); val game = new Roguelite()) {
+                val inputProvider = new LWJGLInputProvider(runner.getWindow(), enableForceClose);
+                runner.run(game, inputProvider, renderer);
+            }
         } catch (Exception e) {
             LOG.error("The game loop unexpectedly stopped.");
             LOG.error("\tException:\t{}", e.toString());

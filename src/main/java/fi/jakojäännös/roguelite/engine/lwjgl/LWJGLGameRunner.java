@@ -3,10 +3,12 @@ package fi.jakojäännös.roguelite.engine.lwjgl;
 import fi.jakojäännös.roguelite.engine.Game;
 import fi.jakojäännös.roguelite.engine.GameRunner;
 import fi.jakojäännös.roguelite.engine.input.InputProvider;
+import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojäännös.roguelite.engine.view.GameRenderer;
 import lombok.Getter;
 import lombok.NonNull;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
@@ -22,7 +24,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider> extends GameRunner<TGame, TInput> {
     @Getter
-    private final long windowId;
+    private final LWJGLWindow window;
 
     public LWJGLGameRunner() {
         GLFWErrorCallback.createPrint(System.err).set();
@@ -31,33 +33,11 @@ public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider> e
             throw new IllegalStateException("Unable to initialize GLFW");
         }
 
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        this.window = new LWJGLWindow();
 
-        windowId = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
-        if (windowId == NULL) {
-            throw new RuntimeException("Failed to create GLFW window");
-        }
-
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
-
-            glfwGetWindowSize(windowId, pWidth, pHeight);
-
-            Optional.ofNullable(glfwGetVideoMode(glfwGetPrimaryMonitor()))
-                    .ifPresent(videoMode -> {
-                        glfwSetWindowPos(
-                                windowId,
-                                (videoMode.width() - pWidth.get(0)) / 2,
-                                (videoMode.height() - pHeight.get(0)) / 2);
-                    });
-        }
-
-        glfwMakeContextCurrent(windowId);
+        glfwMakeContextCurrent(this.window.getId());
         glfwSwapInterval(1);
-        glfwShowWindow(windowId);
+        glfwShowWindow(this.window.getId());
 
         GL.createCapabilities();
         glClearColor(0.25f, 0.6f, 0.4f, 1.0f);
@@ -65,7 +45,7 @@ public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider> e
 
     @Override
     protected boolean shouldContinueLoop(@NonNull TGame game) {
-        return super.shouldContinueLoop(game) && !glfwWindowShouldClose(windowId);
+        return super.shouldContinueLoop(game) && !glfwWindowShouldClose(this.window.getId());
     }
 
     @Override
@@ -74,17 +54,13 @@ public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider> e
 
         super.presentGameState(game, renderer, delta);
 
-        glfwSwapBuffers(windowId);
+        glfwSwapBuffers(this.window.getId());
         glfwPollEvents();
     }
 
     @Override
     public void close() throws Exception {
-        glfwFreeCallbacks(windowId);
-        glfwDestroyWindow(windowId);
-
+        this.window.close();
         glfwTerminate();
-        Optional.ofNullable(glfwSetErrorCallback(null))
-                .ifPresent(Callback::free);
     }
 }
