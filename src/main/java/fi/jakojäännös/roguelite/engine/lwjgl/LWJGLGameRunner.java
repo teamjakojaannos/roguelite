@@ -50,7 +50,7 @@ public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider> e
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         this.window.close();
         glfwTerminate();
     }

@@ -47,7 +47,7 @@ public class Roguelite implements Game {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (this.disposed) {
             LOG.error(".close() called more than once for a game!");
             return;

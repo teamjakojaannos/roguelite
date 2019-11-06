@@ -57,7 +57,7 @@ public class LWJGLWindow implements Window, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         glfwFreeCallbacks(this.id);
         glfwDestroyWindow(this.id);
 
