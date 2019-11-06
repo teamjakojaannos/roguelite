@@ -13,7 +13,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
 @Slf4j
-public class LWJGLInputProvider extends InputProvider {
+public class LWJGLInputProvider implements InputProvider {
     private final Queue<InputEvent> inputEvents;
 
     public LWJGLInputProvider(LWJGLWindow lwjglWindow, boolean enableForceClose) {
@@ -44,5 +44,10 @@ public class LWJGLInputProvider extends InputProvider {
                 glfwSetWindowShouldClose(windowId, true);
             }
         });
+    }
+
+    @Override
+    public Queue<InputEvent> pollEvents() {
+        return inputEvents;
     }
 }

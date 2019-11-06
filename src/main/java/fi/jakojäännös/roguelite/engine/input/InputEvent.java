@@ -1,9 +1,11 @@
 package fi.jakojäännös.roguelite.engine.input;
 
+import lombok.Getter;
+
 public class InputEvent {
-    private final int key;
-    private final int scancode;
-    private final Action action;
+    @Getter private final int key;
+    @Getter private final int scancode;
+    @Getter private final Action action;
 
     public InputEvent(int key, int scancode, Action action) {
         this.key = key;

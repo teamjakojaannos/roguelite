@@ -6,6 +6,7 @@ import fi.jakojäännös.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojäännös.roguelite.engine.utilities.TimeManager;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import java.util.Queue;
 
@@ -39,6 +40,10 @@ public class Roguelite implements Game {
     @Override
     public void tick(Queue<InputEvent> inputEvents, double delta) {
         this.timeManager.tick();
+        while (!inputEvents.isEmpty()) {
+            val event = inputEvents.remove();
+            LOG.info("Received input event: {}/{}:{}", event.getScancode(), event.getKey(), event.getAction());
+        }
     }
 
     @Override
