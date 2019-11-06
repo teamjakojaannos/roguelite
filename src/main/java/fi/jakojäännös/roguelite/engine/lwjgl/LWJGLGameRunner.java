@@ -8,19 +8,10 @@ import fi.jakojäännös.roguelite.engine.view.GameRenderer;
 import lombok.Getter;
 import lombok.NonNull;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.system.Callback;
-import org.lwjgl.system.MemoryStack;
 
-import java.nio.IntBuffer;
-import java.util.Optional;
-
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider> extends GameRunner<TGame, TInput> {
     @Getter
