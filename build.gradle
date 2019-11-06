@@ -57,6 +57,7 @@ dependencies {
 }
 
 test {
+	environment "ENVIRONMENT", "test"
 	useJUnitPlatform()
 	testLogging {
 		events "passed", "skipped", "failed"

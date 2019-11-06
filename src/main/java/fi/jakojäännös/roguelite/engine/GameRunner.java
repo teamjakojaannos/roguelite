@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
+import java.util.Optional;
 import java.util.Queue;
 
 /**
@@ -46,10 +47,13 @@ public abstract class GameRunner<
             throw new IllegalStateException("Tried running an already disposed game!");
         }
 
-        // Create NOP-renderer if provided renderer is null
-        GameRenderer<TGame> actualRenderer = renderer != null
-                ? renderer
-                : new NOPRenderer();
+        // Create NOP-renderer if provided renderer is null and we are in the test environment
+        GameRenderer<TGame> actualRenderer =
+                Optional.ofNullable(renderer)
+                        .or(() -> Optional.ofNullable(System.getenv("ENVIRONMENT"))
+                                          .filter(env -> env.equalsIgnoreCase("test"))
+                                          .map(env -> new NOPRenderer()))
+                        .orElseThrow(() -> new IllegalStateException("run called outside test environment without specifying a valid renderer!"));
 
         // Loop
         var previousFrameTime = game.getTime().getCurrentTime();
