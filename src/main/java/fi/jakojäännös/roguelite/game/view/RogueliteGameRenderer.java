@@ -33,11 +33,15 @@ public class RogueliteGameRenderer implements GameRenderer<Roguelite> {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
 
+        val posX = 16.0f;
+        val posY = 16.0f;
+        val width = 16.0f;
+        val height = 16.0f;
         this.vertices = new float[]{
-                16.0f, 16.0f,
-                32.0f, 16.0f,
-                32.0f, 32.0f,
-                16.0f, 32.0f,
+                posX, posY,
+                posX + width, posY,
+                posX + width, posY + height,
+                posX, posY + height,
         };
         this.vbo = glGenBuffers();
         this.ebo = glGenBuffers();

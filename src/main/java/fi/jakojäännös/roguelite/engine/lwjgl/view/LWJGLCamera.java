@@ -37,10 +37,10 @@ public class LWJGLCamera extends Camera {
     public void resizeViewport(int viewportWidth, int viewportHeight) {
         this.viewportWidth = viewportWidth;
         this.viewportHeight = viewportHeight;
-        glViewport(0, 0, viewportWidth, viewportHeight);
+        glViewport(0, 0, this.viewportWidth, this.viewportHeight);
 
         this.projectionMatrixDirty = true;
-        LOG.info("Resizing viewport: {}x{}", viewportWidth, viewportHeight);
+        LOG.info("Resizing viewport: {}x{}", this.viewportWidth, this.viewportHeight);
     }
 
     @Override
@@ -56,9 +56,9 @@ public class LWJGLCamera extends Camera {
     public LWJGLCamera() {
         super(new Vector2f(0f, 0.0f));
 
-        this.pixelsPerUnit = 5.0f;
+        this.pixelsPerUnit = 8.0f;
 
-        this.projectionMatrix = new Matrix4f();
+        this.projectionMatrix = new Matrix4f().identity();
         this.cachedProjectionMatrixArray = new float[16];
         this.projectionMatrixDirty = true;
         resizeViewport(viewportWidth, viewportHeight);
@@ -70,20 +70,27 @@ public class LWJGLCamera extends Camera {
     }
 
     private void refreshProjectionMatrixIfDirty() {
-        val aspectRatio = (double) viewportWidth / viewportHeight;
-        val viewportHeightInUnits = viewportHeight / this.pixelsPerUnit;
-        this.projectionMatrix.setOrtho2D(
-                0,
-                (float) (aspectRatio * viewportHeightInUnits),
-                viewportHeight,
-                0);
-        this.projectionMatrix.get(cachedProjectionMatrixArray);
+        if (this.projectionMatrixDirty) {
+            LOG.trace("Refreshing projection matrix");
+            val aspectRatio = (double) this.viewportWidth / (double) this.viewportHeight;
+            val viewportHeightInUnits = (double) this.viewportHeight / this.pixelsPerUnit;
+            this.projectionMatrix.setOrtho2D(
+                    0,
+                    (float) (aspectRatio * viewportHeightInUnits),
+                    (float) viewportHeightInUnits,
+                    0);
+            this.projectionMatrix.get(this.cachedProjectionMatrixArray);
+
+            this.projectionMatrixDirty = false;
+        }
     }
 
     private void refreshViewMatrixIfDirty() {
         if (this.viewMatrixDirty) {
-            this.viewMatrix.identity()
-                    .translate(getX(), getY(), -1.0f)
+            LOG.trace("Refreshing view matrix");
+            this.viewMatrix
+                    .identity()
+                    .translate(getX(), getY(), 0.0f)
                     //.scale(this.zoom);
                     .invert();
             this.viewMatrix.get(this.cachedViewMatrixArray);
