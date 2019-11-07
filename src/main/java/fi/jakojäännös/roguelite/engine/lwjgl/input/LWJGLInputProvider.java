@@ -33,11 +33,13 @@ public class LWJGLInputProvider implements InputProvider {
                     inputAction = InputEvent.Action.REPEAT;
                     break;
                 default:
-                    // TODO: Handle errors/repeat actions
+                    LOG.error("Unknown key input action!");
                     return;
             }
-            // TODO: Convert key/scancode to some more sensible data-structure
-            this.inputEvents.offer(new InputEvent(key, scancode, inputAction));
+            this.inputEvents.offer(
+                    new InputEvent(
+                            InputEvent.Key.get(key).orElse(InputEvent.Key.KEY_UNKNOWN),
+                            inputAction));
 
             if (enableForceClose && key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
                 LOG.info("Received force close signal. Sending WindowShouldClose notify.");
@@ -49,5 +51,10 @@ public class LWJGLInputProvider implements InputProvider {
     @Override
     public Queue<InputEvent> pollEvents() {
         return inputEvents;
+    }
+
+    @Override
+    public int mapScancode(InputEvent.Key key) {
+        return glfwGetKeyScancode(key.getKey());
     }
 }

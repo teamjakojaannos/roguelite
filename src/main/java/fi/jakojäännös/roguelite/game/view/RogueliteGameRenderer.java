@@ -33,10 +33,10 @@ public class RogueliteGameRenderer implements GameRenderer<Roguelite> {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
 
-        val posX = 16.0f;
-        val posY = 16.0f;
-        val width = 16.0f;
-        val height = 16.0f;
+        val posX = 0.0f;
+        val posY = 0.0f;
+        val width = 1.0f;
+        val height = 1.0f;
         this.vertices = new float[]{
                 posX, posY,
                 posX + width, posY,
@@ -112,6 +112,12 @@ public class RogueliteGameRenderer implements GameRenderer<Roguelite> {
         // 1. Find entity tagged as camera target
         // 2. Snap camera position to target entity position
         // 3. Render
+
+        new Matrix4f()
+                .identity()
+                .translate(game.getPlayerX(), game.getPlayerY(), 0.0f)
+                .scale(game.getPlayerSize())
+                .get(this.modelTransformationMatrix);
 
         glUseProgram(this.shaderProgram);
 

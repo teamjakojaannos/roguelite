@@ -1,57 +1,48 @@
 package fi.jakojäännös.roguelite.game;
 
-import fi.jakojäännös.roguelite.engine.Game;
+import fi.jakojäännös.roguelite.engine.GameBase;
 import fi.jakojäännös.roguelite.engine.input.InputEvent;
-import fi.jakojäännös.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojäännös.roguelite.engine.utilities.TimeManager;
-import lombok.NonNull;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Queue;
 
 @Slf4j
-public class Roguelite implements Game {
-    private final SimpleTimeManager timeManager = new SimpleTimeManager();
+public class Roguelite extends GameBase {
+    private boolean inputLeft;
+    private boolean inputRight;
+    private boolean inputUp;
+    private boolean inputDown;
 
-    private boolean disposed = false;
-
-    @NonNull
-    @Override
-    public TimeManager getTime() {
-        return new SimpleTimeManager();
-    }
-
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
-
-    @Override
-    public void setFinished(boolean state) {
-
-    }
-
-    @Override
-    public boolean isDisposed() {
-        return disposed;
-    }
+    @Getter private float playerX = 16.0f;
+    @Getter private float playerY = 16.0f;
+    @Getter private float playerSpeed = 4.0f;
+    @Getter private float playerSize = 1.0f;
 
     @Override
     public void tick(Queue<InputEvent> inputEvents, double delta) {
-        this.timeManager.tick();
+        super.tick(inputEvents, delta);
+
         while (!inputEvents.isEmpty()) {
             val event = inputEvents.remove();
-            LOG.info("Received input event: {}/{}:{}", event.getScancode(), event.getKey(), event.getAction());
-        }
-    }
 
-    @Override
-    public void close() {
-        if (this.disposed) {
-            LOG.error(".close() called more than once for a game!");
-            return;
+            if (event.getKey() == InputEvent.Key.KEY_A) {
+                this.inputLeft = event.getAction() != InputEvent.Action.RELEASE;
+            } else if (event.getKey() == InputEvent.Key.KEY_D) {
+                this.inputRight = event.getAction() != InputEvent.Action.RELEASE;
+            } else if (event.getKey() == InputEvent.Key.KEY_W) {
+                this.inputUp = event.getAction() != InputEvent.Action.RELEASE;
+            } else if (event.getKey() == InputEvent.Key.KEY_S) {
+                this.inputDown = event.getAction() != InputEvent.Action.RELEASE;
+            }
         }
-        this.disposed = true;
+
+        val playerDirectionMultiplierX = (this.inputRight ? 1 : 0) - (this.inputLeft ? 1 : 0);
+        val playerDirectionMultiplierY = (this.inputDown ? 1 : 0) - (this.inputUp ? 1 : 0);
+        val playerVelocityX = this.playerSpeed * playerDirectionMultiplierX;
+        val playerVelocityY = this.playerSpeed * playerDirectionMultiplierY;
+        this.playerX += playerVelocityX * delta;
+        this.playerY += playerVelocityY * delta;
     }
 }
