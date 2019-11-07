@@ -11,6 +11,9 @@ import static org.lwjgl.opengl.GL11.glViewport;
 @Slf4j
 public class LWJGLCamera extends Camera {
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
+
+    private float targetScreenSizeInUnits;
+
     private int viewportWidth;
     private int viewportHeight;
     private float pixelsPerUnit;
@@ -56,10 +59,11 @@ public class LWJGLCamera extends Camera {
     public LWJGLCamera() {
         super(new Vector2f(0f, 0.0f));
 
-        this.pixelsPerUnit = 8.0f;
+        this.targetScreenSizeInUnits = 32;
 
         this.projectionMatrix = new Matrix4f().identity();
         this.cachedProjectionMatrixArray = new float[16];
+        this.pixelsPerUnit = 1.0f;
         this.projectionMatrixDirty = true;
         resizeViewport(viewportWidth, viewportHeight);
 
@@ -72,13 +76,30 @@ public class LWJGLCamera extends Camera {
     private void refreshProjectionMatrixIfDirty() {
         if (this.projectionMatrixDirty) {
             LOG.trace("Refreshing projection matrix");
-            val aspectRatio = (double) this.viewportWidth / (double) this.viewportHeight;
-            val viewportHeightInUnits = (double) this.viewportHeight / this.pixelsPerUnit;
+
+            val horizontalMajor = this.viewportWidth > this.viewportHeight;
+            double major = horizontalMajor ? this.viewportWidth : this.viewportHeight;
+            double minor = horizontalMajor ? this.viewportHeight : this.viewportWidth;
+
+            // TODO: Find such realTargetSize that pixelsPerUnit is a positive whole number to avoid
+            //  aliasing.
+            val realTargetSize = this.targetScreenSizeInUnits;
+            this.pixelsPerUnit = horizontalMajor
+                    ? this.viewportWidth / realTargetSize
+                    : this.viewportHeight / realTargetSize;
+
+            val ratio = minor / major;
+            val viewportWidthInUnits = horizontalMajor
+                    ? realTargetSize
+                    : ratio * realTargetSize;
+            val viewportHeightInUnits = horizontalMajor
+                    ? ratio * realTargetSize
+                    : realTargetSize;
             this.projectionMatrix.setOrtho2D(
-                    0,
-                    (float) (aspectRatio * viewportHeightInUnits),
+                    0.0f,
+                    (float) viewportWidthInUnits,
                     (float) viewportHeightInUnits,
-                    0);
+                    0.0f);
             this.projectionMatrix.get(this.cachedProjectionMatrixArray);
 
             this.projectionMatrixDirty = false;
