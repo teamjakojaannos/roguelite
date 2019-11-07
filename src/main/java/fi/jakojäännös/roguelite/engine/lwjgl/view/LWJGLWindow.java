@@ -2,11 +2,15 @@ package fi.jakojäännös.roguelite.engine.lwjgl.view;
 
 import fi.jakojäännös.roguelite.engine.view.Window;
 import lombok.Getter;
+import lombok.NonNull;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -17,6 +21,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class LWJGLWindow implements Window, AutoCloseable {
     @Getter
     private final long id;
+
+    private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
 
     public LWJGLWindow() {
         glfwDefaultWindowHints();
@@ -31,6 +37,13 @@ public class LWJGLWindow implements Window, AutoCloseable {
         if (this.id == NULL) {
             throw new RuntimeException("Failed to create GLFW window");
         }
+
+        GLFWWindowSizeCallback
+                .create((window, width, height) ->
+                        resizeCallbacks.stream()
+                                       .filter(Objects::nonNull)
+                                       .forEach(cb -> cb.call(width, height)))
+                .set(this.id);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1);
@@ -50,16 +63,15 @@ public class LWJGLWindow implements Window, AutoCloseable {
 
 
     @Override
-    public void setResizeCallback(ResizeCallback callback) {
-        GLFWWindowSizeCallback
-                .create((window, width, height) -> callback.call(width, height))
-                .set(this.id);
+    public void addResizeCallback(@NonNull ResizeCallback callback) {
+        this.resizeCallbacks.add(callback);
     }
 
     @Override
     public void close() {
         glfwFreeCallbacks(this.id);
         glfwDestroyWindow(this.id);
+        this.resizeCallbacks.clear();
 
         Optional.ofNullable(glfwSetErrorCallback(null))
                 .ifPresent(Callback::free);

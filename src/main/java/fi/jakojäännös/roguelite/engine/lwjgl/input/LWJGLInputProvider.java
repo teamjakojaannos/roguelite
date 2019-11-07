@@ -16,10 +16,21 @@ public class LWJGLInputProvider implements InputProvider {
     private static final double MOUSE_EPSILON = 0.0001;
     private final Queue<InputEvent> inputEvents;
 
+    private int viewportWidth;
+    private int viewportHeight;
     private double mouseX, mouseY;
+    private boolean justResized;
 
     public LWJGLInputProvider(LWJGLWindow lwjglWindow, boolean enableForceClose) {
         this.inputEvents = new ArrayDeque<>();
+
+        this.viewportWidth = 1;
+        this.viewportHeight = 1;
+        lwjglWindow.addResizeCallback((width, height) -> {
+            this.viewportWidth = width;
+            this.viewportHeight = height;
+            this.justResized = true;
+        });
 
         val windowId = lwjglWindow.getId();
         glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> {
@@ -52,6 +63,19 @@ public class LWJGLInputProvider implements InputProvider {
         });
 
         glfwSetCursorPosCallback(windowId, (window, x, y) -> {
+            x = x / this.viewportWidth;
+            y = y / this.viewportHeight;
+
+            // In case we just resized, update cached position and skip sending delta-events
+            if (this.justResized) {
+                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, (float) x)));
+                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, (float) y)));
+                this.mouseX = x;
+                this.mouseY = y;
+                this.justResized = false;
+                return;
+            }
+
             val deltaX = this.mouseX - x;
             if (Math.abs(deltaX) > MOUSE_EPSILON) {
                 this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X, (float) deltaX)));

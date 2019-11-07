@@ -28,7 +28,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     public RogueliteGameRenderer(LWJGLWindow window) {
         this.camera = new LWJGLCamera();
 
-        window.setResizeCallback(this.camera::resizeViewport);
+        window.addResizeCallback(this.camera::resizeViewport);
 
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
