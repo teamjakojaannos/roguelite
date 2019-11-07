@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Queue;
 
 @Slf4j
-public abstract class GameBase implements Game {
+public abstract class GameBase<TState> implements Game<TState> {
     private final SimpleTimeManager timeManager = new SimpleTimeManager();
 
     private boolean disposed = false;
@@ -37,7 +37,7 @@ public abstract class GameBase implements Game {
     }
 
     @Override
-    public void tick(Queue<InputEvent> inputEvents, double delta) {
+    public void tick(@NonNull TState state, @NonNull Queue<InputEvent> inputEvents, double delta) {
         this.timeManager.tick();
     }
 

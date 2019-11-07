@@ -1,6 +1,7 @@
 package fi.jakojäännös.roguelite.engine.lwjgl.view;
 
 import fi.jakojäännös.roguelite.engine.view.Camera;
+import fi.jakojäännös.roguelite.game.data.GameState;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -71,6 +72,13 @@ public class LWJGLCamera extends Camera {
         this.cachedViewMatrixArray = new float[16];
         this.viewMatrixDirty = true;
         refreshViewMatrixIfDirty();
+    }
+
+    public void updateConfigurationFromState(GameState state) {
+        if (state.viewWidth != this.targetScreenSizeInUnits) {
+            this.targetScreenSizeInUnits = state.viewWidth;
+            this.projectionMatrixDirty = true;
+        }
     }
 
     private void refreshProjectionMatrixIfDirty() {

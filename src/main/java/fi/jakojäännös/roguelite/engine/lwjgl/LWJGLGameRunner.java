@@ -13,7 +13,8 @@ import org.lwjgl.opengl.GL;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
-public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider> extends GameRunner<TGame, TInput> {
+public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputProvider, TState>
+        extends GameRunner<TGame, TInput, TState> {
     @Getter
     private final LWJGLWindow window;
 
@@ -40,10 +41,10 @@ public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider> e
     }
 
     @Override
-    public void presentGameState(TGame game, GameRenderer<TGame> renderer, double delta) {
+    public void presentGameState(TState state, GameRenderer<TState> renderer, double delta) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        super.presentGameState(game, renderer, delta);
+        super.presentGameState(state, renderer, delta);
 
         glfwSwapBuffers(this.window.getId());
         glfwPollEvents();

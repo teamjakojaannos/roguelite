@@ -2,6 +2,7 @@ package fi.jakojäännös.roguelite.engine;
 
 import fi.jakojäännös.roguelite.engine.input.InputEvent;
 import fi.jakojäännös.roguelite.engine.input.InputProvider;
+import fi.jakojäännös.roguelite.engine.input.MouseInfo;
 import fi.jakojäännös.roguelite.engine.view.GameRenderer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.val;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.function.Supplier;
 
 /**
  * Game simulation runner. Utility for running the game simulation.
@@ -18,8 +20,9 @@ import java.util.Queue;
  */
 @RequiredArgsConstructor
 public abstract class GameRunner<
-        TGame extends Game,
-        TInput extends InputProvider>
+        TGame extends Game<TState>,
+        TInput extends InputProvider,
+        TState>
         implements AutoCloseable {
     /**
      * Should the game loop continue running
@@ -42,13 +45,13 @@ public abstract class GameRunner<
      * @param renderer      Renderer to use for presenting the game. NOP-renderer is used if
      *                      provided renderer is <code>null</code>.
      */
-    public void run(@NonNull TGame game, @NonNull TInput inputProvider, GameRenderer<TGame> renderer) {
+    public void run(@NonNull Supplier<TState> defaultStateSupplier, @NonNull TGame game, @NonNull TInput inputProvider, GameRenderer<TState> renderer) {
         if (game.isDisposed()) {
             throw new IllegalStateException("Tried running an already disposed game!");
         }
 
         // Create NOP-renderer if provided renderer is null and we are in the test environment
-        GameRenderer<TGame> actualRenderer =
+        GameRenderer<TState> actualRenderer =
                 Optional.ofNullable(renderer)
                         .or(() -> Optional.ofNullable(System.getenv("ENVIRONMENT"))
                                           .filter(env -> env.equalsIgnoreCase("test"))
@@ -56,6 +59,7 @@ public abstract class GameRunner<
                         .orElseThrow(() -> new IllegalStateException("run called outside test environment without specifying a valid renderer!"));
 
         // Loop
+        val state = defaultStateSupplier.get();
         var previousFrameTime = game.getTime().getCurrentTime();
         while (shouldContinueLoop(game)) {
             if (game.isDisposed()) {
@@ -67,8 +71,8 @@ public abstract class GameRunner<
             val delta = frameElapsedTime / 1000.0;
             previousFrameTime = currentFrameTime;
 
-            simulateTick(game, inputProvider.pollEvents(), delta);
-            presentGameState(game, actualRenderer, delta);
+            simulateTick(state, game, inputProvider.pollEvents(), delta);
+            presentGameState(state, actualRenderer, delta);
         }
     }
 
@@ -79,29 +83,27 @@ public abstract class GameRunner<
      * @param inputEvents Input events to process during this tick
      * @param delta       Time elapsed since the last tick
      */
-    public void simulateTick(TGame game, Queue<InputEvent> inputEvents, double delta) {
-        game.tick(inputEvents, delta);
+    public void simulateTick(TState state, TGame game, Queue<InputEvent> inputEvents, double delta) {
+        game.tick(state, inputEvents, delta);
     }
 
     /**
      * Presents the current game state to the user.
      *
-     * @param game  Game which state to present
+     * @param state Game state which to present
      * @param delta Time elapsed since the last tick
      */
-    public void presentGameState(TGame game, GameRenderer<TGame> renderer, double delta) {
-        renderer.render(game, delta);
+    public void presentGameState(TState state, GameRenderer<TState> renderer, double delta) {
+        renderer.render(state, delta);
     }
 
-    private class NOPRenderer implements GameRenderer<TGame> {
+    private class NOPRenderer implements GameRenderer<TState> {
         @Override
-        public void render(TGame game, double delta) {
-
+        public void render(TState game, double delta) {
         }
 
         @Override
-        public void close() throws Exception {
-
+        public void close() {
         }
     }
 }

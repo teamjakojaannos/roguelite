@@ -6,7 +6,7 @@ import lombok.NonNull;
 
 import java.util.Queue;
 
-public interface Game extends AutoCloseable {
+public interface Game<TState> extends AutoCloseable {
     @NonNull
     TimeManager getTime();
 
@@ -16,5 +16,5 @@ public interface Game extends AutoCloseable {
 
     boolean isDisposed();
 
-    void tick(Queue<InputEvent> inputEvents, double delta);
+    void tick(@NonNull TState state, @NonNull Queue<InputEvent> inputEvents, double delta);
 }

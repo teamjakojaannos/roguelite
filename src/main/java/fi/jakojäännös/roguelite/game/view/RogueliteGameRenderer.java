@@ -3,7 +3,7 @@ package fi.jakojäännös.roguelite.game.view;
 import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojäännös.roguelite.engine.view.GameRenderer;
-import fi.jakojäännös.roguelite.game.Roguelite;
+import fi.jakojäännös.roguelite.game.data.GameState;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -12,7 +12,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.*;
 
 @Slf4j
-public class RogueliteGameRenderer implements GameRenderer<Roguelite> {
+public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final LWJGLCamera camera;
 
     private int shaderProgram;
@@ -108,15 +108,18 @@ public class RogueliteGameRenderer implements GameRenderer<Roguelite> {
     }
 
     @Override
-    public void render(Roguelite game, double delta) {
+    public void render(GameState state, double delta) {
+        // Make sure that the camera configuration matches the current state
+        camera.updateConfigurationFromState(state);
+
         // 1. Find entity tagged as camera target
         // 2. Snap camera position to target entity position
         // 3. Render
 
         new Matrix4f()
                 .identity()
-                .translate(game.getPlayerX(), game.getPlayerY(), 0.0f)
-                .scale(game.getPlayerSize())
+                .translate(state.playerX, state.playerY, 0.0f)
+                .scale(state.playerSize)
                 .get(this.modelTransformationMatrix);
 
         glUseProgram(this.shaderProgram);

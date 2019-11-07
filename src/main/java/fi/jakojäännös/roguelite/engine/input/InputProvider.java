@@ -18,5 +18,5 @@ public interface InputProvider {
      *
      * @return platform-specific scancode for given key
      */
-    int mapScancode(InputEvent.Key key);
+    int mapScancode(InputButton.Keyboard key);
 }
