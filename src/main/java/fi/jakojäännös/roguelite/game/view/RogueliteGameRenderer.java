@@ -116,12 +116,6 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         // 2. Snap camera position to target entity position
         // 3. Render
 
-        new Matrix4f()
-                .identity()
-                .translate(state.playerX, state.playerY, 0.0f)
-                .scale(state.playerSize)
-                .get(this.modelTransformationMatrix);
-
         glUseProgram(this.shaderProgram);
 
         glBindVertexArray(this.vao);
@@ -135,10 +129,27 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         val uniformView = glGetUniformLocation(this.shaderProgram, "view");
         val uniformProj = glGetUniformLocation(this.shaderProgram, "projection");
 
-        glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
         glUniformMatrix4fv(uniformView, false, this.camera.getViewMatrix());
         glUniformMatrix4fv(uniformProj, false, this.camera.getProjectionMatrix());
 
+        new Matrix4f()
+                .identity()
+                .translate(state.playerX, state.playerY, 0.0f)
+                .scale(state.playerSize)
+                .get(this.modelTransformationMatrix);
+
+        glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        new Matrix4f()
+                .identity()
+                .translate(state.crosshairX - state.crosshairSize / 2.0f,
+                        state.crosshairY - state.crosshairSize / 2.0f,
+                        0.0f)
+                .scale(state.crosshairSize)
+                .get(this.modelTransformationMatrix);
+
+        glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 

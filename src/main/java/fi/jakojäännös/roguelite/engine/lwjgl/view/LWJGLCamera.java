@@ -2,6 +2,7 @@ package fi.jakojäännös.roguelite.engine.lwjgl.view;
 
 import fi.jakojäännös.roguelite.engine.view.Camera;
 import fi.jakojäännös.roguelite.game.data.GameState;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -15,9 +16,11 @@ public class LWJGLCamera extends Camera {
 
     private float targetScreenSizeInUnits;
 
+    @Getter private float viewportWidthInUnits;
+    @Getter private float viewportHeightInUnits;
+
     private int viewportWidth;
     private int viewportHeight;
-    private float pixelsPerUnit;
 
     private final Matrix4f projectionMatrix;
     private final float[] cachedProjectionMatrixArray;
@@ -64,7 +67,6 @@ public class LWJGLCamera extends Camera {
 
         this.projectionMatrix = new Matrix4f().identity();
         this.cachedProjectionMatrixArray = new float[16];
-        this.pixelsPerUnit = 1.0f;
         this.projectionMatrixDirty = true;
         resizeViewport(viewportWidth, viewportHeight);
 
@@ -75,10 +77,15 @@ public class LWJGLCamera extends Camera {
     }
 
     public void updateConfigurationFromState(GameState state) {
-        if (state.viewWidth != this.targetScreenSizeInUnits) {
-            this.targetScreenSizeInUnits = state.viewWidth;
+        if (state.targetWorldSize != this.targetScreenSizeInUnits) {
+            this.targetScreenSizeInUnits = state.targetWorldSize;
             this.projectionMatrixDirty = true;
         }
+
+        // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
+        //  to make the change, NEVER mutate state on the view.
+        state.realViewWidth = this.viewportWidthInUnits;
+        state.realViewHeight = this.viewportHeightInUnits;
     }
 
     private void refreshProjectionMatrixIfDirty() {
@@ -91,18 +98,18 @@ public class LWJGLCamera extends Camera {
 
             // TODO: Find such realTargetSize that pixelsPerUnit is a positive whole number to avoid
             //  aliasing.
-            val realTargetSize = this.targetScreenSizeInUnits;
-            this.pixelsPerUnit = horizontalMajor
+            double realTargetSize = this.targetScreenSizeInUnits;
+            val pixelsPerUnit = horizontalMajor
                     ? this.viewportWidth / realTargetSize
                     : this.viewportHeight / realTargetSize;
 
             val ratio = minor / major;
-            val viewportWidthInUnits = horizontalMajor
+            this.viewportWidthInUnits = (float) (horizontalMajor
                     ? realTargetSize
-                    : ratio * realTargetSize;
-            val viewportHeightInUnits = horizontalMajor
+                    : ratio * realTargetSize);
+            this.viewportHeightInUnits = (float) (horizontalMajor
                     ? ratio * realTargetSize
-                    : realTargetSize;
+                    : realTargetSize);
             this.projectionMatrix.setOrtho2D(
                     0.0f,
                     (float) viewportWidthInUnits,

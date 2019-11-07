@@ -22,15 +22,9 @@ public class Roguelite extends GameBase<GameState> {
 
             event.getAxis().ifPresent(input -> {
                 if (input.getAxis() == InputAxis.Mouse.X_POS) {
-                    LOG.info("Received mouse X: {}", input.getValue());
                     state.mouseX = input.getValue();
                 } else if (input.getAxis() == InputAxis.Mouse.Y_POS) {
-                    LOG.info("Received mouse Y: {}", input.getValue());
                     state.mouseY = input.getValue();
-                } else if (input.getAxis() == InputAxis.Mouse.X) {
-                    LOG.info("Received mouse X (movement): {}", input.getValue());
-                } else if (input.getAxis() == InputAxis.Mouse.Y) {
-                    LOG.info("Received mouse Y (movement): {}", input.getValue());
                 }
             });
 
@@ -53,5 +47,8 @@ public class Roguelite extends GameBase<GameState> {
         val playerVelocityY = state.playerSpeed * playerDirectionMultiplierY;
         state.playerX += playerVelocityX * delta;
         state.playerY += playerVelocityY * delta;
+
+        state.crosshairX = state.mouseX * state.realViewWidth;
+        state.crosshairY = state.mouseY * state.realViewHeight;
     }
 }
