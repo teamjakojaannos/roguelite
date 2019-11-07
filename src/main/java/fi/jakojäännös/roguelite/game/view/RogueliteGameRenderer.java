@@ -138,5 +138,9 @@ public class RogueliteGameRenderer implements GameRenderer<Roguelite> {
         glDeleteVertexArrays(this.vao);
         glDeleteBuffers(this.vbo);
         glDeleteBuffers(this.ebo);
+
+        glDeleteShader(this.vertexShader);
+        glDeleteShader(this.fragmentShader);
+        glDeleteProgram(this.shaderProgram);
     }
 }
