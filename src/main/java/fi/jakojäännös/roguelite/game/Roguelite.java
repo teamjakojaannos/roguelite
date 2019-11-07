@@ -15,9 +15,9 @@ public class Roguelite extends GameBase {
     private boolean inputUp;
     private boolean inputDown;
 
-    @Getter private float playerX = 16.0f;
-    @Getter private float playerY = 16.0f;
-    @Getter private float playerSpeed = 4.0f;
+    @Getter private float playerX = 4.0f;
+    @Getter private float playerY = 4.0f;
+    @Getter private float playerSpeed = 8.0f;
     @Getter private float playerSize = 1.0f;
 
     @Override
