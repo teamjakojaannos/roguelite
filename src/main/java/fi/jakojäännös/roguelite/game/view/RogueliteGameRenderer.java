@@ -4,6 +4,7 @@ import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojäännös.roguelite.engine.view.GameRenderer;
 import fi.jakojäännös.roguelite.game.data.GameState;
+import fi.jakojäännös.roguelite.game.data.components.Position;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -132,25 +133,32 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         glUniformMatrix4fv(uniformView, false, this.camera.getViewMatrix());
         glUniformMatrix4fv(uniformProj, false, this.camera.getProjectionMatrix());
 
-        new Matrix4f()
-                .identity()
-                .translate(state.playerX, state.playerY, 0.0f)
-                .scale(state.playerSize)
-                .get(this.modelTransformationMatrix);
+        state.world.getComponentOf(state.player, Position.class)
+                   .ifPresent(position -> {
+                       new Matrix4f()
+                               .identity()
+                               .translate(position.x, position.y, 0.0f)
+                               .scale(state.playerSize)
+                               .get(this.modelTransformationMatrix);
 
-        glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                       glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
+                       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                   });
 
-        new Matrix4f()
-                .identity()
-                .translate(state.crosshairX - state.crosshairSize / 2.0f,
-                        state.crosshairY - state.crosshairSize / 2.0f,
-                        0.0f)
-                .scale(state.crosshairSize)
-                .get(this.modelTransformationMatrix);
 
-        glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        state.world.getComponentOf(state.crosshair, Position.class)
+                   .ifPresent(position -> {
+                       new Matrix4f()
+                               .identity()
+                               .translate(position.x - state.crosshairSize / 2.0f,
+                                       position.y - state.crosshairSize / 2.0f,
+                                       0.0f)
+                               .scale(state.crosshairSize)
+                               .get(this.modelTransformationMatrix);
+
+                       glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
+                       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                   });
     }
 
     @Override

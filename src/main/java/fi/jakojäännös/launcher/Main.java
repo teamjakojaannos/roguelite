@@ -20,7 +20,7 @@ public class Main {
         try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider, GameState>()) {
             try (val renderer = new RogueliteGameRenderer(runner.getWindow()); val game = new Roguelite()) {
                 val inputProvider = new LWJGLInputProvider(runner.getWindow(), enableForceClose);
-                runner.run(GameState::new, game, inputProvider, renderer);
+                runner.run(game::createInitialState, game, inputProvider, renderer);
             }
         } catch (Exception e) {
             LOG.error("The game loop unexpectedly stopped.");
