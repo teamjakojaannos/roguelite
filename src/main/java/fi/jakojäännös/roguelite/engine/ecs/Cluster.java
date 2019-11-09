@@ -12,7 +12,6 @@ import java.util.function.Function;
  * Provides accessors for entity components.
  */
 public class Cluster {
-
     private final int entityCapacity;
     private final EntityStorage entityStorage;
     private final List<ComponentStorage> componentTypes = new ArrayList<>();
@@ -51,6 +50,10 @@ public class Cluster {
         while (!this.taskQueue.isEmpty()) {
             this.taskQueue.remove().execute();
         }
+    }
+
+    EntityStorage getEntityStorage() {
+        return this.entityStorage;
     }
 
     /**
@@ -127,8 +130,12 @@ public class Cluster {
         return Optional.ofNullable(componentTypeIndices.get(component.getClass()));
     }
 
-    private Optional<Integer> getComponentTypeIndexFor(Class<? extends Component> componentClass) {
+    Optional<Integer> getComponentTypeIndexFor(Class<? extends Component> componentClass) {
         return Optional.ofNullable(componentTypeIndices.get(componentClass));
+    }
+
+    public int getNumberOfComponentTypes() {
+        return this.componentTypeIndices.size();
     }
 
     private interface StorageTask {

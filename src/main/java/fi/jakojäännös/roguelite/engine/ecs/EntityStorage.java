@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.val;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 class EntityStorage {
     private int capacity;
@@ -39,5 +41,9 @@ class EntityStorage {
     private void resize(int capacity) {
         this.capacity = capacity;
         this.entities = Arrays.copyOf(this.entities, this.capacity);
+    }
+
+    public Stream<Entity> stream() {
+        return Arrays.stream(this.entities).filter(Objects::nonNull);
     }
 }

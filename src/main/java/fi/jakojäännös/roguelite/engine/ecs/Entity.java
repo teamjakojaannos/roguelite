@@ -2,13 +2,15 @@ package fi.jakojäännös.roguelite.engine.ecs;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+
 public class Entity {
     @Getter private final int id;
     private final byte[] componentBitmask;
 
     @Getter private boolean markedForRemoval;
 
-    public Entity(int id, int nComponentTypes) {
+    Entity(int id, int nComponentTypes) {
         this.id = id;
         this.markedForRemoval = false;
 
@@ -55,5 +57,15 @@ public class Entity {
 
     private int divideAndFloor(int a, int b) {
         return a / b;
+    }
+
+    boolean compareMask(byte[] systemComponentMask) {
+        for (int i = 0; i < this.componentBitmask.length; ++i) {
+            if ((this.componentBitmask[i] & systemComponentMask[i]) != systemComponentMask[i]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
