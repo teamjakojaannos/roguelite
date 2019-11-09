@@ -1,6 +1,5 @@
 package fi.jakojäännös.roguelite.engine.ecs;
 
-import fi.jakojäännös.roguelite.engine.utilities.IdSupplier;
 import lombok.val;
 
 import java.util.*;
@@ -13,44 +12,24 @@ import java.util.function.Function;
  * Provides accessors for entity components.
  */
 public class Cluster {
-    private boolean canGrow;
-    private int entityCapacity;
-    private ArrayList<Entity> entities;
-    private final IdSupplier idSupplier = new IdSupplier();
 
-    private final Queue<StorageTask> taskQueue = new ArrayDeque<>();
+    private final int entityCapacity;
+    private final EntityStorage entityStorage;
     private final List<ComponentStorage> componentTypes = new ArrayList<>();
     private final Map<Class<? extends Component>, Integer> componentTypeIndices = new HashMap<>();
+    private final Queue<StorageTask> taskQueue = new ArrayDeque<>();
 
-    public Cluster() {
-        this(256, true);
-    }
-
-    public Cluster(int entityCapacity, boolean canGrow) {
+    public Cluster(int entityCapacity) {
+        this.entityStorage = new EntityStorage(entityCapacity);
         this.entityCapacity = entityCapacity;
-        this.canGrow = canGrow;
-
-        this.entities = new ArrayList<>(entityCapacity);
-        for (int i = 0; i < entityCapacity; ++i) {
-            this.entities.add(null);
-        }
     }
 
     public Entity createEntity() {
-        val entityId = this.idSupplier.get();
-        val entity = new Entity(entityId, this.componentTypes.size());
+        val entity = this.entityStorage.create(this.componentTypes.size());
         this.taskQueue.offer(() -> {
-            if (entityId >= this.entityCapacity) {
-                if (!canGrow) {
-                    throw new IllegalStateException("Entity capacity overflow");
-                }
-                // TODO: Some a bit more refined scaling strategy could work better
-                this.entityCapacity *= 2;
-                this.entities.ensureCapacity(this.entityCapacity);
-            }
-
-            this.entities.set(entityId, entity);
+            this.entityStorage.spawn(entity);
         });
+
         return entity;
     }
 
@@ -60,7 +39,7 @@ public class Cluster {
             for (val storage : this.componentTypes) {
                 storage.removeComponent(entity);
             }
-            this.idSupplier.free(entity.getId());
+            this.entityStorage.remove(entity);
         });
     }
 

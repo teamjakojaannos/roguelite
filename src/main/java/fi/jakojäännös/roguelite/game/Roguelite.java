@@ -18,7 +18,7 @@ import java.util.Queue;
 public class Roguelite extends GameBase<GameState> {
     public GameState createInitialState() {
         val state = new GameState();
-        state.world = new Cluster();
+        state.world = new Cluster(256);
         state.world.registerComponentType(Position.class, Position[]::new);
 
         state.player = state.world.createEntity();
