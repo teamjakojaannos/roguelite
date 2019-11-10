@@ -1,12 +1,11 @@
 package fi.jakojäännös.roguelite.engine.ecs;
 
+import fi.jakojäännös.roguelite.engine.utilities.BitMaskUtils;
 import lombok.Getter;
-
-import java.util.Arrays;
 
 public class Entity {
     @Getter private final int id;
-    private final byte[] componentBitmask;
+    @Getter private final byte[] componentBitmask;
 
     @Getter private boolean markedForRemoval;
 
@@ -14,7 +13,7 @@ public class Entity {
         this.id = id;
         this.markedForRemoval = false;
 
-        int nBytes = divideAndCeil(nComponentTypes, 8);
+        int nBytes = BitMaskUtils.calculateMaskSize(nComponentTypes);
         this.componentBitmask = new byte[nBytes];
     }
 
@@ -27,8 +26,7 @@ public class Entity {
             throw new IllegalArgumentException("Argument out of bounds. [componentTypeIndex: " + componentTypeIndex + "]");
         }
 
-        int m = componentTypeIndex % 8;
-        return (this.componentBitmask[divideAndFloor(componentTypeIndex, 8)] & (1 << m)) != 0;
+        return BitMaskUtils.isNthBitSet(this.componentBitmask, componentTypeIndex);
     }
 
     void addComponentBit(int componentTypeIndex) {
@@ -36,9 +34,7 @@ public class Entity {
             throw new IllegalArgumentException("Argument out of bounds. [componentTypeIndex: " + componentTypeIndex + "]");
         }
 
-        var old = this.componentBitmask[divideAndFloor(componentTypeIndex, 8)];
-        int m = componentTypeIndex % 8;
-        this.componentBitmask[divideAndFloor(componentTypeIndex, 8)] = (byte) (old | (1 << m));
+        BitMaskUtils.setNthBit(this.componentBitmask, componentTypeIndex);
     }
 
     void removeComponentBit(int componentTypeIndex) {
@@ -46,26 +42,6 @@ public class Entity {
             throw new IllegalArgumentException("Argument out of bounds. [componentTypeIndex: " + componentTypeIndex + "]");
         }
 
-        var old = this.componentBitmask[divideAndFloor(componentTypeIndex, 8)];
-        int m = componentTypeIndex % 8;
-        this.componentBitmask[divideAndFloor(componentTypeIndex, 8)] = (byte) (old & ~(1 << m));
-    }
-
-    private int divideAndCeil(int a, int b) {
-        return a / b + ((a % b == 0) ? 0 : 1);
-    }
-
-    private int divideAndFloor(int a, int b) {
-        return a / b;
-    }
-
-    boolean compareMask(byte[] systemComponentMask) {
-        for (int i = 0; i < this.componentBitmask.length; ++i) {
-            if ((this.componentBitmask[i] & systemComponentMask[i]) != systemComponentMask[i]) {
-                return false;
-            }
-        }
-
-        return true;
+        BitMaskUtils.unsetNthBit(componentBitmask, componentTypeIndex);
     }
 }
