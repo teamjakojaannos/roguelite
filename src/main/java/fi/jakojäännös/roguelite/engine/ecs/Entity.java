@@ -1,16 +1,19 @@
 package fi.jakojäännös.roguelite.engine.ecs;
 
 import fi.jakojäännös.roguelite.engine.utilities.BitMaskUtils;
+import lombok.AccessLevel;
 import lombok.Getter;
 
 public class Entity {
     @Getter private final int id;
-    @Getter private final byte[] componentBitmask;
+    @Getter(AccessLevel.PACKAGE) private final byte[] componentBitmask;
+    @Getter(AccessLevel.PACKAGE) private boolean markedForRemoval;
 
-    @Getter private boolean markedForRemoval;
+    private final int nComponentTypes;
 
     Entity(int id, int nComponentTypes) {
         this.id = id;
+        this.nComponentTypes = nComponentTypes;
         this.markedForRemoval = false;
 
         int nBytes = BitMaskUtils.calculateMaskSize(nComponentTypes);
@@ -22,26 +25,26 @@ public class Entity {
     }
 
     boolean hasComponentBit(int componentTypeIndex) {
-        if (componentTypeIndex < 0 || componentTypeIndex > this.componentBitmask.length * 8) {
-            throw new IllegalArgumentException("Argument out of bounds. [componentTypeIndex: " + componentTypeIndex + "]");
-        }
+        ensureValidIndex(componentTypeIndex);
 
         return BitMaskUtils.isNthBitSet(this.componentBitmask, componentTypeIndex);
     }
 
     void addComponentBit(int componentTypeIndex) {
-        if (componentTypeIndex < 0 || componentTypeIndex > this.componentBitmask.length * 8) {
-            throw new IllegalArgumentException("Argument out of bounds. [componentTypeIndex: " + componentTypeIndex + "]");
-        }
+        ensureValidIndex(componentTypeIndex);
 
         BitMaskUtils.setNthBit(this.componentBitmask, componentTypeIndex);
     }
 
     void removeComponentBit(int componentTypeIndex) {
-        if (componentTypeIndex < 0 || componentTypeIndex > this.componentBitmask.length * 8) {
-            throw new IllegalArgumentException("Argument out of bounds. [componentTypeIndex: " + componentTypeIndex + "]");
-        }
+        ensureValidIndex(componentTypeIndex);
 
         BitMaskUtils.unsetNthBit(componentBitmask, componentTypeIndex);
+    }
+
+    private void ensureValidIndex(int componentTypeIndex) {
+        if (componentTypeIndex < 0 || componentTypeIndex >= this.nComponentTypes) {
+            throw new IllegalArgumentException("Argument out of bounds. [componentTypeIndex: " + componentTypeIndex + "]");
+        }
     }
 }
