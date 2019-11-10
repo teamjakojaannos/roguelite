@@ -2,6 +2,7 @@ import org.gradle.internal.os.OperatingSystem
 
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'jacoco'
 
 mainClassName = 'fi.jakojäännös.launcher.Main'
 
