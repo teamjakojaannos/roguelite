@@ -15,10 +15,12 @@ class SystemMap {
     @NonNull
     private final Cluster cluster;
 
-    private boolean dirty;
-
     SystemMap(Cluster cluster) {
         this.cluster = cluster;
+    }
+
+    private int getSystemCount() {
+        return this.systemsById.size();
     }
 
     void put(
@@ -26,7 +28,7 @@ class SystemMap {
             @NonNull ECSSystem system,
             @NonNull String... dependencies
     ) {
-        val id = this.systemsById.size();
+        val id = getSystemCount();
         val requiredComponentsBitMask =
                 system.getRequiredComponents()
                       .stream()
@@ -37,30 +39,57 @@ class SystemMap {
                               BitMaskUtils::setNthBit,
                               BitMaskUtils::combineMasks);
 
-        val entry = new Entry(id,
-                              system,
-                              Arrays.stream(dependencies)
-                                    .mapToInt(this.systemIdLookup::get)
-                                    .toArray(),
-                              requiredComponentsBitMask);
+        val entry = new Entry(id, system, requiredComponentsBitMask);
+
+        Arrays.stream(dependencies)
+              .map(this.systemIdLookup::get)
+              .map(this.systemsById::get)
+              .forEach(entry::addDependency);
+
         this.systemsById.add(entry);
         this.systemIdLookup.put(name, id);
-
-        this.dirty = true;
     }
 
     void forEachPrioritized(@NonNull BiConsumer<ECSSystem, byte[]> forEach) {
-        refreshPriorityListIfDirty();
-        this.systemsById.forEach(entry -> forEach.accept(entry.system, entry.requiredComponentBitMask));
-    }
-
-    private void refreshPriorityListIfDirty() {
-        if (!this.dirty) {
+        if (this.getSystemCount() == 0) {
             return;
         }
 
-        List<Entry> roots = new ArrayList<>();
+        boolean[] processed = new boolean[getSystemCount()];
+        int nextEntryPoint = -1;
+        while ((nextEntryPoint = indexOfFistFalse(processed)) != -1) {
+            Deque<Entry> queue = new ArrayDeque<>();
+            queue.add(this.systemsById.get(nextEntryPoint));
+            while (!queue.isEmpty()) {
+                val entry = queue.getFirst();
+                if (canBeProcessed(entry, processed)) {
+                    queue.removeFirst();
+                    forEach.accept(entry.system, entry.requiredComponentBitMask);
+                    processed[entry.id] = true;
+                } else {
+                    entry.dependencies.stream()
+                                      .filter(dep -> !processed[dep.id])
+                                      .forEach(queue::addFirst);
+                }
+            }
+        }
 
+        //this.systemsById.forEach(entry -> );
+    }
+
+    private boolean canBeProcessed(@NonNull Entry entry, @NonNull boolean[] processed) {
+        return entry.hasNoDependencies() || entry.dependencies.stream()
+                                                              .allMatch(dep -> processed[dep.id]);
+    }
+
+    private int indexOfFistFalse(boolean[] array) {
+        for (int i = 0; i < array.length; ++i) {
+            if (!array[i]) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     Stream<ECSSystem> nonPrioritizedStream() {
@@ -69,9 +98,20 @@ class SystemMap {
 
     @RequiredArgsConstructor
     private static class Entry {
-        private final int systemId;
+        private final int id;
         private final ECSSystem system;
-        private final int[] dependencies;
         private final byte[] requiredComponentBitMask;
+        private final List<Entry> dependencies = new ArrayList<>(0);
+        private final List<Entry> dependents = new ArrayList<>(0);
+
+        boolean hasNoDependencies() {
+            return this.dependencies.isEmpty();
+        }
+
+        void addDependency(@NonNull Entry dependency) {
+            // TODO: Check for circular dependencies
+            dependencies.add(dependency);
+            dependency.dependents.add(this);
+        }
     }
 }
