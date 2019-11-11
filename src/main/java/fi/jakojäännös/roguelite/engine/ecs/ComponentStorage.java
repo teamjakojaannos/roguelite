@@ -11,7 +11,7 @@ import java.util.Queue;
 import java.util.function.Function;
 
 @Slf4j
-public class ComponentStorage<TComponent extends Component> {
+class ComponentStorage<TComponent extends Component> {
     /**
      * <code>ComponentTypeIndex</code> for fast checks if some entity has this type of component.
      *
@@ -28,11 +28,6 @@ public class ComponentStorage<TComponent extends Component> {
     }
 
     void addComponent(@NonNull Entity entity, @NonNull TComponent component) {
-        if (entity.hasComponentBit(this.componentTypeIndex)) {
-            LOG.warn("Tried to add component ({}) to an entity, but it already has a component of given type!", component.getClass());
-            return;
-        }
-
         this.taskQueue.offer(() -> {
             if (entity.hasComponentBit(this.componentTypeIndex)) {
                 LOG.warn("Add task executed when component bit is already set!");
@@ -45,11 +40,6 @@ public class ComponentStorage<TComponent extends Component> {
     }
 
     void removeComponent(@NonNull Entity entity) {
-        if (!entity.hasComponentBit(this.componentTypeIndex)) {
-            LOG.warn("Tried to remove component (type: {}) from an entity, but there is none to remove!", this.componentTypeIndex);
-            return;
-        }
-
         this.taskQueue.offer(() -> {
             this.componentMap.remove(entity);
             entity.removeComponentBit(this.componentTypeIndex);
@@ -64,7 +54,7 @@ public class ComponentStorage<TComponent extends Component> {
         return this.componentMap.get(entity);
     }
 
-    public void applyModifications() {
+    void applyModifications() {
         while (!this.taskQueue.isEmpty()) {
             this.taskQueue.remove().execute();
         }
