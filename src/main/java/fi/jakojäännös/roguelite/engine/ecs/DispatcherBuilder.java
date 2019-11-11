@@ -26,6 +26,10 @@ public class DispatcherBuilder {
     }
 
     public SystemDispatcher build() {
+        if (this.cluster == null) {
+            throw new IllegalStateException("A cluster must be provided!");
+        }
+
         return new SystemDispatcher(this.cluster, this.systems);
     }
 
