@@ -9,7 +9,7 @@ public class IdSupplier {
     public int get() {
         int newId;
         if (this.freeIDs.isEmpty()) {
-            newId = this.count + 1;
+            newId = this.count;
         } else {
             newId = this.freeIDs.poll();
         }
