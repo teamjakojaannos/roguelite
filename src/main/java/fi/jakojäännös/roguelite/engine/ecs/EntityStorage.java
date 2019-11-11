@@ -1,6 +1,8 @@
 package fi.jakojäännös.roguelite.engine.ecs;
 
 import fi.jakojäännös.roguelite.engine.utilities.IdSupplier;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.val;
 
@@ -9,7 +11,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 class EntityStorage {
-    private int capacity;
+    @Getter(AccessLevel.PACKAGE) private int capacity;
     private Entity[] entities;
 
     private final IdSupplier idSupplier = new IdSupplier();
