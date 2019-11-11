@@ -7,36 +7,36 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class DispatcherBuilder {
+public class DispatcherBuilder<TState> {
     private Collection<SystemEntry> systems = new ArrayList<>();
     private Cluster cluster;
 
-    public DispatcherBuilder withCluster(@NonNull Cluster cluster) {
+    public DispatcherBuilder<TState> withCluster(@NonNull Cluster cluster) {
         this.cluster = cluster;
         return this;
     }
 
-    public DispatcherBuilder withSystem(
+    public DispatcherBuilder<TState> withSystem(
             @NonNull String name,
-            @NonNull ECSSystem system,
+            @NonNull ECSSystem<TState> system,
             @NonNull String... dependencies
     ) {
-        this.systems.add(new SystemEntry(name, system, dependencies));
+        this.systems.add(new SystemEntry<>(name, system, dependencies));
         return this;
     }
 
-    public SystemDispatcher build() {
+    public SystemDispatcher<TState> build() {
         if (this.cluster == null) {
             throw new IllegalStateException("A cluster must be provided!");
         }
 
-        return new SystemDispatcher(this.cluster, this.systems);
+        return new SystemDispatcher<>(this.cluster, this.systems);
     }
 
     @RequiredArgsConstructor
-    static class SystemEntry {
+    static class SystemEntry<TState> {
         @Getter private final String name;
-        @Getter private final ECSSystem system;
+        @Getter private final ECSSystem<TState> system;
         @Getter private final String[] dependencies;
     }
 }

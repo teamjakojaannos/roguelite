@@ -8,8 +8,8 @@ import lombok.val;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SystemDispatcher {
-    @NonNull private final SystemMap systems;
+public class SystemDispatcher<TState> {
+    @NonNull private final SystemMap<TState> systems;
     @NonNull private final Cluster cluster;
 
     SystemDispatcher(Cluster cluster, Collection<DispatcherBuilder.SystemEntry> systems) {
@@ -23,7 +23,7 @@ public class SystemDispatcher {
     }
 
     public void dispatch(
-            @NonNull GameState state,
+            @NonNull TState state,
             double delta
     ) {
 

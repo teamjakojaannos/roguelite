@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MockECSSystem implements ECSSystem {
+public class MockECSSystem<TState> implements ECSSystem<TState> {
     private Collection<Class<? extends Component>> components;
     public boolean tickCalled = false;
 
@@ -28,7 +28,7 @@ public class MockECSSystem implements ECSSystem {
 
     @Override
     public void tick(
-            Stream<Entity> entities, GameState state, double delta
+            Stream<Entity> entities, TState state, double delta
     ) {
         this.tickCalled = true;
     }

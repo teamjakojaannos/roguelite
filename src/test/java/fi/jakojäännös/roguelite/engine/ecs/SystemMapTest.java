@@ -139,19 +139,19 @@ class SystemMapTest {
     @Test
     void forEachPrioritizedIteratesInExpectedOrder_complexDependencies() {
         Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
-        Map<String, ECSSystem> systems = Map.ofEntries(
-                Map.entry("valid_0", new MockECSSystem()),
-                Map.entry("valid_1", new MockECSSystem()),
-                Map.entry("valid_2", new MockECSSystem()),
-                Map.entry("valid_3", new MockECSSystem()),
-                Map.entry("valid_4", new MockECSSystem()),
-                Map.entry("valid_5", new MockECSSystem()),
-                Map.entry("valid_6", new MockECSSystem()),
-                Map.entry("valid_7", new MockECSSystem()),
-                Map.entry("valid_8", new MockECSSystem()),
-                Map.entry("valid_9", new MockECSSystem()),
-                Map.entry("valid_10", new MockECSSystem())
+        SystemMap<State> map = new SystemMap<>(cluster);
+        Map<String, ECSSystem<State>> systems = Map.ofEntries(
+                Map.entry("valid_0", new MockECSSystem<>()),
+                Map.entry("valid_1", new MockECSSystem<>()),
+                Map.entry("valid_2", new MockECSSystem<>()),
+                Map.entry("valid_3", new MockECSSystem<>()),
+                Map.entry("valid_4", new MockECSSystem<>()),
+                Map.entry("valid_5", new MockECSSystem<>()),
+                Map.entry("valid_6", new MockECSSystem<>()),
+                Map.entry("valid_7", new MockECSSystem<>()),
+                Map.entry("valid_8", new MockECSSystem<>()),
+                Map.entry("valid_9", new MockECSSystem<>()),
+                Map.entry("valid_10", new MockECSSystem<>())
         );
 
         //  0
@@ -175,7 +175,7 @@ class SystemMapTest {
         map.put("valid_8", systems.get("valid_8"), "valid_6");
         map.put("valid_9", systems.get("valid_9"), "valid_7", "valid_8");
 
-        List<ECSSystem> processed = new ArrayList<>();
+        List<ECSSystem<State>> processed = new ArrayList<>();
         map.forEachPrioritized((system, bytes) -> {
             // Ugly hack for finding the name of the system
             String name = systems.entrySet()
@@ -189,5 +189,8 @@ class SystemMapTest {
             assertTrue(map.getDependencies(name).allMatch(processed::contains));
             processed.add(system);
         });
+    }
+
+    private static class State {
     }
 }

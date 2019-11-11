@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 public class Roguelite extends GameBase<GameState> {
-    private SystemDispatcher dispatcher;
+    private SystemDispatcher<GameState> dispatcher;
 
     public GameState createInitialState() {
         val state = new GameState();
@@ -43,9 +43,9 @@ public class Roguelite extends GameBase<GameState> {
     }
 
     private void initializeSystems(@NonNull Cluster cluster) {
-        this.dispatcher = new DispatcherBuilder()
+        this.dispatcher = new DispatcherBuilder<GameState>()
                 .withCluster(cluster)
-                .withSystem("player_move", new ECSSystem() {
+                .withSystem("player_move", new ECSSystem<GameState>() {
                     @Override
                     public Collection<Class<? extends Component>> getRequiredComponents() {
                         return List.of(Position.class, PlayerTag.class);
@@ -65,7 +65,7 @@ public class Roguelite extends GameBase<GameState> {
                                                               }));
                     }
                 })
-                .withSystem("crosshair_snap_to_cursor", new ECSSystem() {
+                .withSystem("crosshair_snap_to_cursor", new ECSSystem<GameState>() {
                     @Override
                     public Collection<Class<? extends Component>> getRequiredComponents() {
                         return List.of(Position.class, CrosshairTag.class);

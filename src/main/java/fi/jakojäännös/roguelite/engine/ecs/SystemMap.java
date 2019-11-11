@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
-class SystemMap {
+class SystemMap<TState> {
     private final Map<String, Integer> systemIdLookup = new HashMap<>();
     private final List<Entry> systemsById = new ArrayList<>();
     @NonNull
@@ -32,7 +32,7 @@ class SystemMap {
 
     void put(
             @NonNull String name,
-            @NonNull ECSSystem system,
+            @NonNull ECSSystem<TState> system,
             String... dependencies
     ) {
         val id = getSystemCount();
@@ -58,7 +58,7 @@ class SystemMap {
         this.systemIdLookup.put(name, id);
     }
 
-    void forEachPrioritized(@NonNull BiConsumer<ECSSystem, byte[]> forEach) {
+    void forEachPrioritized(@NonNull BiConsumer<ECSSystem<TState>, byte[]> forEach) {
         if (this.getSystemCount() == 0) {
             return;
         }
@@ -98,14 +98,14 @@ class SystemMap {
         return -1;
     }
 
-    Stream<ECSSystem> nonPrioritizedStream() {
+    Stream<ECSSystem<TState>> nonPrioritizedStream() {
         return this.systemsById.stream().map(entry -> entry.system);
     }
 
     @RequiredArgsConstructor
-    private static class Entry {
+    private class Entry {
         private final int id;
-        private final ECSSystem system;
+        private final ECSSystem<TState> system;
         private final byte[] requiredComponentBitMask;
         private final List<Entry> dependencies = new ArrayList<>(0);
         private final List<Entry> dependents = new ArrayList<>(0);
