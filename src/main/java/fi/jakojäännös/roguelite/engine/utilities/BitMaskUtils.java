@@ -1,8 +1,5 @@
 package fi.jakojäännös.roguelite.engine.utilities;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public class BitMaskUtils {
     public static int calculateMaskSize(int n) {
         // fast divide by 8 and ceil
@@ -36,7 +33,7 @@ public class BitMaskUtils {
         }
 
         for (int i = 0; i < a.length; ++i) {
-            if ((a[i] & b[i]) != a[i]) {
+            if (a[i] != b[i]) {
                 return false;
             }
         }
