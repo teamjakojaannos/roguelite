@@ -15,18 +15,25 @@ class SystemMap {
     @NonNull
     private final Cluster cluster;
 
-    SystemMap(Cluster cluster) {
+    SystemMap(@NonNull Cluster cluster) {
         this.cluster = cluster;
     }
 
-    private int getSystemCount() {
+    int getSystemCount() {
         return this.systemsById.size();
+    }
+
+    Stream<ECSSystem> getDependencies(String name) {
+        return Stream.ofNullable(this.systemIdLookup.get(name))
+                     .map(this.systemsById::get)
+                     .flatMap(entry -> entry.dependencies.stream())
+                     .map(entry -> entry.system);
     }
 
     void put(
             @NonNull String name,
             @NonNull ECSSystem system,
-            @NonNull String... dependencies
+            String... dependencies
     ) {
         val id = getSystemCount();
         val requiredComponentsBitMask =
@@ -42,9 +49,10 @@ class SystemMap {
         val entry = new Entry(id, system, requiredComponentsBitMask);
 
         Arrays.stream(dependencies)
-              .map(this.systemIdLookup::get)
-              .map(this.systemsById::get)
-              .forEach(entry::addDependency);
+              .forEach(dependencyName ->
+                               entry.addDependency(Optional.ofNullable(this.systemIdLookup.get(dependencyName))
+                                                           .map(this.systemsById::get)
+                                                           .orElseThrow(() -> new IllegalStateException("Tried to register dependency \"" + dependencyName + "\" which was not registered!"))));
 
         this.systemsById.add(entry);
         this.systemIdLookup.put(name, id);
@@ -73,8 +81,6 @@ class SystemMap {
                 }
             }
         }
-
-        //this.systemsById.forEach(entry -> );
     }
 
     private boolean canBeProcessed(@NonNull Entry entry, @NonNull boolean[] processed) {
@@ -108,7 +114,7 @@ class SystemMap {
             return this.dependencies.isEmpty();
         }
 
-        void addDependency(@NonNull Entry dependency) {
+        void addDependency(Entry dependency) {
             // TODO: Check for circular dependencies
             dependencies.add(dependency);
             dependency.dependents.add(this);
