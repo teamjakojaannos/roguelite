@@ -1,7 +1,5 @@
 package fi.jakojäännös.roguelite.engine.ecs;
 
-import fi.jakojäännös.roguelite.game.data.GameState;
-
 import java.util.Collection;
 import java.util.stream.Stream;
 

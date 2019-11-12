@@ -7,19 +7,25 @@ import lombok.val;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 class SystemMap<TState> {
     private final Map<String, Integer> systemIdLookup = new HashMap<>();
     private final List<Entry> systemsById = new ArrayList<>();
     @NonNull
-    private final Cluster cluster;
+    private final Function<Class<? extends Component>, Optional<Integer>> componentTypeMapper;
+    private final int nComponentTypes;
 
-    SystemMap(@NonNull Cluster cluster) {
-        this.cluster = cluster;
+    SystemMap(
+            @NonNull Function<Class<? extends Component>, Optional<Integer>> componentTypeMapper,
+            int nComponentTypes
+    ) {
+        this.componentTypeMapper = componentTypeMapper;
+        this.nComponentTypes = nComponentTypes;
     }
 
-    int getSystemCount() {
+    private int getSystemCount() {
         return this.systemsById.size();
     }
 
@@ -39,10 +45,10 @@ class SystemMap<TState> {
         val requiredComponentsBitMask =
                 system.getRequiredComponents()
                       .stream()
-                      .map(this.cluster::getComponentTypeIndexFor)
+                      .map(this.componentTypeMapper)
                       .filter(Optional::isPresent)
                       .map(Optional::get)
-                      .reduce(new byte[BitMaskUtils.calculateMaskSize(cluster.getNumberOfComponentTypes())],
+                      .reduce(new byte[BitMaskUtils.calculateMaskSize(this.nComponentTypes)],
                               BitMaskUtils::setNthBit,
                               BitMaskUtils::combineMasks);
 

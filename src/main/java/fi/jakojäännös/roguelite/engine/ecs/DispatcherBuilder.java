@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class DispatcherBuilder<TState> {
-    private Collection<SystemEntry> systems = new ArrayList<>();
+    private Collection<SystemEntry<TState>> systems = new ArrayList<>();
     private Cluster cluster;
 
     public DispatcherBuilder<TState> withCluster(@NonNull Cluster cluster) {

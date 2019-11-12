@@ -1,20 +1,23 @@
 package fi.jakojäännös.roguelite.engine.ecs;
 
 import fi.jakojäännös.roguelite.engine.utilities.BitMaskUtils;
-import fi.jakojäännös.roguelite.game.data.GameState;
 import lombok.NonNull;
 import lombok.val;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SystemDispatcher<TState> {
     @NonNull private final SystemMap<TState> systems;
     @NonNull private final Cluster cluster;
 
-    SystemDispatcher(Cluster cluster, Collection<DispatcherBuilder.SystemEntry> systems) {
+    SystemDispatcher(Cluster cluster, Collection<DispatcherBuilder.SystemEntry<TState>> systems) {
         this.cluster = cluster;
-        this.systems = new SystemMap(this.cluster);
+        this.systems = new SystemMap<>(
+                this.cluster::getComponentTypeIndexFor,
+                this.cluster.getNumberOfComponentTypes()
+        );
         systems.forEach(entry -> this.systems.put(entry.getName(),
                                                   entry.getSystem(),
                                                   entry.getDependencies()));

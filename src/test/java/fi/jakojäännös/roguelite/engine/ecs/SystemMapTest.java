@@ -6,74 +6,70 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SystemMapTest {
     @Test
-    void constructorThrowsIfClusterIsNull() {
-        assertThrows(NullPointerException.class, () -> new SystemMap(null));
+    void constructorThrowsIfMapperIsNull() {
+        assertThrows(NullPointerException.class, () -> new SystemMap(null, 0));
     }
 
     @ParameterizedTest
     @CsvSource({"valid,,valid", ",valid,valid"})
     void putThrowsIfAnyOfParametersAreNull(String name, String system, String dependency) {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
-        map.put("valid", new MockECSSystem());
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 1);
+        map.put("valid", new MockECSSystem<>());
 
         assertThrows(NullPointerException.class,
                      () -> map.put(
                              name,
-                             system == null ? null : new MockECSSystem(),
+                             system == null ? null : new MockECSSystem<>(),
                              dependency
                      ));
     }
 
     @Test
     void putThrowsIfDependencyIsNotRegistered() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 1);
         assertThrows(IllegalStateException.class,
                      () -> map.put("valid",
-                                   new MockECSSystem(),
+                                   new MockECSSystem<>(),
                                    "invalid"));
     }
 
     @Test
     void putSucceedsIfAllParametersAreValid_noDependencies() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 1);
 
         assertDoesNotThrow(() -> map.put("valid",
-                                         new MockECSSystem()));
+                                         new MockECSSystem<>()));
     }
 
     @Test
     void putSucceedsIfAllParametersAreValid_singleDependency() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
-        map.put("valid_dep_1", new MockECSSystem());
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        map.put("valid_dep_1", new MockECSSystem<>());
 
         assertDoesNotThrow(() -> map.put("valid",
-                                         new MockECSSystem(),
+                                         new MockECSSystem<>(),
                                          "valid_dep_1"));
     }
 
     @Test
     void putSucceedsIfAllParametersAreValid_manyDependencies() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
-        map.put("valid_dep_1", new MockECSSystem());
-        map.put("valid_dep_2", new MockECSSystem());
-        map.put("valid_dep_3", new MockECSSystem());
-        map.put("valid_dep_4", new MockECSSystem());
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        map.put("valid_dep_1", new MockECSSystem<>());
+        map.put("valid_dep_2", new MockECSSystem<>());
+        map.put("valid_dep_3", new MockECSSystem<>());
+        map.put("valid_dep_4", new MockECSSystem<>());
 
         assertDoesNotThrow(() -> map.put("valid",
-                                         new MockECSSystem(),
+                                         new MockECSSystem<>(),
                                          "valid_dep_1",
                                          "valid_dep_2",
                                          "valid_dep_3",
@@ -83,9 +79,13 @@ class SystemMapTest {
 
     @Test
     void nonPrioritizedStreamGetsAllRegisteredSystems_noDependencies() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
-        List<ECSSystem> systems = List.of(new MockECSSystem(), new MockECSSystem(), new MockECSSystem(), new MockECSSystem());
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        List<ECSSystem<State>> systems = List.of(
+                new MockECSSystem<>(),
+                new MockECSSystem<>(),
+                new MockECSSystem<>(),
+                new MockECSSystem<>()
+        );
         for (int i = 0; i < systems.size(); ++i) {
             map.put("valid_" + i, systems.get(i));
         }
@@ -95,9 +95,14 @@ class SystemMapTest {
 
     @Test
     void nonPrioritizedStreamGetsAllRegisteredSystems_simpleDependencies() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
-        List<ECSSystem> systems = List.of(new MockECSSystem(), new MockECSSystem(), new MockECSSystem(), new MockECSSystem(), new MockECSSystem());
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        List<ECSSystem<State>> systems = List.of(
+                new MockECSSystem<>(),
+                new MockECSSystem<>(),
+                new MockECSSystem<>(),
+                new MockECSSystem<>(),
+                new MockECSSystem<>()
+        );
         map.put("valid_0", systems.get(0));
         for (int i = 1; i < systems.size(); ++i) {
             map.put("valid_" + i, systems.get(i), "valid_" + (i - 1));
@@ -108,24 +113,27 @@ class SystemMapTest {
 
     @Test
     void forEachPrioritizedThrowsIfConsumerIsNull() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
         assertThrows(NullPointerException.class, () -> map.forEachPrioritized(null));
     }
 
     @Test
     void forEachPrioritizedSucceedsWhenMapIsEmpty() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
         assertDoesNotThrow(() -> map.forEachPrioritized((system, bytes) -> {
         }));
     }
 
     @Test
     void forEachPrioritizedIteratesInExpectedOrder_simpleDependencies() {
-        Cluster cluster = new Cluster(256);
-        SystemMap map = new SystemMap(cluster);
-        List<ECSSystem> systems = new ArrayList<>(List.of(new MockECSSystem(), new MockECSSystem(), new MockECSSystem(), new MockECSSystem(), new MockECSSystem()));
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        List<ECSSystem<State>> systems = new ArrayList<>(List.of(
+                new MockECSSystem<>(),
+                new MockECSSystem<>(),
+                new MockECSSystem<>(),
+                new MockECSSystem<>(),
+                new MockECSSystem<>())
+        );
         map.put("valid_0", systems.get(0));
         for (int i = 1; i < systems.size(); ++i) {
             map.put("valid_" + i, systems.get(i), "valid_" + (i - 1));
@@ -138,8 +146,7 @@ class SystemMapTest {
 
     @Test
     void forEachPrioritizedIteratesInExpectedOrder_complexDependencies() {
-        Cluster cluster = new Cluster(256);
-        SystemMap<State> map = new SystemMap<>(cluster);
+        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
         Map<String, ECSSystem<State>> systems = Map.ofEntries(
                 Map.entry("valid_0", new MockECSSystem<>()),
                 Map.entry("valid_1", new MockECSSystem<>()),
@@ -189,6 +196,10 @@ class SystemMapTest {
             assertTrue(map.getDependencies(name).allMatch(processed::contains));
             processed.add(system);
         });
+    }
+
+    private Function<Class<? extends Component>, Optional<Integer>> testComponentTypeMapper() {
+        return type -> Optional.of(0);
     }
 
     private static class State {
