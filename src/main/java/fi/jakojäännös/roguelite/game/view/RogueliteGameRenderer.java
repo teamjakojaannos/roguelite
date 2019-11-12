@@ -109,7 +109,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     }
 
     @Override
-    public void render(GameState state, double delta) {
+    public void render(GameState state, double partialTickAlpha) {
         // Make sure that the camera configuration matches the current state
         camera.updateConfigurationFromState(state);
 

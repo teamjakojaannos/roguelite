@@ -2,10 +2,10 @@ package fi.jakojäännös.roguelite.engine;
 
 import fi.jakojäännös.roguelite.engine.input.InputEvent;
 import fi.jakojäännös.roguelite.engine.input.InputProvider;
-import fi.jakojäännös.roguelite.engine.input.MouseInfo;
 import fi.jakojäännös.roguelite.engine.view.GameRenderer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Optional;
@@ -18,6 +18,7 @@ import java.util.function.Supplier;
  * @param <TGame>
  * @param <TInput>
  */
+@Slf4j
 @RequiredArgsConstructor
 public abstract class GameRunner<
         TGame extends Game<TState>,
@@ -45,7 +46,12 @@ public abstract class GameRunner<
      * @param renderer      Renderer to use for presenting the game. NOP-renderer is used if
      *                      provided renderer is <code>null</code>.
      */
-    public void run(@NonNull Supplier<TState> defaultStateSupplier, @NonNull TGame game, @NonNull TInput inputProvider, GameRenderer<TState> renderer) {
+    public void run(
+            @NonNull Supplier<TState> defaultStateSupplier,
+            @NonNull TGame game,
+            @NonNull TInput inputProvider,
+            GameRenderer<TState> renderer
+    ) {
         if (game.isDisposed()) {
             throw new IllegalStateException("Tried running an already disposed game!");
         }
@@ -60,19 +66,33 @@ public abstract class GameRunner<
 
         // Loop
         val state = defaultStateSupplier.get();
-        var previousFrameTime = game.getTime().getCurrentTime();
+        game.getTime().refresh();
+        var previousFrameTime = game.getTime().getCurrentRealTime();
+        var accumulator = 0L;
+
+        val simulationTimestep = 20L; // 50 TPS = 20ms per tick
+        val simulationTimestepInSeconds = simulationTimestep / 1000.0;
         while (shouldContinueLoop(game)) {
-            if (game.isDisposed()) {
-                throw new IllegalStateException("Running the loop for already disposed game!");
+            game.getTime().refresh();
+            val currentFrameTime = game.getTime().getCurrentRealTime();
+            var frameElapsedTime = currentFrameTime - previousFrameTime;
+            if (frameElapsedTime > 250L) {
+                LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
+                frameElapsedTime = 250L;
             }
 
-            val currentFrameTime = game.getTime().getCurrentTime();
-            val frameElapsedTime = currentFrameTime - previousFrameTime;
-            val delta = frameElapsedTime / 1000.0;
             previousFrameTime = currentFrameTime;
 
-            simulateTick(state, game, inputProvider.pollEvents(), delta);
-            presentGameState(state, actualRenderer, delta);
+            accumulator += frameElapsedTime;
+            while (accumulator >= simulationTimestep) {
+                simulateTick(state, game, inputProvider.pollEvents(), simulationTimestepInSeconds);
+
+                game.getTime().progressGameTime(simulationTimestep);
+                accumulator -= simulationTimestep;
+            }
+
+            val partialTickAlpha = accumulator / (double) simulationTimestep;
+            presentGameState(state, actualRenderer, partialTickAlpha);
         }
     }
 
@@ -81,25 +101,38 @@ public abstract class GameRunner<
      *
      * @param game        Game to simulate
      * @param inputEvents Input events to process during this tick
-     * @param delta       Time elapsed since the last tick
+     * @param delta       Time since the last tick
      */
-    public void simulateTick(TState state, TGame game, Queue<InputEvent> inputEvents, double delta) {
+    public void simulateTick(
+            TState state,
+            TGame game,
+            Queue<InputEvent> inputEvents,
+            double delta
+    ) {
+        if (game.isDisposed()) {
+            throw new IllegalStateException("Simulating tick for already disposed game!");
+        }
+
         game.tick(state, inputEvents, delta);
     }
 
     /**
      * Presents the current game state to the user.
      *
-     * @param state Game state which to present
-     * @param delta Time elapsed since the last tick
+     * @param state            Game state which to present
+     * @param partialTickAlpha Time blending factor between the last two frames we should render at
      */
-    public void presentGameState(TState state, GameRenderer<TState> renderer, double delta) {
-        renderer.render(state, delta);
+    public void presentGameState(
+            TState state,
+            GameRenderer<TState> renderer,
+            double partialTickAlpha
+    ) {
+        renderer.render(state, partialTickAlpha);
     }
 
     private class NOPRenderer implements GameRenderer<TState> {
         @Override
-        public void render(TState game, double delta) {
+        public void render(TState game, double partialTickAlpha) {
         }
 
         @Override

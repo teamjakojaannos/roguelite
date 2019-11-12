@@ -1,5 +1,11 @@
 package fi.jakojäännös.roguelite.engine.utilities;
 
 public interface TimeManager {
-    long getCurrentTime();
+    long getCurrentRealTime();
+
+    long getCurrentGameTime();
+
+    void progressGameTime(long timestep);
+
+    void refresh();
 }

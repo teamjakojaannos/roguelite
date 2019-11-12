@@ -41,10 +41,10 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
     }
 
     @Override
-    public void presentGameState(TState state, GameRenderer<TState> renderer, double delta) {
+    public void presentGameState(TState state, GameRenderer<TState> renderer, double partialTickAlpha) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        super.presentGameState(state, renderer, delta);
+        super.presentGameState(state, renderer, partialTickAlpha);
 
         glfwSwapBuffers(this.window.getId());
         glfwPollEvents();
