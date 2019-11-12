@@ -10,14 +10,13 @@ import fi.jakojäännös.roguelite.engine.input.InputEvent;
 import fi.jakojäännös.roguelite.game.data.components.CrosshairTag;
 import fi.jakojäännös.roguelite.game.data.components.PlayerTag;
 import fi.jakojäännös.roguelite.game.data.components.Position;
+import fi.jakojäännös.roguelite.game.systems.MovePlayerSystem;
+import fi.jakojäännös.roguelite.game.systems.SnapToCursorSystem;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Queue;
-import java.util.stream.Stream;
 
 @Slf4j
 public class Roguelite extends GameBase<GameState> {
@@ -25,51 +24,8 @@ public class Roguelite extends GameBase<GameState> {
 
     public Roguelite() {
         this.dispatcher = new DispatcherBuilder<GameState>()
-                .withSystem("player_move", new ECSSystem<>() {
-                    @Override
-                    public Collection<Class<? extends Component>> getRequiredComponents() {
-                        return List.of(Position.class, PlayerTag.class);
-                    }
-
-                    @Override
-                    public void tick(
-                            Stream<Entity> entities,
-                            GameState state,
-                            double delta,
-                            Cluster cluster
-                    ) {
-                        val playerDirectionMultiplierX = (state.inputRight ? 1 : 0) - (state.inputLeft ? 1 : 0);
-                        val playerDirectionMultiplierY = (state.inputDown ? 1 : 0) - (state.inputUp ? 1 : 0);
-                        val playerVelocityX = state.playerSpeed * playerDirectionMultiplierX;
-                        val playerVelocityY = state.playerSpeed * playerDirectionMultiplierY;
-
-                        entities.forEach(entity -> state.world.getComponentOf(entity, Position.class)
-                                                              .ifPresent(position -> {
-                                                                  position.x += playerVelocityX * delta;
-                                                                  position.y += playerVelocityY * delta;
-                                                              }));
-                    }
-                })
-                .withSystem("crosshair_snap_to_cursor", new ECSSystem<>() {
-                    @Override
-                    public Collection<Class<? extends Component>> getRequiredComponents() {
-                        return List.of(Position.class, CrosshairTag.class);
-                    }
-
-                    @Override
-                    public void tick(
-                            Stream<Entity> entities,
-                            GameState state,
-                            double delta,
-                            Cluster cluster
-                    ) {
-                        entities.forEach(entity -> state.world.getComponentOf(entity, Position.class)
-                                                              .ifPresent(position -> {
-                                                                  position.x = state.mouseX * state.realViewWidth;
-                                                                  position.y = state.mouseY * state.realViewHeight;
-                                                              }));
-                    }
-                })
+                .withSystem("player_move", new MovePlayerSystem())
+                .withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
                 .build();
     }
 
@@ -126,4 +82,5 @@ public class Roguelite extends GameBase<GameState> {
 
         this.dispatcher.dispatch(state.world, state, delta);
     }
+
 }
