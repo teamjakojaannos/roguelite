@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Function;
@@ -60,6 +61,10 @@ class ComponentStorage<TComponent extends Component> {
         }
     }
 
+    void resize(int entityCapacity) {
+        this.componentMap.resize(entityCapacity);
+    }
+
     private interface StorageTask {
         void execute();
     }
@@ -72,7 +77,7 @@ class ComponentStorage<TComponent extends Component> {
         private int[] entityComponentIndexLookup;
 
         private final Function<Integer, TComponent[]> componentArraySupplier;
-        private final TComponent[] components;
+        private TComponent[] components;
 
         private ComponentMap(int entityCapacity, Function<Integer, TComponent[]> componentArraySupplier) {
             this.entityCapacity = entityCapacity;
@@ -109,6 +114,12 @@ class ComponentStorage<TComponent extends Component> {
                         this.idSupplier.free(componentIndex);
                         this.entityComponentIndexLookup[componentIndex] = 0;
                     });
+        }
+
+        private void resize(int entityCapacity) {
+            this.entityCapacity = entityCapacity;
+            this.entityComponentIndexLookup = Arrays.copyOf(this.entityComponentIndexLookup, this.entityCapacity);
+            this.components = Arrays.copyOf(this.components, this.entityCapacity);
         }
     }
 }

@@ -12,11 +12,12 @@ import java.util.function.Function;
  * Provides accessors for entity components.
  */
 public class Cluster {
-    private final int entityCapacity;
     private final EntityStorage entityStorage;
     private final List<ComponentStorage> componentTypes = new ArrayList<>();
     private final Map<Class<? extends Component>, Integer> componentTypeIndices = new HashMap<>();
     private final Queue<StorageTask> taskQueue = new ArrayDeque<>();
+
+    private int entityCapacity;
 
     public Cluster(int entityCapacity) {
         this.entityStorage = new EntityStorage(entityCapacity);
@@ -25,6 +26,10 @@ public class Cluster {
 
     public Entity createEntity() {
         val entity = this.entityStorage.create(this.componentTypes.size());
+        if (entity.getId() >= this.entityCapacity) {
+            resize(this.entityCapacity * 2);
+        }
+
         this.taskQueue.offer(() -> {
             this.entityStorage.spawn(entity);
         });
@@ -134,7 +139,13 @@ public class Cluster {
         return Optional.ofNullable(componentTypeIndices.get(componentClass));
     }
 
-    public int getNumberOfComponentTypes() {
+    private void resize(int entityCapacity) {
+        this.entityCapacity = entityCapacity;
+        this.entityStorage.resize(entityCapacity);
+        this.componentTypes.forEach(storage -> storage.resize(entityCapacity));
+    }
+
+    int getNumberOfComponentTypes() {
         return this.componentTypeIndices.size();
     }
 

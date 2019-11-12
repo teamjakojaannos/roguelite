@@ -28,10 +28,6 @@ class EntityStorage {
     }
 
     void spawn(@NonNull Entity entity) {
-        if (entity.getId() >= this.capacity) {
-            resize(this.capacity * 2);
-        }
-
         this.entities[entity.getId()] = entity;
     }
 
@@ -40,7 +36,7 @@ class EntityStorage {
         this.entities[entity.getId()] = null;
     }
 
-    private void resize(int capacity) {
+    void resize(int capacity) {
         this.capacity = capacity;
         this.entities = Arrays.copyOf(this.entities, this.capacity);
     }

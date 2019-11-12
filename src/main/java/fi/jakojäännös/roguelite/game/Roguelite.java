@@ -91,5 +91,7 @@ public class Roguelite extends GameBase<GameState> {
         }
 
         this.dispatcher.dispatch(state.world, state, delta);
+        state.world.getComponentOf(state.player, Position.class)
+                   .ifPresent(position -> LOG.info("{}:{}", position.x, position.y));
     }
 }

@@ -67,8 +67,11 @@ public abstract class GameRunner<
         // Loop
         val state = defaultStateSupplier.get();
         game.getTime().refresh();
+        val initialTime = System.currentTimeMillis();
         var previousFrameTime = game.getTime().getCurrentRealTime();
         var accumulator = 0L;
+        var ticks = 0;
+        var frames = 0;
 
         val simulationTimestep = 20L; // 50 TPS = 20ms per tick
         val simulationTimestepInSeconds = simulationTimestep / 1000.0;
@@ -76,7 +79,7 @@ public abstract class GameRunner<
             game.getTime().refresh();
             val currentFrameTime = game.getTime().getCurrentRealTime();
             var frameElapsedTime = currentFrameTime - previousFrameTime;
-            if (frameElapsedTime > 250L) {
+            if (frameElapsedTime > 250L && false) {
                 LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
                 frameElapsedTime = 250L;
             }
@@ -89,11 +92,29 @@ public abstract class GameRunner<
 
                 game.getTime().progressGameTime(simulationTimestep);
                 accumulator -= simulationTimestep;
+                ++ticks;
             }
 
             val partialTickAlpha = accumulator / (double) simulationTimestep;
             presentGameState(state, actualRenderer, partialTickAlpha);
+            frames++;
         }
+
+        val totalTime = System.currentTimeMillis() - initialTime;
+        val totalTimeSeconds = totalTime / 1000.0;
+
+        val avgTimePerTick = totalTime / (double) ticks;
+        val avgTicksPerSecond = ticks / totalTimeSeconds;
+
+        val avgTimePerFrame = totalTime / (double) frames;
+        val avgFramesPerSecond = frames / totalTimeSeconds;
+        LOG.info("Finished execution after {} seconds", totalTimeSeconds);
+        LOG.info("\tTicks:\t\t{}", ticks);
+        LOG.info("\tAvg. TPT:\t{}", avgTimePerTick);
+        LOG.info("\tAvg. TPS:\t{}", avgTicksPerSecond);
+        LOG.info("\tFrames:\t\t{}", frames);
+        LOG.info("\tAvg. TPF:\t{}", avgTimePerFrame);
+        LOG.info("\tAvg. FPS:\t{}", avgFramesPerSecond);
     }
 
     /**
