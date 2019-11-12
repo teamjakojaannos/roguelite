@@ -11,6 +11,9 @@ import lombok.val;
 import java.util.Arrays;
 import java.util.Optional;
 
+/**
+ * The main entry point. CMD args WIP.
+ */
 @Slf4j
 public class Main {
     public static void main(String[] args) {
