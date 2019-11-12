@@ -39,7 +39,7 @@ public class SystemDispatcher<TState> {
 
                     system.tick(cluster.getEntityStorage()
                                        .stream()
-                                       .filter(entity -> BitMaskUtils.compareMasks(entity.getComponentBitmask(),
+                                       .filter(entity -> BitMaskUtils.hasAllBitsOf(entity.getComponentBitmask(),
                                                                                    requiredComponentsBitMask)),
                                 state,
                                 delta,

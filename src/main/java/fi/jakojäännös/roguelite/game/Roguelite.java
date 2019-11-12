@@ -7,10 +7,9 @@ import fi.jakojäännös.roguelite.engine.input.ButtonInput;
 import fi.jakojäännös.roguelite.engine.input.InputAxis;
 import fi.jakojäännös.roguelite.engine.input.InputButton;
 import fi.jakojäännös.roguelite.engine.input.InputEvent;
-import fi.jakojäännös.roguelite.game.data.components.CrosshairTag;
-import fi.jakojäännös.roguelite.game.data.components.PlayerTag;
-import fi.jakojäännös.roguelite.game.data.components.Position;
-import fi.jakojäännös.roguelite.game.systems.MovePlayerSystem;
+import fi.jakojäännös.roguelite.game.data.components.*;
+import fi.jakojäännös.roguelite.game.systems.CharacterMovementSystem;
+import fi.jakojäännös.roguelite.game.systems.PlayerInputSystem;
 import fi.jakojäännös.roguelite.game.systems.SnapToCursorSystem;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,8 @@ public class Roguelite extends GameBase<GameState> {
 
     public Roguelite() {
         this.dispatcher = new DispatcherBuilder<GameState>()
-                .withSystem("player_move", new MovePlayerSystem())
+                .withSystem("player_input", new PlayerInputSystem())
+                .withSystem("character_move", new CharacterMovementSystem(), "player_input")
                 .withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
                 .build();
     }
@@ -33,11 +33,21 @@ public class Roguelite extends GameBase<GameState> {
         val state = new GameState();
         state.world = new Cluster(256);
         state.world.registerComponentType(Position.class, Position[]::new);
+        state.world.registerComponentType(Velocity.class, Velocity[]::new);
+        state.world.registerComponentType(CharacterInput.class, CharacterInput[]::new);
+        state.world.registerComponentType(CharacterStats.class, CharacterStats[]::new);
         state.world.registerComponentType(PlayerTag.class, PlayerTag[]::new);
         state.world.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);
 
         state.player = state.world.createEntity();
         state.world.addComponentTo(state.player, new Position(4.0f, 4.0f));
+        state.world.addComponentTo(state.player, new Velocity());
+        state.world.addComponentTo(state.player, new CharacterInput());
+        state.world.addComponentTo(state.player, new CharacterStats(
+                10.0f,
+                100.0f,
+                800.0f
+        ));
         state.world.addComponentTo(state.player, new PlayerTag());
 
         state.crosshair = state.world.createEntity();
@@ -82,5 +92,4 @@ public class Roguelite extends GameBase<GameState> {
 
         this.dispatcher.dispatch(state.world, state, delta);
     }
-
 }

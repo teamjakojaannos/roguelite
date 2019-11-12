@@ -27,13 +27,21 @@ public class BitMaskUtils {
         return (mask[n / 8] & (1 << (n % 8))) != 0;
     }
 
-    public static boolean compareMasks(byte[] a, byte[] b) {
+    /**
+     * Checks that all bits set on mask b are also set on mask a
+     *
+     * @param a mask to validate
+     * @param b mask to validate against
+     *
+     * @return true if condition is met, false otherwise
+     */
+    public static boolean hasAllBitsOf(byte[] a, byte[] b) {
         if (a.length != b.length) {
             return false;
         }
 
         for (int i = 0; i < a.length; ++i) {
-            if (a[i] != b[i]) {
+            if ((a[i] & b[i]) != b[i]) {
                 return false;
             }
         }
