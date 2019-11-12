@@ -5,6 +5,8 @@ import fi.jakojäännös.roguelite.engine.ecs.Component;
 import fi.jakojäännös.roguelite.engine.ecs.ECSSystem;
 import fi.jakojäännös.roguelite.engine.ecs.Entity;
 import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojäännös.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
+import fi.jakojäännös.roguelite.engine.utilities.io.TextFileHelper;
 import fi.jakojäännös.roguelite.game.data.GameState;
 import fi.jakojäännös.roguelite.game.data.components.PlayerTag;
 import fi.jakojäännös.roguelite.game.data.components.Position;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,9 +36,7 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
     }
 
     private final LWJGLCamera camera;
-    private final int shaderProgram;
-    private final int vertexShader;
-    private final int fragmentShader;
+    private final ShaderProgram shader;
 
     private float[] vertices;
     private float[] modelTransformationMatrix;
@@ -45,6 +46,10 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
 
     public PlayerRendererSystem(LWJGLCamera camera) {
         this.camera = camera;
+        this.shader = new ShaderProgram(
+                "assets/shaders/sprite.vert",
+                "assets/shaders/sprite.frag"
+        );
 
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
@@ -69,56 +74,6 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
         this.modelTransformationMatrix = new Matrix4f().identity().get(new float[4 * 4]);
-
-        this.vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(this.vertexShader,
-                       "#version 150\n" +
-                               "\n" +
-                               "in vec2 in_pos;\n" +
-                               "\n" +
-                               "uniform mat4 projection;\n" +
-                               "uniform mat4 model;\n" +
-                               "uniform mat4 view;\n" +
-                               "\n" +
-                               "void main(void) {\n" +
-                               "   mat4 mvp = projection * view * model;\n" +
-                               "   gl_Position = mvp * vec4(in_pos.x, in_pos.y, 0.0, 1.0);\n" +
-                               "}\n"
-        );
-        glCompileShader(this.vertexShader);
-
-        this.fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(this.fragmentShader,
-                       "#version 150\n" +
-                               "\n" +
-                               "out vec4 out_fragColor;\n" +
-                               "\n" +
-                               "void main(void) {\n" +
-                               "    out_fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" +
-                               "}\n"
-        );
-        glCompileShader(this.fragmentShader);
-
-        if (glGetShaderi(this.vertexShader, GL_COMPILE_STATUS) != GL_TRUE) {
-            LOG.error("Error compiling vertex shader:\n{}", glGetShaderInfoLog(this.vertexShader));
-        }
-
-        if (glGetShaderi(this.fragmentShader, GL_COMPILE_STATUS) != GL_TRUE) {
-            LOG.error("Error compiling fragment shader:\n{}", glGetShaderInfoLog(this.fragmentShader));
-        }
-
-        this.shaderProgram = glCreateProgram();
-        glAttachShader(this.shaderProgram, this.vertexShader);
-        glAttachShader(this.shaderProgram, this.fragmentShader);
-
-        glBindAttribLocation(this.shaderProgram, 0, "in_pos");
-        glBindFragDataLocation(this.shaderProgram, 0, "out_fragColor");
-
-        glLinkProgram(this.shaderProgram);
-
-        if (glGetProgrami(this.shaderProgram, GL_LINK_STATUS) != GL_TRUE) {
-            LOG.error(glGetProgramInfoLog(this.shaderProgram));
-        }
     }
 
     @Override
@@ -128,7 +83,7 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
             double partialTickAlpha,
             Cluster cluster
     ) {
-        glUseProgram(this.shaderProgram);
+        glUseProgram(this.shader.getShaderProgram());
 
         glBindVertexArray(this.vao);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
@@ -137,9 +92,9 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * 2, 0);
 
-        val uniformModel = glGetUniformLocation(this.shaderProgram, "model");
-        val uniformView = glGetUniformLocation(this.shaderProgram, "view");
-        val uniformProj = glGetUniformLocation(this.shaderProgram, "projection");
+        val uniformModel = glGetUniformLocation(this.shader.getShaderProgram(), "model");
+        val uniformView = glGetUniformLocation(this.shader.getShaderProgram(), "view");
+        val uniformProj = glGetUniformLocation(this.shader.getShaderProgram(), "projection");
 
         glUniformMatrix4fv(uniformView, false, this.camera.getViewMatrix());
         glUniformMatrix4fv(uniformProj, false, this.camera.getProjectionMatrix());
@@ -165,8 +120,6 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
         glDeleteBuffers(this.vbo);
         glDeleteBuffers(this.ebo);
 
-        glDeleteShader(this.vertexShader);
-        glDeleteShader(this.fragmentShader);
-        glDeleteProgram(this.shaderProgram);
+        this.shader.close();
     }
 }
