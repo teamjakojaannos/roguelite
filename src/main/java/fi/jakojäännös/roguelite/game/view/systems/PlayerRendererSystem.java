@@ -6,7 +6,6 @@ import fi.jakojäännös.roguelite.engine.ecs.ECSSystem;
 import fi.jakojäännös.roguelite.engine.ecs.Entity;
 import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojäännös.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
-import fi.jakojäännös.roguelite.engine.utilities.io.TextFileHelper;
 import fi.jakojäännös.roguelite.game.data.GameState;
 import fi.jakojäännös.roguelite.game.data.components.PlayerTag;
 import fi.jakojäännös.roguelite.game.data.components.Position;
@@ -14,14 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
 import static org.lwjgl.opengl.GL30.*;
 
 @Slf4j
@@ -37,9 +33,10 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
 
     private final LWJGLCamera camera;
     private final ShaderProgram shader;
+    private final int uniformProjectionMatrix;
+    private final int uniformViewMatrix;
+    private final int uniformModelMatrix;
 
-    private float[] vertices;
-    private float[] modelTransformationMatrix;
     private int vao;
     private int vbo;
     private int ebo;
@@ -50,6 +47,9 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
                 "assets/shaders/sprite.vert",
                 "assets/shaders/sprite.frag"
         );
+        this.uniformModelMatrix = this.shader.getUniformLocation("model");
+        this.uniformViewMatrix = this.shader.getUniformLocation("view");
+        this.uniformProjectionMatrix = this.shader.getUniformLocation("projection");
 
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
@@ -58,7 +58,7 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
         val posY = 0.0f;
         val width = 1.0f;
         val height = 1.0f;
-        this.vertices = new float[]{
+        val vertices = new float[]{
                 posX, posY,
                 posX + width, posY,
                 posX + width, posY + height,
@@ -73,7 +73,12 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
         };
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
-        this.modelTransformationMatrix = new Matrix4f().identity().get(new float[4 * 4]);
+        glBindVertexArray(this.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * 2, 0);
     }
 
     @Override
@@ -83,35 +88,23 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
             double partialTickAlpha,
             Cluster cluster
     ) {
-        glUseProgram(this.shader.getShaderProgram());
-
-        glBindVertexArray(this.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        glBufferData(GL_ARRAY_BUFFER, this.vertices, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * 2, 0);
-
-        val uniformModel = glGetUniformLocation(this.shader.getShaderProgram(), "model");
-        val uniformView = glGetUniformLocation(this.shader.getShaderProgram(), "view");
-        val uniformProj = glGetUniformLocation(this.shader.getShaderProgram(), "projection");
-
-        glUniformMatrix4fv(uniformView, false, this.camera.getViewMatrix());
-        glUniformMatrix4fv(uniformProj, false, this.camera.getProjectionMatrix());
+        this.shader.use();
+        this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());
+        this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
 
         val modelMatrix = new Matrix4f();
-        entities.forEach(entity -> {
-            state.world.getComponentOf(entity, Position.class)
-                       .ifPresent(position -> {
-                           modelMatrix.identity()
-                                      .translate(position.x, position.y, 0.0f)
-                                      .scale(state.playerSize)
-                                      .get(this.modelTransformationMatrix);
+        val modelMatrixArray = new float[4 * 4];
+        entities.forEach(
+                entity -> state.world.getComponentOf(entity, Position.class)
+                                     .ifPresent(position -> {
+                                         modelMatrix.identity()
+                                                    .translate(position.x, position.y, 0.0f)
+                                                    .scale(state.playerSize)
+                                                    .get(modelMatrixArray);
 
-                           glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
-                           glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                       });
-        });
+                                         this.shader.setUniformMat4x4(this.uniformModelMatrix, modelMatrixArray);
+                                         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                                     }));
     }
 
     @Override

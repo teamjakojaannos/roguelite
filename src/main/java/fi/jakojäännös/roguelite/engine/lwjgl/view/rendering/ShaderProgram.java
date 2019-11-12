@@ -64,6 +64,18 @@ public class ShaderProgram implements AutoCloseable {
         }
     }
 
+    public void use() {
+        glUseProgram(this.shaderProgram);
+    }
+
+    public void setUniformMat4x4(int uniformLocation, float[] matrix) {
+        glUniformMatrix4fv(uniformLocation, false, matrix);
+    }
+
+    public int getUniformLocation(String name) {
+        return glGetUniformLocation(shaderProgram, name);
+    }
+
     @Override
     public void close() {
         glDeleteShader(this.vertexShader);
