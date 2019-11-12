@@ -15,24 +15,6 @@ class EntityStorageTest {
     }
 
     @Test
-    void storageGrowsWhenOverfull() {
-        EntityStorage storage = new EntityStorage(1);
-        storage.spawn(storage.create(100));
-        storage.spawn(storage.create(100));
-        assertTrue(storage.getCapacity() > 1);
-    }
-
-    @Test
-    void storageGrowsWhenOverfull_large() {
-        EntityStorage storage = new EntityStorage(256);
-        for (int i = 0; i < 256; ++i) {
-            storage.spawn(storage.create(100));
-        }
-        storage.spawn(storage.create(100));
-        assertTrue(storage.getCapacity() > 256);
-    }
-
-    @Test
     void streamContainsAllSpawned() {
         EntityStorage storage = new EntityStorage(256);
         List<Entity> entities = List.of(
