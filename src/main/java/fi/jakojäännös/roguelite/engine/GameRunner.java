@@ -56,6 +56,8 @@ public abstract class GameRunner<
             throw new IllegalStateException("Tried running an already disposed game!");
         }
 
+        LOG.info("Runner starting...");
+
         // Create NOP-renderer if provided renderer is null and we are in the test environment
         GameRenderer<TState> actualRenderer =
                 Optional.ofNullable(renderer)
@@ -75,11 +77,13 @@ public abstract class GameRunner<
 
         val simulationTimestep = 20L; // 50 TPS = 20ms per tick
         val simulationTimestepInSeconds = simulationTimestep / 1000.0;
+
+        LOG.info("Entering main loop");
         while (shouldContinueLoop(game)) {
             game.getTime().refresh();
             val currentFrameTime = game.getTime().getCurrentRealTime();
             var frameElapsedTime = currentFrameTime - previousFrameTime;
-            if (frameElapsedTime > 250L && false) {
+            if (frameElapsedTime > 250L) {
                 LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
                 frameElapsedTime = 250L;
             }

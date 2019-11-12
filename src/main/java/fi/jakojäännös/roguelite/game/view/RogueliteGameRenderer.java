@@ -15,6 +15,8 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final LWJGLCamera camera;
 
     public RogueliteGameRenderer(LWJGLWindow window) {
+        LOG.info("Constructing GameRenderer...");
+
         this.camera = new LWJGLCamera();
         this.rendererDispatcher = new DispatcherBuilder<GameState>()
                 .withSystem("render_player", new PlayerRendererSystem(this.camera))
@@ -22,7 +24,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
 
         window.addResizeCallback(this.camera::resizeViewport);
 
-        LOG.info("Renderer initialization finished!");
+        LOG.info("GameRenderer initialization finished.");
     }
 
     @Override
