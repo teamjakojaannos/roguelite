@@ -1,73 +1,45 @@
-import org.gradle.internal.os.OperatingSystem
-
-apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: 'jacoco'
-
-mainClassName = 'fi.jakojäännös.launcher.Main'
-
-project.ext.lwjglVersion = "3.2.3"
-project.ext.jomlVersion = "1.9.19"
-
-project.ext.slf4jVersion = "1.7.28"
-
-switch (OperatingSystem.current()) {
-	case OperatingSystem.LINUX:
-		project.ext.lwjglNatives = "natives-linux"
-		break
-	case OperatingSystem.MAC_OS:
-		project.ext.lwjglNatives = "natives-macos"
-		break
-	case OperatingSystem.WINDOWS:
-		project.ext.lwjglNatives = "natives-windows" 
-		break
+plugins {
+    id 'org.javamodularity.moduleplugin' version '1.5.0' apply false
 }
 
-repositories {
-	mavenCentral()
-}
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'org.javamodularity.moduleplugin'
 
-dependencies {
-	// Lombok
-	compileOnly "org.projectlombok:lombok:1.18.10"
-	annotationProcessor "org.projectlombok:lombok:1.18.10"
+    repositories {
+        mavenCentral()
+    }
 
-	// Logging
-	implementation "org.slf4j:slf4j-api:$slf4jVersion"
-	runtimeOnly "org.slf4j:slf4j-simple:$slf4jVersion"
+    dependencies {
+        // Lombok
+        compileOnly "org.projectlombok:lombok:1.18.10"
+        testCompileOnly "org.projectlombok:lombok:1.18.10"
+        annotationProcessor "org.projectlombok:lombok:1.18.10"
 
-	// JUnit 5
-	testImplementation('org.junit.jupiter:junit-jupiter:5.5.2')
+        // Logging
+        implementation "org.slf4j:slf4j-api:$slf4jVersion"
+        runtimeOnly "org.slf4j:slf4j-simple:$slf4jVersion"
 
-	// LWJGL and its components
-	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+        // JUnit 5
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-params:$jUnitVersion"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
+    }
 
-	implementation "org.lwjgl:lwjgl"
-	implementation "org.lwjgl:lwjgl-assimp"
-	implementation "org.lwjgl:lwjgl-glfw"
-	implementation "org.lwjgl:lwjgl-openal"
-	implementation "org.lwjgl:lwjgl-stb"
-	implementation "org.lwjgl:lwjgl-opengl"
-	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
-	implementation "org.joml:joml:${jomlVersion}"
-}
+    test {
+        environment "ENVIRONMENT", "test"
+        useJUnitPlatform()
+        testLogging {
+            events "passed", "skipped", "failed"
+            stackTraceFilters = []
+        }
+    }
 
-test {
-	environment "ENVIRONMENT", "test"
-	useJUnitPlatform()
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
-}
-
-jacocoTestReport {
-	reports {
-		xml.enabled true
-		html.enabled true
-	}
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+            html.enabled true
+        }
+    }
 }

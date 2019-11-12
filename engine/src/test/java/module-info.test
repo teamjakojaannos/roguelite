@@ -1,0 +1,5 @@
+--add-modules
+    org.junit.jupiter.params
+
+--add-reads
+    roguelite.engine=org.junit.jupiter.params
