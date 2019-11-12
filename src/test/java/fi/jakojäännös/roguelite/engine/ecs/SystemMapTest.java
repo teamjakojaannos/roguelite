@@ -8,21 +8,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SystemMapTest {
-    @Test
-    void constructorThrowsIfMapperIsNull() {
-        assertThrows(NullPointerException.class, () -> new SystemMap(null, 0));
-    }
-
     @ParameterizedTest
     @CsvSource({"valid,,valid", ",valid,valid"})
     void putThrowsIfAnyOfParametersAreNull(String name, String system, String dependency) {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 1);
+        SystemMap<State> map = new SystemMap<>();
         map.put("valid", new MockECSSystem<>());
 
         assertThrows(NullPointerException.class,
@@ -35,7 +28,7 @@ class SystemMapTest {
 
     @Test
     void putThrowsIfDependencyIsNotRegistered() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 1);
+        SystemMap<State> map = new SystemMap<>();
         assertThrows(IllegalStateException.class,
                      () -> map.put("valid",
                                    new MockECSSystem<>(),
@@ -44,7 +37,7 @@ class SystemMapTest {
 
     @Test
     void putSucceedsIfAllParametersAreValid_noDependencies() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 1);
+        SystemMap<State> map = new SystemMap<>();
 
         assertDoesNotThrow(() -> map.put("valid",
                                          new MockECSSystem<>()));
@@ -52,7 +45,7 @@ class SystemMapTest {
 
     @Test
     void putSucceedsIfAllParametersAreValid_singleDependency() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        SystemMap<State> map = new SystemMap<>();
         map.put("valid_dep_1", new MockECSSystem<>());
 
         assertDoesNotThrow(() -> map.put("valid",
@@ -62,7 +55,7 @@ class SystemMapTest {
 
     @Test
     void putSucceedsIfAllParametersAreValid_manyDependencies() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        SystemMap<State> map = new SystemMap<>();
         map.put("valid_dep_1", new MockECSSystem<>());
         map.put("valid_dep_2", new MockECSSystem<>());
         map.put("valid_dep_3", new MockECSSystem<>());
@@ -79,7 +72,7 @@ class SystemMapTest {
 
     @Test
     void nonPrioritizedStreamGetsAllRegisteredSystems_noDependencies() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        SystemMap<State> map = new SystemMap<>();
         List<ECSSystem<State>> systems = List.of(
                 new MockECSSystem<>(),
                 new MockECSSystem<>(),
@@ -95,7 +88,7 @@ class SystemMapTest {
 
     @Test
     void nonPrioritizedStreamGetsAllRegisteredSystems_simpleDependencies() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        SystemMap<State> map = new SystemMap<>();
         List<ECSSystem<State>> systems = List.of(
                 new MockECSSystem<>(),
                 new MockECSSystem<>(),
@@ -113,20 +106,20 @@ class SystemMapTest {
 
     @Test
     void forEachPrioritizedThrowsIfConsumerIsNull() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        SystemMap<State> map = new SystemMap<>();
         assertThrows(NullPointerException.class, () -> map.forEachPrioritized(null));
     }
 
     @Test
     void forEachPrioritizedSucceedsWhenMapIsEmpty() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
-        assertDoesNotThrow(() -> map.forEachPrioritized((system, bytes) -> {
+        SystemMap<State> map = new SystemMap<>();
+        assertDoesNotThrow(() -> map.forEachPrioritized(system -> {
         }));
     }
 
     @Test
     void forEachPrioritizedIteratesInExpectedOrder_simpleDependencies() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        SystemMap<State> map = new SystemMap<>();
         List<ECSSystem<State>> systems = new ArrayList<>(List.of(
                 new MockECSSystem<>(),
                 new MockECSSystem<>(),
@@ -139,14 +132,12 @@ class SystemMapTest {
             map.put("valid_" + i, systems.get(i), "valid_" + (i - 1));
         }
 
-        map.forEachPrioritized((system, bytes) -> {
-            assertEquals(systems.remove(0), system);
-        });
+        map.forEachPrioritized(system -> assertEquals(systems.remove(0), system));
     }
 
     @Test
     void forEachPrioritizedIteratesInExpectedOrder_complexDependencies() {
-        SystemMap<State> map = new SystemMap<>(testComponentTypeMapper(), 0);
+        SystemMap<State> map = new SystemMap<>();
         Map<String, ECSSystem<State>> systems = Map.ofEntries(
                 Map.entry("valid_0", new MockECSSystem<>()),
                 Map.entry("valid_1", new MockECSSystem<>()),
@@ -183,7 +174,7 @@ class SystemMapTest {
         map.put("valid_9", systems.get("valid_9"), "valid_7", "valid_8");
 
         List<ECSSystem<State>> processed = new ArrayList<>();
-        map.forEachPrioritized((system, bytes) -> {
+        map.forEachPrioritized(system -> {
             // Ugly hack for finding the name of the system
             String name = systems.entrySet()
                                  .stream()
@@ -196,10 +187,6 @@ class SystemMapTest {
             assertTrue(map.getDependencies(name).allMatch(processed::contains));
             processed.add(system);
         });
-    }
-
-    private Function<Class<? extends Component>, Optional<Integer>> testComponentTypeMapper() {
-        return type -> Optional.of(0);
     }
 
     private static class State {

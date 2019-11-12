@@ -10,35 +10,42 @@ import java.util.stream.Collectors;
 
 public class SystemDispatcher<TState> {
     @NonNull private final SystemMap<TState> systems;
-    @NonNull private final Cluster cluster;
 
-    SystemDispatcher(Cluster cluster, Collection<DispatcherBuilder.SystemEntry<TState>> systems) {
-        this.cluster = cluster;
-        this.systems = new SystemMap<>(
-                this.cluster::getComponentTypeIndexFor,
-                this.cluster.getNumberOfComponentTypes()
-        );
+    SystemDispatcher(Collection<DispatcherBuilder.SystemEntry<TState>> systems) {
+        this.systems = new SystemMap<>();
         systems.forEach(entry -> this.systems.put(entry.getName(),
                                                   entry.getSystem(),
                                                   entry.getDependencies()));
-
-        verifyClusterIsCompatible(this.cluster);
     }
 
     public void dispatch(
+            @NonNull Cluster cluster,
             @NonNull TState state,
             double delta
     ) {
+        verifyClusterIsCompatible(cluster);
 
         this.systems.forEachPrioritized(
-                (system, requiredComponentBitMask) ->
-                        system.tick(this.cluster.getEntityStorage()
-                                                .stream()
-                                                .filter(entity -> BitMaskUtils.compareMasks(entity.getComponentBitmask(),
-                                                                                            requiredComponentBitMask)),
-                                    state,
-                                    delta
-                        ));
+                (system) -> {
+                    val requiredComponentsBitMask =
+                            system.getRequiredComponents()
+                                  .stream()
+                                  .map(cluster::getComponentTypeIndexFor)
+                                  .filter(Optional::isPresent)
+                                  .map(Optional::get)
+                                  .reduce(new byte[BitMaskUtils.calculateMaskSize(cluster.getNumberOfComponentTypes())],
+                                          BitMaskUtils::setNthBit,
+                                          BitMaskUtils::combineMasks);
+
+                    system.tick(cluster.getEntityStorage()
+                                       .stream()
+                                       .filter(entity -> BitMaskUtils.compareMasks(entity.getComponentBitmask(),
+                                                                                   requiredComponentsBitMask)),
+                                state,
+                                delta,
+                                cluster);
+                }
+        );
     }
 
     /**

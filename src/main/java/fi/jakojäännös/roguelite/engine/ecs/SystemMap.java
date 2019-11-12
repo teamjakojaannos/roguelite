@@ -7,23 +7,13 @@ import lombok.val;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 class SystemMap<TState> {
     private final Map<String, Integer> systemIdLookup = new HashMap<>();
     private final List<Entry> systemsById = new ArrayList<>();
-    @NonNull
-    private final Function<Class<? extends Component>, Optional<Integer>> componentTypeMapper;
-    private final int nComponentTypes;
-
-    SystemMap(
-            @NonNull Function<Class<? extends Component>, Optional<Integer>> componentTypeMapper,
-            int nComponentTypes
-    ) {
-        this.componentTypeMapper = componentTypeMapper;
-        this.nComponentTypes = nComponentTypes;
-    }
 
     private int getSystemCount() {
         return this.systemsById.size();
@@ -42,17 +32,7 @@ class SystemMap<TState> {
             String... dependencies
     ) {
         val id = getSystemCount();
-        val requiredComponentsBitMask =
-                system.getRequiredComponents()
-                      .stream()
-                      .map(this.componentTypeMapper)
-                      .filter(Optional::isPresent)
-                      .map(Optional::get)
-                      .reduce(new byte[BitMaskUtils.calculateMaskSize(this.nComponentTypes)],
-                              BitMaskUtils::setNthBit,
-                              BitMaskUtils::combineMasks);
-
-        val entry = new Entry(id, system, requiredComponentsBitMask);
+        val entry = new Entry(id, system);
 
         Arrays.stream(dependencies)
               .forEach(dependencyName ->
@@ -64,7 +44,7 @@ class SystemMap<TState> {
         this.systemIdLookup.put(name, id);
     }
 
-    void forEachPrioritized(@NonNull BiConsumer<ECSSystem<TState>, byte[]> forEach) {
+    void forEachPrioritized(@NonNull Consumer<ECSSystem<TState>> forEach) {
         if (this.getSystemCount() == 0) {
             return;
         }
@@ -78,7 +58,7 @@ class SystemMap<TState> {
                 val entry = queue.getFirst();
                 if (canBeProcessed(entry, processed)) {
                     queue.removeFirst();
-                    forEach.accept(entry.system, entry.requiredComponentBitMask);
+                    forEach.accept(entry.system);
                     processed[entry.id] = true;
                 } else {
                     entry.dependencies.stream()
@@ -112,7 +92,6 @@ class SystemMap<TState> {
     private class Entry {
         private final int id;
         private final ECSSystem<TState> system;
-        private final byte[] requiredComponentBitMask;
         private final List<Entry> dependencies = new ArrayList<>(0);
         private final List<Entry> dependents = new ArrayList<>(0);
 

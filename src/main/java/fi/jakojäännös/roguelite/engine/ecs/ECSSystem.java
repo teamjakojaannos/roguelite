@@ -11,6 +11,7 @@ public interface ECSSystem<TState> {
     void tick(
             Stream<Entity> entities,
             TState state,
-            double delta
+            double delta,
+            Cluster cluster
     );
 }

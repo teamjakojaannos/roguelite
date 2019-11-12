@@ -9,12 +9,6 @@ import java.util.Collection;
 
 public class DispatcherBuilder<TState> {
     private Collection<SystemEntry<TState>> systems = new ArrayList<>();
-    private Cluster cluster;
-
-    public DispatcherBuilder<TState> withCluster(@NonNull Cluster cluster) {
-        this.cluster = cluster;
-        return this;
-    }
 
     public DispatcherBuilder<TState> withSystem(
             @NonNull String name,
@@ -26,11 +20,7 @@ public class DispatcherBuilder<TState> {
     }
 
     public SystemDispatcher<TState> build() {
-        if (this.cluster == null) {
-            throw new IllegalStateException("A cluster must be provided!");
-        }
-
-        return new SystemDispatcher<>(this.cluster, this.systems);
+        return new SystemDispatcher<>(this.systems);
     }
 
     @RequiredArgsConstructor

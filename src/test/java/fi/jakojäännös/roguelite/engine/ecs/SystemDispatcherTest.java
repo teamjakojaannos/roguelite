@@ -13,13 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SystemDispatcherTest {
     @Test
-    void constructorThrowsIfClusterIsIncompatible() {
+    void dispatchThrowsIfClusterIsIncompatible() {
+        SystemDispatcher<State> dispatcher = new SystemDispatcher<>(List.of(
+                new DispatcherBuilder.SystemEntry<>("system_1", new MockECSSystem<>(List.of(MockComponent.class)), new String[0])
+        ));
         Cluster cluster = new Cluster(256);
         // MockComponent NOT registered to cluster
         assertThrows(IllegalStateException.class,
-                     () -> new SystemDispatcher(cluster, List.of(
-                             new DispatcherBuilder.SystemEntry<>("system_1", new MockECSSystem<State>(List.of(MockComponent.class)), new String[0])
-                     )));
+                     () -> dispatcher.dispatch(cluster, new State(), 0.0));
     }
 
     @Test
@@ -28,11 +29,11 @@ class SystemDispatcherTest {
         cluster.registerComponentType(MockComponent.class, MockComponent[]::new);
 
         TestSystem system = new TestSystem();
-        SystemDispatcher<State> dispatcher = new SystemDispatcher<State>(cluster, List.of(
+        SystemDispatcher<State> dispatcher = new SystemDispatcher<>(List.of(
                 new DispatcherBuilder.SystemEntry<>("system_1", system, new String[0])
         ));
 
-        dispatcher.dispatch(new State(), 0.0);
+        dispatcher.dispatch(cluster, new State(), 0.0);
         assertTrue(system.tickCalled);
     }
 
@@ -49,7 +50,8 @@ class SystemDispatcherTest {
 
         @Override
         public void tick(
-                Stream<Entity> entities, State state, double delta
+                Stream<Entity> entities, State state, double delta,
+                Cluster cluster
         ) {
             this.tickCalled = true;
         }
