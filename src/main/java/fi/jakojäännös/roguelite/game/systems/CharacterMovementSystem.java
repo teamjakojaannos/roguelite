@@ -11,6 +11,7 @@ import fi.jakojäännös.roguelite.game.data.components.Position;
 import fi.jakojäännös.roguelite.game.data.components.Velocity;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.joml.Vector2f;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,24 +44,29 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
             // Accelerate
             if (input.move.lengthSquared() > INPUT_EPSILON) {
                 val accelerationThisFrame = stats.acceleration * (float) delta;
-                val accelerationInput = input.move.mul(accelerationThisFrame);
+                val accelerationInput = input.move.mul(accelerationThisFrame, new Vector2f());
 
                 val magnitude = velocity.velocity.add(accelerationInput)
                                                  .length();
-                velocity.velocity.normalize(Math.min(magnitude, stats.speed));
+                if (magnitude > INPUT_EPSILON) {
+                    velocity.velocity.normalize(Math.min(magnitude, stats.speed));
+                } else {
+                    velocity.velocity.set(0.0f, 0.0f);
+                }
             }
             // Deceleration
             else {
                 val decelerationThisFrame = stats.friction * (float) delta;
                 val xVel = velocity.velocity.x;
                 val yVel = velocity.velocity.y;
-                velocity.velocity.set(Math.signum(xVel) * Math.max(0.0f, (Math.abs(xVel) - decelerationThisFrame)),
-                                      Math.signum(yVel) * Math.max(0.0f, (Math.abs(yVel) - decelerationThisFrame)));
+                velocity.velocity.set(Math.signum(xVel) * Math.max(0.0f, Math.abs(xVel) - decelerationThisFrame),
+                                      Math.signum(yVel) * Math.max(0.0f, Math.abs(yVel) - decelerationThisFrame));
             }
 
             val position = cluster.getComponentOf(entity, Position.class).get();
             position.x += velocity.velocity.x * delta;
             position.y += velocity.velocity.y * delta;
+            LOG.info("vel: {}", velocity.velocity);
         });
     }
 }
