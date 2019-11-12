@@ -144,14 +144,14 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
         glUniformMatrix4fv(uniformView, false, this.camera.getViewMatrix());
         glUniformMatrix4fv(uniformProj, false, this.camera.getProjectionMatrix());
 
+        val modelMatrix = new Matrix4f();
         entities.forEach(entity -> {
             state.world.getComponentOf(entity, Position.class)
                        .ifPresent(position -> {
-                           new Matrix4f()
-                                   .identity()
-                                   .translate(position.x, position.y, 0.0f)
-                                   .scale(state.playerSize)
-                                   .get(this.modelTransformationMatrix);
+                           modelMatrix.identity()
+                                      .translate(position.x, position.y, 0.0f)
+                                      .scale(state.playerSize)
+                                      .get(this.modelTransformationMatrix);
 
                            glUniformMatrix4fv(uniformModel, false, this.modelTransformationMatrix);
                            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
