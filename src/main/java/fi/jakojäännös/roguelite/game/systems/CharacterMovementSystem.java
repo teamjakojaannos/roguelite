@@ -66,7 +66,6 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
             val position = cluster.getComponentOf(entity, Position.class).get();
             position.x += velocity.velocity.x * delta;
             position.y += velocity.velocity.y * delta;
-            LOG.info("vel: {}", velocity.velocity);
         });
     }
 }
