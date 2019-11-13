@@ -19,8 +19,8 @@ public class Main {
     public static void main(String[] args) {
         val debugStackTraces = true;
         val enableForceClose = true;
-        val enableLWJGLDebug = true;
-        val enableLWJGLLibraryLoaderDebug = true;
+        val enableLWJGLDebug = false;
+        val enableLWJGLLibraryLoaderDebug = false;
 
         if (enableLWJGLDebug) {
             LOG.info("Enabling LWJGL Debug mode");
@@ -31,10 +31,6 @@ public class Main {
             LOG.info("Enabling LWJGL SharedLibraryLoader debug mode");
             System.setProperty("org.lwjgl.util.DebugLoader", "true");
         }
-
-        LOG.info("Scanning for libraries from paths \"{}\" and \"{}\"",
-                 System.getProperty("java.library.path"),
-                 System.getProperty("org.lwjgl.librarypath"));
 
         try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider, GameState>()) {
             try (val renderer = new RogueliteGameRenderer(runner.getWindow()); val game = new Roguelite()) {

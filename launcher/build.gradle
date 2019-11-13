@@ -42,6 +42,11 @@ application {
 
 run {
     moduleOptions {
+        addModules = [
+                "org.lwjgl.natives",
+                "org.lwjgl.opengl.natives",
+        ]
+        addReads = ["launcher": "org.lwjgl.opengl.natives,org.lwjgl.natives"]
     }
 
     //jvmArgs = ['-XX:+PrintGCDetails']
