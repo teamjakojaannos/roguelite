@@ -1,7 +1,7 @@
-package fi.jakojäännös.roguelite.engine.lwjgl.input;
+package fi.jakojaannos.roguelite.engine.lwjgl.input;
 
-import fi.jakojäännös.roguelite.engine.input.*;
-import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLWindow;
+import fi.jakojaannos.roguelite.engine.input.*;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 

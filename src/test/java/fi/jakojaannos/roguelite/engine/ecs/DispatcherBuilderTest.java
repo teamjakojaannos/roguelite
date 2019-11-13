@@ -1,6 +1,6 @@
-package fi.jakojäännös.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojäännös.roguelite.test.mock.engine.ecs.MockECSSystem;
+import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockECSSystem;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;

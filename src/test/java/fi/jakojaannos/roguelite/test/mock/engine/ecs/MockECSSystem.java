@@ -1,9 +1,9 @@
-package fi.jakojäännös.roguelite.test.mock.engine.ecs;
+package fi.jakojaannos.roguelite.test.mock.engine.ecs;
 
-import fi.jakojäännös.roguelite.engine.ecs.Cluster;
-import fi.jakojäännös.roguelite.engine.ecs.Component;
-import fi.jakojäännös.roguelite.engine.ecs.ECSSystem;
-import fi.jakojäännös.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.Cluster;
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
 
 import java.util.Collection;
 import java.util.List;

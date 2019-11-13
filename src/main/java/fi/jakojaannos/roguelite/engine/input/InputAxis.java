@@ -1,6 +1,4 @@
-package fi.jakojäännös.roguelite.engine.input;
-
-import lombok.Getter;
+package fi.jakojaannos.roguelite.engine.input;
 
 public interface InputAxis {
     enum Mouse implements InputAxis {

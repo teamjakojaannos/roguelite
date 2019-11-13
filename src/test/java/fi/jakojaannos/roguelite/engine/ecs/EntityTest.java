@@ -1,4 +1,4 @@
-package fi.jakojäännös.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -1,14 +1,11 @@
-package fi.jakojäännös.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojäännös.roguelite.engine.utilities.BitMaskUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 class SystemMap<TState> {

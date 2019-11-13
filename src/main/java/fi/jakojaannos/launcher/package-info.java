@@ -1,4 +1,4 @@
 /**
  * Game launcher. Provides functionality for configuring and launching the game.
  */
-package fi.jakojäännös.launcher;
+package fi.jakojaannos.launcher;

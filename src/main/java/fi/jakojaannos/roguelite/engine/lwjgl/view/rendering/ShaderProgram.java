@@ -1,6 +1,6 @@
-package fi.jakojäännös.roguelite.engine.lwjgl.view.rendering;
+package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import fi.jakojäännös.roguelite.engine.utilities.io.TextFileHelper;
+import fi.jakojaannos.roguelite.engine.utilities.io.TextFileHelper;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

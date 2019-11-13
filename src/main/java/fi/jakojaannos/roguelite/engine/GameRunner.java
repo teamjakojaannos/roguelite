@@ -1,8 +1,8 @@
-package fi.jakojäännös.roguelite.engine;
+package fi.jakojaannos.roguelite.engine;
 
-import fi.jakojäännös.roguelite.engine.input.InputEvent;
-import fi.jakojäännös.roguelite.engine.input.InputProvider;
-import fi.jakojäännös.roguelite.engine.view.GameRenderer;
+import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

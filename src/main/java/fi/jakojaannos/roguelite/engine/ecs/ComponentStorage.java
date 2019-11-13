@@ -1,6 +1,6 @@
-package fi.jakojäännös.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojäännös.roguelite.engine.utilities.IdSupplier;
+import fi.jakojaannos.roguelite.engine.utilities.IdSupplier;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -87,7 +87,7 @@ class ComponentStorage<TComponent extends Component> {
             this.entityComponentIndexLookup = new int[entityCapacity];
         }
 
-        private Optional<Integer> componentIndexOf(fi.jakojäännös.roguelite.engine.ecs.Entity entity) {
+        private Optional<Integer> componentIndexOf(fi.jakojaannos.roguelite.engine.ecs.Entity entity) {
             val index = this.entityComponentIndexLookup[entity.getId()];
             if (index == 0) {
                 return Optional.empty();
@@ -96,18 +96,18 @@ class ComponentStorage<TComponent extends Component> {
             return Optional.of(index - 1);
         }
 
-        void put(fi.jakojäännös.roguelite.engine.ecs.Entity entity, TComponent component) {
+        void put(fi.jakojaannos.roguelite.engine.ecs.Entity entity, TComponent component) {
             val componentIndex = this.idSupplier.get();
             this.entityComponentIndexLookup[entity.getId()] = componentIndex + 1;
             this.components[componentIndex] = component;
         }
 
-        Optional<TComponent> get(fi.jakojäännös.roguelite.engine.ecs.Entity entity) {
+        Optional<TComponent> get(fi.jakojaannos.roguelite.engine.ecs.Entity entity) {
             return componentIndexOf(entity)
                     .map(componentIndex -> this.components[componentIndex]);
         }
 
-        void remove(fi.jakojäännös.roguelite.engine.ecs.Entity entity) {
+        void remove(fi.jakojaannos.roguelite.engine.ecs.Entity entity) {
             componentIndexOf(entity)
                     .ifPresent(componentIndex -> {
                         this.components[componentIndex] = null;

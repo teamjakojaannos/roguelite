@@ -1,4 +1,4 @@
-package fi.jakojäännös.roguelite.engine.view;
+package fi.jakojaannos.roguelite.engine.view;
 
 import org.joml.Vector2f;
 

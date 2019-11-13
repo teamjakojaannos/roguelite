@@ -1,14 +1,14 @@
-package fi.jakojäännös.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojäännös.roguelite.engine.ecs.Cluster;
-import fi.jakojäännös.roguelite.engine.ecs.Component;
-import fi.jakojäännös.roguelite.engine.ecs.ECSSystem;
-import fi.jakojäännös.roguelite.engine.ecs.Entity;
-import fi.jakojäännös.roguelite.game.data.GameState;
-import fi.jakojäännös.roguelite.game.data.components.CharacterInput;
-import fi.jakojäännös.roguelite.game.data.components.CharacterStats;
-import fi.jakojäännös.roguelite.game.data.components.Position;
-import fi.jakojäännös.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.engine.ecs.Cluster;
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.Position;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2f;

@@ -1,10 +1,10 @@
-package fi.jakojäännös.launcher;
+package fi.jakojaannos.launcher;
 
-import fi.jakojäännös.roguelite.engine.lwjgl.LWJGLGameRunner;
-import fi.jakojäännös.roguelite.engine.lwjgl.input.LWJGLInputProvider;
-import fi.jakojäännös.roguelite.game.Roguelite;
-import fi.jakojäännös.roguelite.game.data.GameState;
-import fi.jakojäännös.roguelite.game.view.RogueliteGameRenderer;
+import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
+import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
+import fi.jakojaannos.roguelite.game.Roguelite;
+import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 

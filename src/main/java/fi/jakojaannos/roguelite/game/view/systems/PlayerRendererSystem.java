@@ -1,14 +1,14 @@
-package fi.jakojäännös.roguelite.game.view.systems;
+package fi.jakojaannos.roguelite.game.view.systems;
 
-import fi.jakojäännös.roguelite.engine.ecs.Cluster;
-import fi.jakojäännös.roguelite.engine.ecs.Component;
-import fi.jakojäännös.roguelite.engine.ecs.ECSSystem;
-import fi.jakojäännös.roguelite.engine.ecs.Entity;
-import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojäännös.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
-import fi.jakojäännös.roguelite.game.data.GameState;
-import fi.jakojäännös.roguelite.game.data.components.PlayerTag;
-import fi.jakojäännös.roguelite.game.data.components.Position;
+import fi.jakojaannos.roguelite.engine.ecs.Cluster;
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
+import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.components.Position;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;

@@ -1,13 +1,12 @@
-package fi.jakojäännös.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojäännös.roguelite.engine.ecs.Cluster;
-import fi.jakojäännös.roguelite.engine.ecs.Component;
-import fi.jakojäännös.roguelite.engine.ecs.ECSSystem;
-import fi.jakojäännös.roguelite.engine.ecs.Entity;
-import fi.jakojäännös.roguelite.game.data.GameState;
-import fi.jakojäännös.roguelite.game.data.components.CharacterInput;
-import fi.jakojäännös.roguelite.game.data.components.PlayerTag;
-import fi.jakojäännös.roguelite.game.data.components.Position;
+import fi.jakojaannos.roguelite.engine.ecs.Cluster;
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
 import lombok.val;
 
 import java.util.Collection;

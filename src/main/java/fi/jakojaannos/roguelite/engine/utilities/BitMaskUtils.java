@@ -1,4 +1,4 @@
-package fi.jakojäännös.roguelite.engine.utilities;
+package fi.jakojaannos.roguelite.engine.utilities;
 
 public class BitMaskUtils {
     public static int calculateMaskSize(int n) {

@@ -1,6 +1,6 @@
-package fi.jakojäännös.roguelite.engine.lwjgl.view;
+package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
-import fi.jakojäännös.roguelite.engine.view.Window;
+import fi.jakojaannos.roguelite.engine.view.Window;
 import lombok.Getter;
 import lombok.NonNull;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;

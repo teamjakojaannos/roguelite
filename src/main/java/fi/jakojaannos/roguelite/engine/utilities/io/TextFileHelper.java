@@ -1,4 +1,4 @@
-package fi.jakojäännös.roguelite.engine.utilities.io;
+package fi.jakojaannos.roguelite.engine.utilities.io;
 
 import lombok.NonNull;
 

@@ -1,7 +1,7 @@
-package fi.jakojäännös.roguelite.engine.lwjgl.view;
+package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
-import fi.jakojäännös.roguelite.engine.view.Camera;
-import fi.jakojäännös.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.game.data.GameState;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

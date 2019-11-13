@@ -1,12 +1,12 @@
-package fi.jakojäännös.roguelite.game.view;
+package fi.jakojaannos.roguelite.game.view;
 
-import fi.jakojäännös.roguelite.engine.ecs.DispatcherBuilder;
-import fi.jakojäännös.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLWindow;
-import fi.jakojäännös.roguelite.engine.view.GameRenderer;
-import fi.jakojäännös.roguelite.game.data.GameState;
-import fi.jakojäännös.roguelite.game.view.systems.PlayerRendererSystem;
+import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
+import fi.jakojaannos.roguelite.engine.view.GameRenderer;
+import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.view.systems.PlayerRendererSystem;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

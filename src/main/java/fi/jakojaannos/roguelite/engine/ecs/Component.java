@@ -1,4 +1,4 @@
-package fi.jakojäännös.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs;
 
 public interface Component {
 }

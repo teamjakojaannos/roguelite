@@ -1,7 +1,7 @@
-package fi.jakojäännös.roguelite.engine;
+package fi.jakojaannos.roguelite.engine;
 
-import fi.jakojäännös.roguelite.engine.input.InputEvent;
-import fi.jakojäännös.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import lombok.NonNull;
 
 import java.util.Queue;

@@ -1,4 +1,4 @@
-package fi.jakojäännös.roguelite.engine.view;
+package fi.jakojaannos.roguelite.engine.view;
 
 public interface Window {
     void addResizeCallback(ResizeCallback callback);

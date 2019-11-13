@@ -1,7 +1,7 @@
-package fi.jakojäännös.roguelite.game.data;
+package fi.jakojaannos.roguelite.game.data;
 
-import fi.jakojäännös.roguelite.engine.ecs.Cluster;
-import fi.jakojäännös.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.Cluster;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
 
 public class GameState {
     public float targetWorldSize = 32.0f;

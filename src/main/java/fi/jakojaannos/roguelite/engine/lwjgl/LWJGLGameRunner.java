@@ -1,10 +1,10 @@
-package fi.jakojäännös.roguelite.engine.lwjgl;
+package fi.jakojaannos.roguelite.engine.lwjgl;
 
-import fi.jakojäännös.roguelite.engine.Game;
-import fi.jakojäännös.roguelite.engine.GameRunner;
-import fi.jakojäännös.roguelite.engine.input.InputProvider;
-import fi.jakojäännös.roguelite.engine.lwjgl.view.LWJGLWindow;
-import fi.jakojäännös.roguelite.engine.view.GameRenderer;
+import fi.jakojaannos.roguelite.engine.Game;
+import fi.jakojaannos.roguelite.engine.GameRunner;
+import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
+import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import lombok.Getter;
 import lombok.NonNull;
 import org.lwjgl.glfw.GLFWErrorCallback;

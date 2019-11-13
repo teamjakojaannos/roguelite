@@ -1,6 +1,6 @@
-package fi.jakojäännös.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojäännös.roguelite.engine.utilities.BitMaskUtils;
+import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

@@ -1,6 +1,6 @@
-package fi.jakojäännös.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojäännös.roguelite.engine.utilities.IdSupplier;
+import fi.jakojaannos.roguelite.engine.utilities.IdSupplier;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;

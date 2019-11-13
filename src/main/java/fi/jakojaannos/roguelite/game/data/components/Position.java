@@ -1,6 +1,6 @@
-package fi.jakojäännös.roguelite.game.data.components;
+package fi.jakojaannos.roguelite.game.data.components;
 
-import fi.jakojäännös.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.Component;
 
 public class Position implements Component {
     public float x;

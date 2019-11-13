@@ -1,4 +1,4 @@
-package fi.jakojäännös.roguelite.engine.utilities;
+package fi.jakojaannos.roguelite.engine.utilities;
 
 import java.util.PriorityQueue;
 
