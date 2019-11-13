@@ -4,7 +4,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'jacoco'
 
-mainClassName = 'fi.jakojäännös.launcher.Main'
+mainClassName = 'fi.jakojaannos.launcher.Main'
 
 project.ext.lwjglVersion = "3.2.3"
 project.ext.jomlVersion = "1.9.19"
