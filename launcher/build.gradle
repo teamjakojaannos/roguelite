@@ -45,8 +45,9 @@ run {
         addModules = [
                 "org.lwjgl.natives",
                 "org.lwjgl.opengl.natives",
+                "org.lwjgl.glfw.natives",
         ]
-        addReads = ["launcher": "org.lwjgl.opengl.natives,org.lwjgl.natives"]
+        addReads = ["launcher": "org.lwjgl.natives,org.lwjgl.opengl.natives,org.lwjgl.glfw.natives"]
     }
 
     //jvmArgs = ['-XX:+PrintGCDetails']
