@@ -3,5 +3,5 @@ module roguelite.engine.ecs {
     requires org.slf4j;
     requires roguelite.engine;
 
-    exports fi.jakojäännös.roguelite.engine.ecs;
+    exports fi.jakojaannos.roguelite.engine.ecs;
 }

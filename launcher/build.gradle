@@ -36,7 +36,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "$moduleName/fi.jakojäännös.roguelite.launcher.Main"
+    mainClassName = "$moduleName/fi.jakojaannos.roguelite.launcher.Main"
     //applicationDefaultJvmArgs = ['-XX:+PrintGCDetails']
 }
 

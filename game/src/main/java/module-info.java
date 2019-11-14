@@ -7,7 +7,7 @@ module roguelite.game {
     requires roguelite.engine;
     requires roguelite.engine.ecs;
 
-    exports fi.jakojäännös.roguelite.game;
-    exports fi.jakojäännös.roguelite.game.view;
-    exports fi.jakojäännös.roguelite.game.data;
+    exports fi.jakojaannos.roguelite.game;
+    exports fi.jakojaannos.roguelite.game.view;
+    exports fi.jakojaannos.roguelite.game.data;
 }
