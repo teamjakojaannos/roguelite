@@ -1,7 +1,19 @@
+import org.gradle.internal.os.OperatingSystem
+
 apply plugin: 'application'
 apply plugin: 'java'
 
-project.ext.lwjglNatives = "natives-linux"
+switch (OperatingSystem.current()) {
+    case OperatingSystem.LINUX:
+        project.ext.lwjglNatives = "natives-linux"
+        break
+    case OperatingSystem.MAC_OS:
+        project.ext.lwjglNatives = "natives-macos"
+        break
+    case OperatingSystem.WINDOWS:
+        project.ext.lwjglNatives = "natives-windows"
+        break
+}
 
 dependencies {
     implementation project(':engine')

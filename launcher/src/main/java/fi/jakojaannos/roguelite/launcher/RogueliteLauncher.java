@@ -27,6 +27,7 @@ public class RogueliteLauncher {
     @Setter private int windowWidth = -1;
     @Setter private int windowHeight = -1;
     @Setter private String assetRoot = "assets/";
+    @Setter private Window.Mode windowMode = Window.Mode.Windowed;
 
     public void parseCommandLineArguments(@NonNull String... args) {
         try {
@@ -106,8 +107,7 @@ public class RogueliteLauncher {
         try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider, GameState>(
                 this.windowWidth,
                 this.windowHeight
-        )
-        ) {
+        )) {
             try (val renderer = new RogueliteGameRenderer(
                     this.assetRoot,
                     runner.getWindow());
@@ -133,9 +133,5 @@ public class RogueliteLauncher {
                 LOG.error("\tRun with --debug for stack traces");
             }
         }
-    }
-
-    public void setWindowMode(Window.Mode mode) {
-
     }
 }
