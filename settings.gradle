@@ -1,0 +1,8 @@
+rootProject.name = 'roguelite'
+
+include 'launcher'
+
+include 'engine'
+include 'engine.ecs'
+
+include 'game'
