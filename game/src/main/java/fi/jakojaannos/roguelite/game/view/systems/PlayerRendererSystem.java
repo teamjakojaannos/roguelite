@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.Position;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -41,11 +42,11 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
     private int vbo;
     private int ebo;
 
-    public PlayerRendererSystem(LWJGLCamera camera) {
+    public PlayerRendererSystem(@NonNull String assetRoot, @NonNull LWJGLCamera camera) {
         this.camera = camera;
         this.shader = new ShaderProgram(
-                "assets/shaders/sprite.vert",
-                "assets/shaders/sprite.frag"
+                assetRoot + "shaders/sprite.vert",
+                assetRoot + "shaders/sprite.frag"
         );
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
         this.uniformViewMatrix = this.shader.getUniformLocation("view");

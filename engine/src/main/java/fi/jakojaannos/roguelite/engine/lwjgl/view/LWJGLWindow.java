@@ -24,7 +24,7 @@ public class LWJGLWindow implements Window, AutoCloseable {
 
     private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
 
-    public LWJGLWindow() {
+    public LWJGLWindow(int width, int height) {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -33,16 +33,16 @@ public class LWJGLWindow implements Window, AutoCloseable {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
-        this.id = glfwCreateWindow(300, 300, "Konna", NULL, NULL);
+        this.id = glfwCreateWindow(width, height, "Konna", NULL, NULL);
         if (this.id == NULL) {
             throw new RuntimeException("Failed to create GLFW window");
         }
 
         GLFWWindowSizeCallback
-                .create((window, width, height) ->
+                .create((window, newWidth, newHeight) ->
                         resizeCallbacks.stream()
                                        .filter(Objects::nonNull)
-                                       .forEach(cb -> cb.call(width, height)))
+                                       .forEach(cb -> cb.call(newWidth, newHeight)))
                 .set(this.id);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {

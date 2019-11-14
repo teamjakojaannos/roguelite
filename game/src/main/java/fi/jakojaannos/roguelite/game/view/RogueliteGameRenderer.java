@@ -7,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -14,12 +15,14 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final SystemDispatcher<GameState> rendererDispatcher;
     private final LWJGLCamera camera;
 
-    public RogueliteGameRenderer(LWJGLWindow window) {
+    public RogueliteGameRenderer(@NonNull String assetRoot, @NonNull LWJGLWindow window) {
         LOG.info("Constructing GameRenderer...");
+        LOG.info("asset root: {}", assetRoot);
+
 
         this.camera = new LWJGLCamera();
         this.rendererDispatcher = new DispatcherBuilder<GameState>()
-                .withSystem("render_player", new PlayerRendererSystem(this.camera))
+                .withSystem("render_player", new PlayerRendererSystem(assetRoot, this.camera))
                 .build();
 
         window.addResizeCallback(this.camera::resizeViewport);

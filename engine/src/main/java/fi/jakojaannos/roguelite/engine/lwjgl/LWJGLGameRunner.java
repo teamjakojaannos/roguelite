@@ -18,14 +18,17 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
     @Getter
     private final LWJGLWindow window;
 
-    public LWJGLGameRunner() {
+    public LWJGLGameRunner(int windowWidth, int windowHeight) {
         GLFWErrorCallback.createPrint(System.err).set();
 
         if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
 
-        this.window = new LWJGLWindow();
+        this.window = new LWJGLWindow(
+                windowWidth == -1 ? 800 : windowWidth,
+                windowHeight == -1 ? 600 : windowHeight
+        );
 
         glfwMakeContextCurrent(this.window.getId());
         glfwSwapInterval(1);

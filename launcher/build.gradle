@@ -51,4 +51,13 @@ run {
     }
 
     //jvmArgs = ['-XX:+PrintGCDetails']
+    setArgsString("--enableForceClose --assetRoot ../assets/")
 }
+
+
+test {
+    moduleOptions {
+        runOnClasspath = true
+    }
+}
+
