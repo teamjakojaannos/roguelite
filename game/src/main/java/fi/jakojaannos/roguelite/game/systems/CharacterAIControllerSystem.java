@@ -25,6 +25,8 @@ public class CharacterAIControllerSystem implements ECSSystem<GameState> {
         return REQUIRED_COMPONENTS;
     }
 
+    private final Vector2d tmpDirection = new Vector2d();
+
     @Override
     public void tick(Stream<Entity> entities, GameState gameState, double delta, Cluster cluster) {
 
@@ -33,16 +35,14 @@ public class CharacterAIControllerSystem implements ECSSystem<GameState> {
                 .orElse(new Transform(5.0f, 5.0f))
                 .getCenter(playerPos);
 
-
         entities.forEach(entity -> {
             val myPos = new Vector2d();
             cluster.getComponentOf(entity, Transform.class).get()
                     .getCenter(myPos);
 
-            Vector2d toPlayer = new Vector2d(playerPos).sub(myPos);
-
+            tmpDirection.set(playerPos).sub(myPos);
             val input = cluster.getComponentOf(entity, CharacterInput.class).get();
-            input.move.add(toPlayer);
+            input.move.set(tmpDirection);
         });
     }
 }

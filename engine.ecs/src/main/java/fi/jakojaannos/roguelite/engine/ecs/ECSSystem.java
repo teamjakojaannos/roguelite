@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
+import lombok.NonNull;
+
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -9,9 +11,9 @@ public interface ECSSystem<TState> {
     // TODO: This is sub-optimal performance-wise; components should be stored so that they can
     //  be efficiently passed here via some specialized parameter data-structure
     void tick(
-            Stream<Entity> entities,
-            TState state,
+            @NonNull Stream<Entity> entities,
+            @NonNull TState state,
             double delta,
-            Cluster cluster
+            @NonNull Cluster cluster
     );
 }
