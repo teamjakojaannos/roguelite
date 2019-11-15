@@ -99,7 +99,7 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
                 entity -> state.world.getComponentOf(entity, Position.class)
                                      .ifPresent(position -> {
                                          modelMatrix.identity()
-                                                    .translate(position.x, position.y, 0.0f)
+                                                    .translate((float) position.x, (float) position.y, 0.0f)
                                                     .scale(state.playerSize)
                                                     .get(modelMatrixArray);
 

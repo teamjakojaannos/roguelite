@@ -29,10 +29,10 @@ public class PlayerInputSystem implements ECSSystem<GameState> {
         val inputHorizontal = (state.inputRight ? 1 : 0) - (state.inputLeft ? 1 : 0);
         val inputVertical = (state.inputDown ? 1 : 0) - (state.inputUp ? 1 : 0);
 
-        entities.forEach(entity -> state.world.getComponentOf(entity, CharacterInput.class)
-                                              .ifPresent(input -> {
-                                                  input.move.set(inputHorizontal,
-                                                                 inputVertical);
-                                              }));
+        entities.forEach(entity -> cluster.getComponentOf(entity, CharacterInput.class)
+                                          .ifPresent(input -> {
+                                              input.move.set(inputHorizontal,
+                                                             inputVertical);
+                                          }));
     }
 }

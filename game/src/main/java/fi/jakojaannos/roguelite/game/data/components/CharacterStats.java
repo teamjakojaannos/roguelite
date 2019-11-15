@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CharacterStats implements Component {
-    public float speed = 4.0f;
-    public float acceleration = 1.0f;
-    public float friction = 2.0f;
+    public double speed = 4.0;
+    public double acceleration = 1.0;
+    public double friction = 2.0;
 }

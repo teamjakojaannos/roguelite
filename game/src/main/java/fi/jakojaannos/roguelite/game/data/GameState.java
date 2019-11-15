@@ -22,7 +22,7 @@ public class GameState {
 
     public float crosshairSize = 0.5f;
 
-    public Cluster world;
+    public Cluster world = new Cluster(256);
     public Entity player;
     public Entity crosshair;
 }

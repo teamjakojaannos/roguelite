@@ -1,17 +1,17 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
-import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.engine.ecs.Cluster;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.Position;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.joml.Vector2f;
+import org.joml.Vector2d;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +22,7 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
             Position.class, Velocity.class, CharacterInput.class, CharacterStats.class
     );
-    private static final float INPUT_EPSILON = 0.00001f;
+    private static final float INPUT_EPSILON = 0.001f;
 
     @Override
     public Collection<Class<? extends Component>> getRequiredComponents() {
@@ -42,16 +42,13 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
             val velocity = cluster.getComponentOf(entity, Velocity.class).get();
 
             // Accelerate
-            if (input.move.lengthSquared() > INPUT_EPSILON) {
-                val accelerationThisFrame = stats.acceleration * (float) delta;
-                val accelerationInput = input.move.mul(accelerationThisFrame, new Vector2f());
+            if (input.move.lengthSquared() > INPUT_EPSILON * INPUT_EPSILON) {
+                val inputAcceleration = input.move.normalize(stats.acceleration * delta, new Vector2d());
 
-                val magnitude = velocity.velocity.add(accelerationInput)
-                                                 .length();
-                if (magnitude > INPUT_EPSILON) {
-                    velocity.velocity.normalize(Math.min(magnitude, stats.speed));
-                } else {
-                    velocity.velocity.set(0.0f, 0.0f);
+                velocity.velocity.add(inputAcceleration);
+
+                if (velocity.velocity.lengthSquared() > stats.speed * stats.speed) {
+                    velocity.velocity.normalize(stats.speed);
                 }
             }
             // Deceleration
