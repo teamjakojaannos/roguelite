@@ -5,7 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.view.systems.PlayerRendererSystem;
+import fi.jakojaannos.roguelite.game.view.systems.EntityBoundsRenderingSystem;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +21,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
 
         this.camera = new RogueliteCamera();
         this.rendererDispatcher = new DispatcherBuilder<GameState>()
-                .withSystem("render_player", new PlayerRendererSystem(assetRoot, this.camera))
+                .withSystem("render_player", new EntityBoundsRenderingSystem(assetRoot, this.camera))
                 .build();
 
         window.addResizeCallback(this.camera::resizeViewport);

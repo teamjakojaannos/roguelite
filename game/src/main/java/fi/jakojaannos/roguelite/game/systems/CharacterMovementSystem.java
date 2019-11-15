@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
-import fi.jakojaannos.roguelite.game.data.components.Position;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class CharacterMovementSystem implements ECSSystem<GameState> {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            Position.class, Velocity.class, CharacterInput.class, CharacterStats.class
+            Transform.class, Velocity.class, CharacterInput.class, CharacterStats.class
     );
     private static final float INPUT_EPSILON = 0.001f;
 
@@ -28,6 +28,8 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
     public Collection<Class<? extends Component>> getRequiredComponents() {
         return REQUIRED_COMPONENTS;
     }
+
+    private final Vector2d tmpVelocity = new Vector2d();
 
     @Override
     public void tick(
@@ -43,13 +45,13 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
 
             // Accelerate
             if (input.move.lengthSquared() > INPUT_EPSILON * INPUT_EPSILON) {
-                val inputAcceleration = input.move.normalize(stats.acceleration * delta, new Vector2d());
+                input.move.normalize(stats.acceleration * delta, tmpVelocity);
+                tmpVelocity.add(velocity.velocity);
 
-                velocity.velocity.add(inputAcceleration);
-
-                if (velocity.velocity.lengthSquared() > stats.speed * stats.speed) {
-                    velocity.velocity.normalize(stats.speed);
+                if (tmpVelocity.lengthSquared() > stats.speed * stats.speed) {
+                    tmpVelocity.normalize(stats.speed);
                 }
+                velocity.velocity.set(tmpVelocity);
             }
             // Deceleration
             else {
@@ -60,9 +62,9 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
                                       Math.signum(yVel) * Math.max(0.0f, Math.abs(yVel) - decelerationThisFrame));
             }
 
-            val position = cluster.getComponentOf(entity, Position.class).get();
-            position.x += velocity.velocity.x * delta;
-            position.y += velocity.velocity.y * delta;
+            val transform = cluster.getComponentOf(entity, Transform.class).get();
+            velocity.velocity.mul(delta, tmpVelocity);
+            transform.bounds.translate(tmpVelocity);
         });
     }
 }

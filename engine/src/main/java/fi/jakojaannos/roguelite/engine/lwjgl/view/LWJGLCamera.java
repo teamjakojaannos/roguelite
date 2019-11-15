@@ -25,22 +25,19 @@ public class LWJGLCamera extends Camera {
     private int viewportHeight;
 
     private final Matrix4f projectionMatrix;
-    private final float[] cachedProjectionMatrixArray;
     private boolean projectionMatrixDirty;
 
     private final Matrix4f viewMatrix;
-    private final float[] cachedViewMatrixArray;
     private boolean viewMatrixDirty;
 
-    // TODO: Wrap all rendering requiring arrays to use some immutable utility class. This is unsafe.
-    public float[] getViewMatrix() {
+    public Matrix4f getViewMatrix() {
         refreshViewMatrixIfDirty();
-        return cachedViewMatrixArray;
+        return viewMatrix;
     }
 
-    public float[] getProjectionMatrix() {
+    public Matrix4f getProjectionMatrix() {
         refreshProjectionMatrixIfDirty();
-        return cachedProjectionMatrixArray;
+        return projectionMatrix;
     }
 
     protected void setTargetScreenSizeInUnits(double targetSize) {
@@ -71,12 +68,10 @@ public class LWJGLCamera extends Camera {
         super(new Vector2f(0f, 0.0f));
 
         this.projectionMatrix = new Matrix4f().identity();
-        this.cachedProjectionMatrixArray = new float[16];
         this.projectionMatrixDirty = true;
         resizeViewport(viewportWidth, viewportHeight);
 
         this.viewMatrix = new Matrix4f();
-        this.cachedViewMatrixArray = new float[16];
         this.viewMatrixDirty = true;
         refreshViewMatrixIfDirty();
     }
@@ -108,7 +103,6 @@ public class LWJGLCamera extends Camera {
                     (float) viewportWidthInUnits,
                     (float) viewportHeightInUnits,
                     0.0f);
-            this.projectionMatrix.get(this.cachedProjectionMatrixArray);
 
             this.projectionMatrixDirty = false;
         }
@@ -122,7 +116,6 @@ public class LWJGLCamera extends Camera {
                     .translate(getX(), getY(), 0.0f)
                     //.scale(this.zoom);
                     .invert();
-            this.viewMatrix.get(this.cachedViewMatrixArray);
 
             this.viewMatrixDirty = false;
         }

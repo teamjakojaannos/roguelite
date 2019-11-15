@@ -7,8 +7,8 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
 import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
-import fi.jakojaannos.roguelite.game.data.components.Position;
+import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -22,9 +22,9 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
 @Slf4j
-public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable {
+public class EntityBoundsRenderingSystem implements ECSSystem<GameState>, AutoCloseable {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            Position.class, PlayerTag.class
+            Transform.class
     );
 
     @Override
@@ -42,7 +42,9 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
     private int vbo;
     private int ebo;
 
-    public PlayerRendererSystem(@NonNull String assetRoot, @NonNull LWJGLCamera camera) {
+    private final Matrix4f modelMatrix = new Matrix4f();
+
+    public EntityBoundsRenderingSystem(@NonNull String assetRoot, @NonNull LWJGLCamera camera) {
         this.camera = camera;
         this.shader = new ShaderProgram(
                 assetRoot + "shaders/sprite.vert",
@@ -93,19 +95,18 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
         this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());
         this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
 
-        val modelMatrix = new Matrix4f();
-        val modelMatrixArray = new float[4 * 4];
         entities.forEach(
-                entity -> state.world.getComponentOf(entity, Position.class)
-                                     .ifPresent(position -> {
-                                         modelMatrix.identity()
-                                                    .translate((float) position.x, (float) position.y, 0.0f)
-                                                    .scale((float) state.playerSize)
-                                                    .get(modelMatrixArray);
-
-                                         this.shader.setUniformMat4x4(this.uniformModelMatrix, modelMatrixArray);
-                                         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                                     }));
+                entity -> {
+                    val transform = state.world.getComponentOf(entity, Transform.class).get();
+                    this.shader.setUniformMat4x4(this.uniformModelMatrix,
+                                                 modelMatrix.identity()
+                                                            .translate((float) transform.bounds.minX,
+                                                                       (float) transform.bounds.minY, 0.0f)
+                                                            .scaleXY((float) transform.getWidth(), (float) transform.getHeight())
+                    );
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                }
+        );
     }
 
     @Override

@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.game.data.components;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.joml.Rectangled;
 
 @NoArgsConstructor
 @AllArgsConstructor

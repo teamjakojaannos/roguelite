@@ -1,18 +1,18 @@
 package fi.jakojaannos.roguelite.game;
 
+import fi.jakojaannos.roguelite.engine.GameBase;
 import fi.jakojaannos.roguelite.engine.ecs.Cluster;
 import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.input.ButtonInput;
+import fi.jakojaannos.roguelite.engine.input.InputAxis;
+import fi.jakojaannos.roguelite.engine.input.InputButton;
+import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.systems.CharacterMovementSystem;
 import fi.jakojaannos.roguelite.game.systems.PlayerInputSystem;
 import fi.jakojaannos.roguelite.game.systems.SnapToCursorSystem;
-import fi.jakojaannos.roguelite.engine.GameBase;
-import fi.jakojaannos.roguelite.engine.input.ButtonInput;
-import fi.jakojaannos.roguelite.engine.input.InputAxis;
-import fi.jakojaannos.roguelite.engine.input.InputButton;
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -33,12 +33,13 @@ public class Roguelite extends GameBase<GameState> {
 
     public static Cluster createCluster(int capacity) {
         val cluster = new Cluster(capacity);
-        cluster.registerComponentType(Position.class, Position[]::new);
+        cluster.registerComponentType(Transform.class, Transform[]::new);
         cluster.registerComponentType(Velocity.class, Velocity[]::new);
         cluster.registerComponentType(CharacterInput.class, CharacterInput[]::new);
         cluster.registerComponentType(CharacterStats.class, CharacterStats[]::new);
         cluster.registerComponentType(PlayerTag.class, PlayerTag[]::new);
-        cluster.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);;
+        cluster.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);
+        ;
 
         return cluster;
     }
@@ -46,7 +47,7 @@ public class Roguelite extends GameBase<GameState> {
     public static GameState createInitialState() {
         val state = new GameState(createCluster(256));
         state.player = state.world.createEntity();
-        state.world.addComponentTo(state.player, new Position(4.0f, 4.0f));
+        state.world.addComponentTo(state.player, new Transform(4.0f, 4.0f));
         state.world.addComponentTo(state.player, new Velocity());
         state.world.addComponentTo(state.player, new CharacterInput());
         state.world.addComponentTo(state.player, new CharacterStats(
@@ -57,7 +58,7 @@ public class Roguelite extends GameBase<GameState> {
         state.world.addComponentTo(state.player, new PlayerTag());
 
         state.crosshair = state.world.createEntity();
-        state.world.addComponentTo(state.crosshair, new Position(-999.0f, -999.0f));
+        state.world.addComponentTo(state.crosshair, new Transform(-999.0, -999.0, 0.5, 0.5, 0.25, 0.25));
         state.world.addComponentTo(state.crosshair, new CrosshairTag());
 
         return state;

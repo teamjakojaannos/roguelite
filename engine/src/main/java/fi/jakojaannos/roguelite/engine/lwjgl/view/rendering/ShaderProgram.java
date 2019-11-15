@@ -4,7 +4,10 @@ import fi.jakojaannos.roguelite.engine.utilities.io.TextFileHelper;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 
@@ -69,8 +72,10 @@ public class ShaderProgram implements AutoCloseable {
         glUseProgram(this.shaderProgram);
     }
 
-    public void setUniformMat4x4(int uniformLocation, float[] matrix) {
-        glUniformMatrix4fv(uniformLocation, false, matrix);
+    public void setUniformMat4x4(int uniformLocation, Matrix4f matrix) {
+        try (val stack = MemoryStack.stackPush()) {
+            glUniformMatrix4fv(uniformLocation, false, matrix.get(stack.mallocFloat(16)));
+        }
     }
 
     public int getUniformLocation(String name) {
