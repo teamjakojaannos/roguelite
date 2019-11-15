@@ -25,7 +25,7 @@ class RogueliteTest {
             boolean up,
             boolean down
     ) {
-        GameState state = new GameState(Roguelite.createCluster(256));
+        GameState state = Roguelite.createInitialState();
         Roguelite roguelite = new Roguelite();
 
         Queue<InputEvent> events = new ArrayDeque<>();
@@ -51,7 +51,7 @@ class RogueliteTest {
             double newPos
     ) {
         InputAxis.Mouse axisPos = horizontal ? InputAxis.Mouse.X_POS : InputAxis.Mouse.Y_POS;
-        GameState state = new GameState(Roguelite.createCluster(256));
+        GameState state = Roguelite.createInitialState();
         if (horizontal) {
             state.mouseX = initial;
         } else {
