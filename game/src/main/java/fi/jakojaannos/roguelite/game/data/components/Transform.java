@@ -48,4 +48,18 @@ public class Transform implements Component {
         this.bounds.maxX = x + w - this.origin.x;
         this.bounds.maxY = y + h - this.origin.y;
     }
+
+    public double getCenterX() {
+        return bounds.minX + getWidth() / 2;
+    }
+
+    public double getCenterY() {
+        return bounds.minY + getHeight() / 2;
+    }
+
+    public void getCenter(Vector2d result) {
+        result.x = getCenterX();
+        result.y = getCenterY();
+    }
+
 }
