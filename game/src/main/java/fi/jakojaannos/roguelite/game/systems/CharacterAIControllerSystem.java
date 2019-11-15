@@ -29,7 +29,6 @@ public class CharacterAIControllerSystem implements ECSSystem<GameState> {
 
     @Override
     public void tick(Stream<Entity> entities, GameState gameState, double delta, Cluster cluster) {
-
         Vector2d playerPos = new Vector2d();
         cluster.getComponentOf(gameState.player, Transform.class)
                 .orElse(new Transform(5.0f, 5.0f))

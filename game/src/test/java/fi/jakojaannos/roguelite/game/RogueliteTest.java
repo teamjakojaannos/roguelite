@@ -1,10 +1,7 @@
 package fi.jakojaannos.roguelite.game;
 
-import fi.jakojaannos.roguelite.engine.ecs.Cluster;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.components.*;
-import lombok.val;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
