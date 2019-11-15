@@ -114,7 +114,7 @@ public class RogueliteLauncher {
                  val game = new Roguelite()
             ) {
                 val inputProvider = new LWJGLInputProvider(runner.getWindow(), this.enableForceClose);
-                runner.run(game::createInitialState, game, inputProvider, renderer);
+                runner.run(Roguelite::createInitialState, game, inputProvider, renderer);
             }
         } catch (Exception e) {
             LOG.error("The game loop unexpectedly stopped.");

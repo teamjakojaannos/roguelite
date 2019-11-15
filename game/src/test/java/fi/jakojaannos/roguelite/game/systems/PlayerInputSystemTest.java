@@ -4,6 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Cluster;
 import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.game.Roguelite;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;

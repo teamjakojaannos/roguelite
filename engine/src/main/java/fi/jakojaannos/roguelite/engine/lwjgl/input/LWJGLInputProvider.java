@@ -68,8 +68,8 @@ public class LWJGLInputProvider implements InputProvider {
 
             // In case we just resized, update cached position and skip sending delta-events
             if (this.justResized) {
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, (float) x)));
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, (float) y)));
+                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
+                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
                 this.mouseX = x;
                 this.mouseY = y;
                 this.justResized = false;
@@ -78,15 +78,15 @@ public class LWJGLInputProvider implements InputProvider {
 
             val deltaX = this.mouseX - x;
             if (Math.abs(deltaX) > MOUSE_EPSILON) {
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X, (float) deltaX)));
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, (float) x)));
+                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X, deltaX)));
+                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
                 this.mouseX = x;
             }
 
             val deltaY = this.mouseY - y;
             if (Math.abs(deltaY) > MOUSE_EPSILON) {
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y, (float) deltaY)));
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, (float) y)));
+                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y, deltaY)));
+                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
                 this.mouseY = y;
             }
         });

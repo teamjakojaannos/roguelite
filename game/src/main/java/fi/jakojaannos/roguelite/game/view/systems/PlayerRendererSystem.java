@@ -100,7 +100,7 @@ public class PlayerRendererSystem implements ECSSystem<GameState>, AutoCloseable
                                      .ifPresent(position -> {
                                          modelMatrix.identity()
                                                     .translate((float) position.x, (float) position.y, 0.0f)
-                                                    .scale(state.playerSize)
+                                                    .scale((float) state.playerSize)
                                                     .get(modelMatrixArray);
 
                                          this.shader.setUniformMat4x4(this.uniformModelMatrix, modelMatrixArray);

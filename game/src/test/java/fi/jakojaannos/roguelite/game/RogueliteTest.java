@@ -1,11 +1,10 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.ecs.Cluster;
-import fi.jakojaannos.roguelite.engine.input.ButtonInput;
-import fi.jakojaannos.roguelite.engine.input.InputButton;
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import lombok.val;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -29,14 +28,8 @@ class RogueliteTest {
             boolean up,
             boolean down
     ) {
+        GameState state = new GameState(Roguelite.createCluster(256));
         Roguelite roguelite = new Roguelite();
-        GameState state = new GameState();
-        state.world.registerComponentType(Position.class, Position[]::new);
-        state.world.registerComponentType(Velocity.class, Velocity[]::new);
-        state.world.registerComponentType(CharacterInput.class, CharacterInput[]::new);
-        state.world.registerComponentType(CharacterStats.class, CharacterStats[]::new);
-        state.world.registerComponentType(PlayerTag.class, PlayerTag[]::new);
-        state.world.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);
 
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(new InputEvent(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
@@ -47,5 +40,33 @@ class RogueliteTest {
         assertEquals(state.inputRight, right);
         assertEquals(state.inputUp, up);
         assertEquals(state.inputDown, down);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+                       "true,0.0,1.0", "false,0.0,1.0",
+                       "true,0.0,0.0", "false,0.0,0.0",
+                       "true,0.2,0.3", "false,0.2,0.3",
+    })
+    void mouseInputEventsUpdateGameState(
+            boolean horizontal,
+            double initial,
+            double newPos
+    ) {
+        InputAxis.Mouse axisPos = horizontal ? InputAxis.Mouse.X_POS : InputAxis.Mouse.Y_POS;
+        GameState state = new GameState(Roguelite.createCluster(256));
+        if (horizontal) {
+            state.mouseX = initial;
+        } else {
+            state.mouseY = initial;
+        }
+        Roguelite roguelite = new Roguelite();
+
+        Queue<InputEvent> events = new ArrayDeque<>();
+        events.offer(new InputEvent(new AxialInput(axisPos, newPos)));
+
+        roguelite.tick(state, events, 1.0);
+
+        assertEquals(newPos, horizontal ? state.mouseX : state.mouseY);
     }
 }
