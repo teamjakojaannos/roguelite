@@ -64,8 +64,10 @@ public class LWJGLCamera extends Camera {
         }
     }
 
-    public LWJGLCamera() {
+    public LWJGLCamera(int viewportWidth, int viewportHeight) {
         super(new Vector2f(0f, 0.0f));
+        this.viewportWidth = viewportWidth;
+        this.viewportHeight = viewportHeight;
 
         this.projectionMatrix = new Matrix4f().identity();
         this.projectionMatrixDirty = true;

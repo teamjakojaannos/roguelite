@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view;
 import fi.jakojaannos.roguelite.engine.view.Window;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
@@ -18,10 +19,13 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+@Slf4j
 public class LWJGLWindow implements Window, AutoCloseable {
     @Getter
     private final long id;
 
+    @Getter private int width;
+    @Getter private int height;
     private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
 
     public LWJGLWindow(int width, int height) {
@@ -50,6 +54,9 @@ public class LWJGLWindow implements Window, AutoCloseable {
             IntBuffer pHeight = stack.mallocInt(1);
 
             glfwGetWindowSize(this.id, pWidth, pHeight);
+            this.width = pWidth.get();
+            this.height = pHeight.get();
+            LOG.info("Window size after creation: {}×{}", width, height);
 
             Optional.ofNullable(glfwGetVideoMode(glfwGetPrimaryMonitor()))
                     .ifPresent(videoMode -> {

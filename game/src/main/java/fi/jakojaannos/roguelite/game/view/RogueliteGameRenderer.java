@@ -19,7 +19,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         LOG.info("asset root: {}", assetRoot);
 
 
-        this.camera = new RogueliteCamera();
+        this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
         this.rendererDispatcher = new DispatcherBuilder<GameState>()
                 .withSystem("render_player", new EntityBoundsRenderingSystem(assetRoot, this.camera))
                 .build();

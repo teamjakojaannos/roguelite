@@ -4,6 +4,10 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.game.data.GameState;
 
 class RogueliteCamera extends LWJGLCamera {
+    public RogueliteCamera(int viewportWidth, int viewportHeight) {
+        super(viewportWidth, viewportHeight);
+    }
+
     void updateConfigurationFromState(GameState state) {
         if (state.targetWorldSize != getTargetScreenSizeInUnits()) {
             setTargetScreenSizeInUnits(state.targetWorldSize);
