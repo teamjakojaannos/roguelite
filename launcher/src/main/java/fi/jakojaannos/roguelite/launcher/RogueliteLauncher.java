@@ -130,7 +130,7 @@ public class RogueliteLauncher {
                                 .reduce(e.toString(),
                                         (accumulator, element) -> String.format("%s\n\t%s", accumulator, element)));
             } else {
-                LOG.error("\tRun with --debug for stack traces");
+                LOG.error("\tRun with --debugStackTraces for stack traces");
             }
         }
     }

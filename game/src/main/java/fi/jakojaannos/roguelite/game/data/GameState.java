@@ -18,6 +18,7 @@ public class GameState {
     public boolean inputRight = false;
     public boolean inputUp = false;
     public boolean inputDown = false;
+    public boolean inputAttack = true;
 
     public double playerSpeed = 8.0f;
     public double playerSize = 1.0f;

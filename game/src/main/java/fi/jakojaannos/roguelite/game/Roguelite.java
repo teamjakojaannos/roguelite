@@ -10,9 +10,7 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.systems.CharacterMovementSystem;
-import fi.jakojaannos.roguelite.game.systems.PlayerInputSystem;
-import fi.jakojaannos.roguelite.game.systems.SnapToCursorSystem;
+import fi.jakojaannos.roguelite.game.systems.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -26,7 +24,9 @@ public class Roguelite extends GameBase<GameState> {
     public Roguelite() {
         this.dispatcher = new DispatcherBuilder<GameState>()
                 .withSystem("player_input", new PlayerInputSystem())
+                .withSystem("projectile_move", new ProjectileMovementSystem())
                 .withSystem("character_move", new CharacterMovementSystem(), "player_input")
+                .withSystem("character_attack", new CharacterAttackSystem(), "player_input")
                 .withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
                 .build();
     }
@@ -37,9 +37,10 @@ public class Roguelite extends GameBase<GameState> {
         cluster.registerComponentType(Velocity.class, Velocity[]::new);
         cluster.registerComponentType(CharacterInput.class, CharacterInput[]::new);
         cluster.registerComponentType(CharacterStats.class, CharacterStats[]::new);
+        cluster.registerComponentType(CharacterAbilities.class, CharacterAbilities[]::new);
         cluster.registerComponentType(PlayerTag.class, PlayerTag[]::new);
         cluster.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);
-        ;
+        cluster.registerComponentType(ProjectileTag.class, ProjectileTag[]::new);
 
         return cluster;
     }
@@ -50,10 +51,13 @@ public class Roguelite extends GameBase<GameState> {
         state.world.addComponentTo(state.player, new Transform(4.0f, 4.0f));
         state.world.addComponentTo(state.player, new Velocity());
         state.world.addComponentTo(state.player, new CharacterInput());
+        state.world.addComponentTo(state.player, new CharacterAbilities());
         state.world.addComponentTo(state.player, new CharacterStats(
                 10.0f,
                 100.0f,
-                800.0f
+                800.0f,
+                20.0f,
+                20.0f
         ));
         state.world.addComponentTo(state.player, new PlayerTag());
 
