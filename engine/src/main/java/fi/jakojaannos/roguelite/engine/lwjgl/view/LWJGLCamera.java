@@ -1,7 +1,9 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -13,7 +15,8 @@ import static org.lwjgl.opengl.GL11.glViewport;
 public class LWJGLCamera extends Camera {
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
 
-    private float targetScreenSizeInUnits;
+    @Getter(AccessLevel.PROTECTED)
+    private double targetScreenSizeInUnits = 32.0;
 
     @Getter private float viewportWidthInUnits;
     @Getter private float viewportHeightInUnits;
@@ -40,6 +43,11 @@ public class LWJGLCamera extends Camera {
         return cachedProjectionMatrixArray;
     }
 
+    protected void setTargetScreenSizeInUnits(double targetSize) {
+        this.targetScreenSizeInUnits = targetSize;
+        this.projectionMatrixDirty = true;
+    }
+
     public void resizeViewport(int viewportWidth, int viewportHeight) {
         this.viewportWidth = viewportWidth;
         this.viewportHeight = viewportHeight;
@@ -62,8 +70,6 @@ public class LWJGLCamera extends Camera {
     public LWJGLCamera() {
         super(new Vector2f(0f, 0.0f));
 
-        this.targetScreenSizeInUnits = 32;
-
         this.projectionMatrix = new Matrix4f().identity();
         this.cachedProjectionMatrixArray = new float[16];
         this.projectionMatrixDirty = true;
@@ -74,19 +80,7 @@ public class LWJGLCamera extends Camera {
         this.viewMatrixDirty = true;
         refreshViewMatrixIfDirty();
     }
-/*
-    public void updateConfigurationFromState(GameState state) {
-        if (state.targetWorldSize != this.targetScreenSizeInUnits) {
-            this.targetScreenSizeInUnits = state.targetWorldSize;
-            this.projectionMatrixDirty = true;
-        }
 
-        // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
-        //  to make the change, NEVER mutate state on the view.
-        state.realViewWidth = this.viewportWidthInUnits;
-        state.realViewHeight = this.viewportHeightInUnits;
-    }
-*/
     private void refreshProjectionMatrixIfDirty() {
         if (this.projectionMatrixDirty) {
             LOG.trace("Refreshing projection matrix");
