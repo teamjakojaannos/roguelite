@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Queue;
+import java.util.Random;
 
 @Slf4j
 public class Roguelite extends GameBase<GameState> {
@@ -28,6 +29,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("character_move", new CharacterMovementSystem(), "player_input")
                 .withSystem("character_attack", new CharacterAttackSystem(), "player_input")
                 .withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
+                .withSystem("ai_move", new CharacterAIControllerSystem(), "character_move")
                 .build();
     }
 
@@ -41,6 +43,7 @@ public class Roguelite extends GameBase<GameState> {
         cluster.registerComponentType(PlayerTag.class, PlayerTag[]::new);
         cluster.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);
         cluster.registerComponentType(ProjectileTag.class, ProjectileTag[]::new);
+        cluster.registerComponentType(EnemyAI.class, EnemyAI[]::new);
 
         return cluster;
     }
@@ -64,6 +67,28 @@ public class Roguelite extends GameBase<GameState> {
         state.crosshair = state.world.createEntity();
         state.world.addComponentTo(state.crosshair, new Transform(-999.0, -999.0, 0.5, 0.5, 0.25, 0.25));
         state.world.addComponentTo(state.crosshair, new CrosshairTag());
+
+
+        final double x_max = 20.0f, y_max = 15.0f;
+        Random random = new Random(123);
+
+        for (int i = 0; i < 5; i++) {
+            var e = state.world.createEntity();
+            double xpos = random.nextDouble() * x_max;
+            double ypos = random.nextDouble() * y_max;
+            state.world.addComponentTo(e, new Transform(xpos, ypos));
+            state.world.addComponentTo(e, new Velocity());
+            state.world.addComponentTo(e, new CharacterInput());
+            state.world.addComponentTo(e, new CharacterStats(
+                    4.0,
+                    100.0,
+                    800.0,
+                    4.0,
+                    20.0
+            ));
+
+            state.world.addComponentTo(e, new EnemyAI(25.0f, 1.0f));
+        }
 
         return state;
     }
