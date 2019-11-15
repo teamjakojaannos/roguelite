@@ -39,7 +39,7 @@ class CharacterMovementSystemTest {
         this.characterInput = new CharacterInput();
         this.characterStats = new CharacterStats();
         this.velocity = new Velocity();
-        this.transform = new Transform(0.0f, 0.0f);
+        this.transform = new Transform(0.0, 0.0, 0.0);
         this.state.world.addComponentTo(player, this.transform);
         this.state.world.addComponentTo(player, this.velocity);
         this.state.world.addComponentTo(player, this.characterInput);
@@ -109,7 +109,7 @@ class CharacterMovementSystemTest {
             this.dispatcher.dispatch(this.state.world, this.state, 0.02);
         }
 
-        assertEquals(expectedPositionAfter10s, this.transform.x, POSITION_EPSILON);
+        assertEquals(expectedPositionAfter10s, this.transform.bounds.minX, POSITION_EPSILON);
     }
 
     @ParameterizedTest
@@ -129,8 +129,8 @@ class CharacterMovementSystemTest {
             this.dispatcher.dispatch(this.state.world, this.state, 0.02);
         }
 
-        assertEquals(expectedX, this.transform.x, POSITION_EPSILON);
-        assertEquals(expectedY, this.transform.y, POSITION_EPSILON);
+        assertEquals(expectedX, this.transform.bounds.minX, POSITION_EPSILON);
+        assertEquals(expectedY, this.transform.bounds.minY, POSITION_EPSILON);
     }
 
     @ParameterizedTest
@@ -150,7 +150,7 @@ class CharacterMovementSystemTest {
             this.dispatcher.dispatch(this.state.world, this.state, 0.02);
         }
 
-        assertEquals(expectedX, this.transform.x, POSITION_EPSILON);
-        assertEquals(expectedY, this.transform.y, POSITION_EPSILON);
+        assertEquals(expectedX, this.transform.bounds.minX, POSITION_EPSILON);
+        assertEquals(expectedY, this.transform.bounds.minY, POSITION_EPSILON);
     }
 }
