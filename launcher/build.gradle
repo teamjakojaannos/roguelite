@@ -63,7 +63,7 @@ run {
     }
 
     //jvmArgs = ['-XX:+PrintGCDetails']
-    setArgsString("--debugStackTraces --enableForceClose --assetRoot ../assets/")
+    setArgsString("--debug --assetRoot ../assets/")
 }
 
 

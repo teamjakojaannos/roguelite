@@ -44,9 +44,13 @@ public class LWJGLWindow implements Window, AutoCloseable {
 
         GLFWWindowSizeCallback
                 .create((window, newWidth, newHeight) ->
-                        resizeCallbacks.stream()
-                                       .filter(Objects::nonNull)
-                                       .forEach(cb -> cb.call(newWidth, newHeight)))
+                        {
+                            this.width = newWidth;
+                            this.height = newHeight;
+                            this.resizeCallbacks.stream()
+                                                .filter(Objects::nonNull)
+                                                .forEach(cb -> cb.call(newWidth, newHeight));
+                        })
                 .set(this.id);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -56,7 +60,7 @@ public class LWJGLWindow implements Window, AutoCloseable {
             glfwGetWindowSize(this.id, pWidth, pHeight);
             this.width = pWidth.get();
             this.height = pHeight.get();
-            LOG.info("Window size after creation: {}×{}", width, height);
+            LOG.debug("Window size after creation: {}×{}", width, height);
 
             Optional.ofNullable(glfwGetVideoMode(glfwGetPrimaryMonitor()))
                     .ifPresent(videoMode -> {

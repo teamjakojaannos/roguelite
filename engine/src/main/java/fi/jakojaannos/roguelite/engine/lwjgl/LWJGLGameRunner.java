@@ -36,6 +36,8 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
 
         GL.createCapabilities();
         glClearColor(0.25f, 0.6f, 0.4f, 1.0f);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     @Override

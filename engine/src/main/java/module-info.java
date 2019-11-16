@@ -5,6 +5,8 @@ module roguelite.engine {
     requires org.slf4j;
     requires org.joml;
 
+    requires java.desktop;
+
     exports fi.jakojaannos.roguelite.engine;
     exports fi.jakojaannos.roguelite.engine.input;
     exports fi.jakojaannos.roguelite.engine.lwjgl;
@@ -14,4 +16,5 @@ module roguelite.engine {
     exports fi.jakojaannos.roguelite.engine.utilities;
     exports fi.jakojaannos.roguelite.engine.utilities.io;
     exports fi.jakojaannos.roguelite.engine.view;
+    exports fi.jakojaannos.roguelite.engine.view.rendering;
 }

@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glCreateProgram;
@@ -23,46 +24,50 @@ public class ShaderProgram implements AutoCloseable {
 
     public ShaderProgram(
             @NonNull String vertexShaderPath,
-            @NonNull String fragmentShaderPath
+            @NonNull String fragmentShaderPath,
+            @NonNull Map<Integer, String> attributeLocations,
+            @NonNull Map<Integer, String> fragDataLocations
     ) {
         this.vertexShader = glCreateShader(GL_VERTEX_SHADER);
         this.fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         this.shaderProgram = glCreateProgram();
 
+        // Compile the vertex shader
         try {
             GL20.glShaderSource(this.vertexShader,
                                 TextFileHelper.readFileToString(vertexShaderPath));
         } catch (IOException e) {
-            LOG.error("Loading sprite fragment shader failed!");
+            LOG.error("Loading vertex shader \"{}\" failed!", vertexShaderPath);
             return;
         }
         glCompileShader(this.vertexShader);
 
+        // Compile the fragment shader
         try {
             glShaderSource(this.fragmentShader,
                            TextFileHelper.readFileToString(fragmentShaderPath));
         } catch (IOException e) {
-            LOG.error("Loading sprite fragment shader failed!");
+            LOG.error("Loading fragment shader \"{}\" failed!", fragmentShaderPath);
             return;
         }
         glCompileShader(this.fragmentShader);
 
+        // Check for errors
         if (glGetShaderi(this.vertexShader, GL_COMPILE_STATUS) != GL_TRUE) {
             LOG.error("Error compiling vertex shader:\n{}", glGetShaderInfoLog(this.vertexShader));
         }
-
         if (glGetShaderi(this.fragmentShader, GL_COMPILE_STATUS) != GL_TRUE) {
             LOG.error("Error compiling fragment shader:\n{}", glGetShaderInfoLog(this.fragmentShader));
         }
 
+        // Attach shaders and bind data locations
         glAttachShader(this.shaderProgram, this.vertexShader);
         glAttachShader(this.shaderProgram, this.fragmentShader);
+        attributeLocations.forEach((index, name) -> glBindAttribLocation(this.shaderProgram, index, name));
+        fragDataLocations.forEach((colorNumber, name) -> glBindFragDataLocation(this.shaderProgram, colorNumber, name));
 
-        glBindAttribLocation(this.shaderProgram, 0, "in_pos");
-        glBindFragDataLocation(this.shaderProgram, 0, "out_fragColor");
-
+        // Link the program and check for errors
         glLinkProgram(this.shaderProgram);
-
         if (glGetProgrami(this.shaderProgram, GL_LINK_STATUS) != GL_TRUE) {
             LOG.error(glGetProgramInfoLog(this.shaderProgram));
         }

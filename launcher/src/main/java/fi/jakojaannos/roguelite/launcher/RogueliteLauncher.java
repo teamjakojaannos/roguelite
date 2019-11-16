@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.launcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
 import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.engine.view.Window;
+import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.Roguelite;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
@@ -20,6 +21,9 @@ import java.util.Optional;
 
 @Slf4j
 public class RogueliteLauncher {
+    // Master-debug flag, this sets a bunch of default debug settings on
+    @Setter private boolean debug;
+
     @Setter private boolean enableLWJGLDebug = false;
     @Setter private boolean enableLWJGLLibraryLoaderDebug = false;
     @Setter private boolean enableForceClose = false;
@@ -81,6 +85,8 @@ public class RogueliteLauncher {
                                    .withAction(params -> this.setEnableForceClose(true)))
                      .with(Argument.withName("debugStackTraces")
                                    .withAction(params -> this.setDebugStackTraces(true)))
+                     .with(Argument.withName("debug")
+                                   .withAction(params -> this.setDebug(true)))
                      .ignoreUnknown()
                      .consume(args);
         } catch (ArgumentParsingException e) {
@@ -90,6 +96,12 @@ public class RogueliteLauncher {
     }
 
     public void launch() {
+        if (this.debug) {
+            this.enableForceClose = true;
+            this.debugStackTraces = true;
+            DebugConfig.debugModeEnabled = true;
+        }
+
         if (!(this.assetRoot.endsWith("/") || this.assetRoot.endsWith("\\"))) {
             this.assetRoot = this.assetRoot + '/';
         }

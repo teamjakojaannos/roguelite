@@ -44,6 +44,7 @@ public class Roguelite extends GameBase<GameState> {
         cluster.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);
         cluster.registerComponentType(ProjectileTag.class, ProjectileTag[]::new);
         cluster.registerComponentType(EnemyAI.class, EnemyAI[]::new);
+        cluster.registerComponentType(SpriteInfo.class, SpriteInfo[]::new);
 
         return cluster;
     }
@@ -63,6 +64,9 @@ public class Roguelite extends GameBase<GameState> {
                 20.0f
         ));
         state.world.addComponentTo(state.player, new PlayerTag());
+        val sprite = new SpriteInfo();
+        sprite.spriteName = "textures/sheep.png";
+        state.world.addComponentTo(state.player, sprite);
 
         state.crosshair = state.world.createEntity();
         state.world.addComponentTo(state.crosshair, new Transform(-999.0, -999.0, 0.5, 0.5, 0.25, 0.25));
@@ -101,7 +105,6 @@ public class Roguelite extends GameBase<GameState> {
             double delta
     ) {
         super.tick(state, inputEvents, delta);
-        LOG.info("This is a test modification");
         state.world.applyModifications();
 
         while (!inputEvents.isEmpty()) {

@@ -16,6 +16,7 @@ import org.joml.Matrix4f;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.lwjgl.opengl.GL20.*;
@@ -47,8 +48,10 @@ public class EntityBoundsRenderingSystem implements ECSSystem<GameState>, AutoCl
     public EntityBoundsRenderingSystem(@NonNull String assetRoot, @NonNull LWJGLCamera camera) {
         this.camera = camera;
         this.shader = new ShaderProgram(
-                assetRoot + "shaders/sprite.vert",
-                assetRoot + "shaders/sprite.frag"
+                assetRoot + "shaders/bounds.vert",
+                assetRoot + "shaders/bounds.frag",
+                Map.ofEntries(Map.entry(0, "in_pos")),
+                Map.ofEntries(Map.entry(0, "out_fragColor"))
         );
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
         this.uniformViewMatrix = this.shader.getUniformLocation("view");
@@ -71,8 +74,11 @@ public class EntityBoundsRenderingSystem implements ECSSystem<GameState>, AutoCl
         this.ebo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
         val indices = new int[]{
-                0, 1, 2,
-                2, 3, 0,
+                0, 1,
+                1, 2,
+                2, 0,
+                2, 3,
+                3, 0,
         };
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
@@ -95,6 +101,7 @@ public class EntityBoundsRenderingSystem implements ECSSystem<GameState>, AutoCl
         this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());
         this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
 
+        glBindVertexArray(this.vao);
         entities.forEach(
                 entity -> {
                     val transform = state.world.getComponentOf(entity, Transform.class).get();
@@ -104,7 +111,7 @@ public class EntityBoundsRenderingSystem implements ECSSystem<GameState>, AutoCl
                                                                        (float) transform.bounds.minY, 0.0f)
                                                             .scaleXY((float) transform.getWidth(), (float) transform.getHeight())
                     );
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                    glDrawElements(GL_LINES, 10, GL_UNSIGNED_INT, 0);
                 }
         );
     }

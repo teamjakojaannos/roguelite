@@ -38,7 +38,7 @@ public class CharacterAttackSystem implements ECSSystem<GameState> {
                 val projectile = cluster.createEntity();
                 val projectileX = character.bounds.minX + character.getWidth() / 2.0;
                 val projectileY = character.bounds.minY + character.getHeight() / 2.0;
-                val transform = new Transform(projectileX, projectileY, 0.33, 0.33);
+                val transform = new Transform(projectileX, projectileY, 0.3, 0.3, 0.15, 0.15);
                 cluster.addComponentTo(projectile, new ProjectileTag());
                 cluster.addComponentTo(projectile, transform);
 

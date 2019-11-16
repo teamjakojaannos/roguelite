@@ -4,10 +4,13 @@ import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
+import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.view.systems.EntityBoundsRenderingSystem;
+import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
@@ -15,14 +18,19 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final RogueliteCamera camera;
 
     public RogueliteGameRenderer(@NonNull String assetRoot, @NonNull LWJGLWindow window) {
-        LOG.info("Constructing GameRenderer...");
-        LOG.info("asset root: {}", assetRoot);
+        LOG.debug("Constructing GameRenderer...");
+        LOG.debug("asset root: {}", assetRoot);
 
 
         this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
-        this.rendererDispatcher = new DispatcherBuilder<GameState>()
-                .withSystem("render_player", new EntityBoundsRenderingSystem(assetRoot, this.camera))
-                .build();
+        val builder = new DispatcherBuilder<GameState>()
+                .withSystem("render_sprites", new SpriteRenderingSystem(assetRoot, this.camera));
+
+        if (DebugConfig.debugModeEnabled) {
+            builder.withSystem("render_debug", new EntityBoundsRenderingSystem(assetRoot, this.camera));
+        }
+
+        this.rendererDispatcher = builder.build();
 
         window.addResizeCallback(this.camera::resizeViewport);
 

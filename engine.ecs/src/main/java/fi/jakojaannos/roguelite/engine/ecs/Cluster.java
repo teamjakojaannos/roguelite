@@ -73,7 +73,7 @@ public class Cluster {
      * @param <TComponent>           Type of the component
      */
     public <TComponent extends Component> void registerComponentType(
-            Class<? extends TComponent> componentClass,
+            Class<TComponent> componentClass,
             Function<Integer, TComponent[]> componentArraySupplier
     ) {
         val index = this.componentTypes.size();
