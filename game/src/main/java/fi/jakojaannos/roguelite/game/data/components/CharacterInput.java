@@ -6,5 +6,5 @@ import org.joml.Vector2d;
 public class CharacterInput implements Component {
     public Vector2d move = new Vector2d(0.0f, 0.0f);
 
-    public boolean attack = true;
+    public boolean attack = false;
 }

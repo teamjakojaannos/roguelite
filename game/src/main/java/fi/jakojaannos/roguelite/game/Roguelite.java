@@ -58,7 +58,7 @@ public class Roguelite extends GameBase<GameState> {
         state.world.addComponentTo(state.player, new CharacterStats(
                 10.0f,
                 100.0f,
-                800.0f,
+                150.0f,
                 20.0f,
                 20.0f
         ));
@@ -90,6 +90,7 @@ public class Roguelite extends GameBase<GameState> {
             state.world.addComponentTo(e, new EnemyAI(25.0f, 1.0f));
         }
 
+        state.world.applyModifications();
         return state;
     }
 
@@ -123,6 +124,8 @@ public class Roguelite extends GameBase<GameState> {
                     state.inputUp = input.getAction() != ButtonInput.Action.RELEASE;
                 } else if (input.getButton() == InputButton.Keyboard.KEY_S) {
                     state.inputDown = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Mouse.button(0)) {
+                    state.inputAttack = input.getAction() != ButtonInput.Action.RELEASE;
                 }
             });
         }

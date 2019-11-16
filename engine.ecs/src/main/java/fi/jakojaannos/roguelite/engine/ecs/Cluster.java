@@ -1,9 +1,13 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.val;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 // TODO: Prevent component type registration after first entity is created
 
@@ -122,7 +126,10 @@ public class Cluster {
      * @return If component exists, component optional of the component. Otherwise, an empty
      * optional
      */
-    public <TComponent extends Component> Optional<TComponent> getComponentOf(Entity entity, Class<? extends TComponent> componentClass) {
+    public <TComponent extends Component> Optional<TComponent> getComponentOf(
+            Entity entity,
+            Class<? extends TComponent> componentClass
+    ) {
         val componentTypeIndex = getComponentTypeIndexFor(componentClass)
                 .orElseThrow(() -> new IllegalStateException("Tried adding component of an unregistered type: " + componentClass));
 
@@ -149,7 +156,25 @@ public class Cluster {
         return this.componentTypeIndices.size();
     }
 
+    public <TComponent extends Component> Stream<EntityComponentPair> getEntitiesWith(
+            @NonNull Class<? extends TComponent> componentType
+    ) {
+        val componentTypeIndex = getComponentTypeIndexFor(componentType)
+                .orElseThrow(() -> new IllegalArgumentException(String.format(
+                        "Component type \"%s\" cannot be found!",
+                        componentType.getSimpleName())));
+        return this.entityStorage.stream()
+                                 .filter(e -> e.hasComponentBit(componentTypeIndex))
+                                 .map(e -> new EntityComponentPair<TComponent>(e, getComponentOf(e, componentType).orElseThrow()));
+    }
+
     private interface StorageTask {
         void execute();
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class EntityComponentPair<TComponent extends Component> {
+        private final Entity entity;
+        private final TComponent component;
     }
 }

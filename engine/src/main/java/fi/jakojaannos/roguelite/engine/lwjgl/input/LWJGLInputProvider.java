@@ -4,12 +4,13 @@ import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.lwjgl.glfw.GLFWKeyCallbackI;
 
 import java.util.ArrayDeque;
+import java.util.Optional;
 import java.util.Queue;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
 @Slf4j
 public class LWJGLInputProvider implements InputProvider {
@@ -32,64 +33,73 @@ public class LWJGLInputProvider implements InputProvider {
             this.justResized = true;
         });
 
-        val windowId = lwjglWindow.getId();
-        glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> {
-            ButtonInput.Action inputAction;
-            switch (action) {
-                case GLFW_RELEASE:
-                    inputAction = ButtonInput.Action.RELEASE;
-                    break;
-                case GLFW_PRESS:
-                    inputAction = ButtonInput.Action.PRESS;
-                    break;
-                case GLFW_REPEAT:
-                    inputAction = ButtonInput.Action.REPEAT;
-                    break;
-                default:
-                    LOG.error("Unknown key input action!");
-                    return;
-            }
-            this.inputEvents.offer(
-                    new InputEvent(
-                            new ButtonInput(
-                                    InputButton.Keyboard.get(key)
-                                                        .orElse(InputButton.Keyboard.KEY_UNKNOWN),
-                                    inputAction)));
+        glfwSetKeyCallback(lwjglWindow.getId(), keyCallback(enableForceClose));
+        glfwSetMouseButtonCallback(lwjglWindow.getId(), this::mouseButtonCallback);
+        glfwSetCursorPosCallback(lwjglWindow.getId(), this::cursorPositionCallback);
+    }
+
+    private void cursorPositionCallback(long window, double x, double y) {
+        x = x / this.viewportWidth;
+        y = y / this.viewportHeight;
+
+        // In case we just resized, update cached position and skip sending delta-events
+        if (this.justResized) {
+            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
+            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
+            this.mouseX = x;
+            this.mouseY = y;
+            this.justResized = false;
+            return;
+        }
+
+        val deltaX = this.mouseX - x;
+        if (Math.abs(deltaX) > MOUSE_EPSILON) {
+            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X, deltaX)));
+            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
+            this.mouseX = x;
+        }
+
+        val deltaY = this.mouseY - y;
+        if (Math.abs(deltaY) > MOUSE_EPSILON) {
+            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y, deltaY)));
+            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
+            this.mouseY = y;
+        }
+    }
+
+    private GLFWKeyCallbackI keyCallback(boolean enableForceClose) {
+        return (window, key, scancode, action, mods) -> {
+            mapAction(action).ifPresent(inputAction -> this.inputEvents.offer(
+                    ButtonInput.event(InputButton.Keyboard.get(key)
+                                                          .orElse(InputButton.Keyboard.KEY_UNKNOWN),
+                                      inputAction)));
+
 
             if (enableForceClose && key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
                 LOG.info("Received force close signal. Sending WindowShouldClose notify.");
-                glfwSetWindowShouldClose(windowId, true);
+                glfwSetWindowShouldClose(window, true);
             }
-        });
+        };
+    }
 
-        glfwSetCursorPosCallback(windowId, (window, x, y) -> {
-            x = x / this.viewportWidth;
-            y = y / this.viewportHeight;
+    private void mouseButtonCallback(long window, int button, int action, int mods) {
+        mapAction(action)
+                .ifPresent(ia -> this.inputEvents.offer(ButtonInput.event(InputButton.Mouse.button(button),
+                                                                          ia)));
+    }
 
-            // In case we just resized, update cached position and skip sending delta-events
-            if (this.justResized) {
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
-                this.mouseX = x;
-                this.mouseY = y;
-                this.justResized = false;
-                return;
-            }
-
-            val deltaX = this.mouseX - x;
-            if (Math.abs(deltaX) > MOUSE_EPSILON) {
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X, deltaX)));
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
-                this.mouseX = x;
-            }
-
-            val deltaY = this.mouseY - y;
-            if (Math.abs(deltaY) > MOUSE_EPSILON) {
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y, deltaY)));
-                this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
-                this.mouseY = y;
-            }
-        });
+    private Optional<ButtonInput.Action> mapAction(int action) {
+        switch (action) {
+            case GLFW_RELEASE:
+                return Optional.of(ButtonInput.Action.RELEASE);
+            case GLFW_PRESS:
+                return Optional.of(ButtonInput.Action.PRESS);
+            case GLFW_REPEAT:
+                return Optional.of(ButtonInput.Action.REPEAT);
+            default:
+                LOG.error("Unknown key input action: {}", action);
+                return Optional.empty();
+        }
     }
 
     @Override

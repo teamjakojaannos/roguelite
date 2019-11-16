@@ -1,11 +1,46 @@
 package fi.jakojaannos.roguelite.engine.input;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 public interface InputButton {
+    @EqualsAndHashCode
+    final class Mouse implements InputButton {
+        private static Map<Integer, Mouse> buttonInstances = new TreeMap<>();
+
+        private final int index;
+
+        private Mouse(int index) {
+            this.index = index;
+        }
+
+        public static Mouse button(int index) {
+            return buttonInstances.computeIfAbsent(index, integer -> new Mouse(index));
+        }
+
+        public String getName() {
+            switch (this.index) {
+                case 0:
+                    return "Mouse Left";
+                case 1:
+                    return "Mouse Right";
+                case 2:
+                    return "Mouse Middle";
+                case 3:
+                    return "Thumb 1";
+                case 4:
+                    return "Thumb 2";
+                default:
+                    return "Mouse Button #" + (this.index + 1);
+            }
+        }
+    }
+
     enum Keyboard implements InputButton {
         // Printable keys
         KEY_UNKNOWN(-1),

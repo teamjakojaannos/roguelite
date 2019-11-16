@@ -16,6 +16,14 @@ public class Transform implements Component {
         return this.bounds.maxY - this.bounds.minY;
     }
 
+    public final double getCenterX() {
+        return this.bounds.minX + getWidth() / 2;
+    }
+
+    public final double getCenterY() {
+        return this.bounds.minY + getHeight() / 2;
+    }
+
     public Transform() {
         this(0.0, 0.0, 1.0);
     }
@@ -49,17 +57,10 @@ public class Transform implements Component {
         this.bounds.maxY = y + h - this.origin.y;
     }
 
-    public double getCenterX() {
-        return bounds.minX + getWidth() / 2;
-    }
-
-    public double getCenterY() {
-        return bounds.minY + getHeight() / 2;
-    }
-
-    public void getCenter(Vector2d result) {
+    public Vector2d getCenter(Vector2d result) {
         result.x = getCenterX();
         result.y = getCenterY();
+        return result;
     }
 
 }
