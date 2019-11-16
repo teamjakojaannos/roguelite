@@ -29,9 +29,16 @@ public class LWJGLWindow implements Window, AutoCloseable {
     private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
 
     public LWJGLWindow(int width, int height) {
+        this(width, height, false);
+    }
+
+    public LWJGLWindow(int width, int height, boolean shouldFloat) {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        if (shouldFloat) {
+            glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+        }
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

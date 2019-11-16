@@ -93,13 +93,13 @@ public class LWJGLCamera extends Camera {
                     ? this.viewportWidth / realTargetSize
                     : this.viewportHeight / realTargetSize;
 
-            val ratio = minor / major;
+            val ratio = major / minor;
             this.viewportWidthInUnits = (float) (horizontalMajor
-                    ? realTargetSize
-                    : ratio * realTargetSize);
-            this.viewportHeightInUnits = (float) (horizontalMajor
                     ? ratio * realTargetSize
                     : realTargetSize);
+            this.viewportHeightInUnits = (float) (horizontalMajor
+                    ? realTargetSize
+                    : ratio * realTargetSize);
             this.projectionMatrix.setOrtho2D(
                     0.0f,
                     (float) viewportWidthInUnits,

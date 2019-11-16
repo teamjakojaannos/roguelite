@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.game.Roguelite;
 import lombok.NonNull;
 
 public class GameState {
-    public float targetWorldSize = 32.0f;
+    public float targetWorldVisibleOnScreen = 24.0f;
 
     public float realViewWidth = 1.0f;
     public float realViewHeight = 1.0f;

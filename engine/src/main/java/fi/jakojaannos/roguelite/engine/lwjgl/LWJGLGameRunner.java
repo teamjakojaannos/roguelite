@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.engine.lwjgl;
 
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.Game;
 import fi.jakojaannos.roguelite.engine.GameRunner;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import lombok.Getter;
 import lombok.NonNull;
@@ -19,6 +19,10 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
     private final LWJGLWindow window;
 
     public LWJGLGameRunner(int windowWidth, int windowHeight) {
+        this(windowWidth, windowHeight, false);
+    }
+
+    public LWJGLGameRunner(int windowWidth, int windowHeight, boolean floatWindow) {
         GLFWErrorCallback.createPrint(System.err).set();
 
         if (!glfwInit()) {
@@ -27,12 +31,17 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
 
         this.window = new LWJGLWindow(
                 windowWidth == -1 ? 800 : windowWidth,
-                windowHeight == -1 ? 600 : windowHeight
+                windowHeight == -1 ? 600 : windowHeight,
+                floatWindow
         );
 
         glfwMakeContextCurrent(this.window.getId());
         glfwSwapInterval(1);
         glfwShowWindow(this.window.getId());
+
+        if (floatWindow) {
+            glfwSetWindowAttrib(this.window.getId(), GLFW_FLOATING, GLFW_TRUE);
+        }
 
         GL.createCapabilities();
         glClearColor(0.25f, 0.6f, 0.4f, 1.0f);
@@ -46,7 +55,11 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
     }
 
     @Override
-    public void presentGameState(TState state, GameRenderer<TState> renderer, double partialTickAlpha) {
+    public void presentGameState(
+            TState state,
+            GameRenderer<TState> renderer,
+            double partialTickAlpha
+    ) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         super.presentGameState(state, renderer, partialTickAlpha);

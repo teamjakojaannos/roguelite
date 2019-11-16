@@ -32,6 +32,7 @@ public class RogueliteLauncher {
     @Setter private int windowHeight = -1;
     @Setter private String assetRoot = "assets/";
     @Setter private Window.Mode windowMode = Window.Mode.Windowed;
+    @Setter private boolean floatWindow = false;
 
     public void parseCommandLineArguments(@NonNull String... args) {
         try {
@@ -87,6 +88,8 @@ public class RogueliteLauncher {
                                    .withAction(params -> this.setDebugStackTraces(true)))
                      .with(Argument.withName("debug")
                                    .withAction(params -> this.setDebug(true)))
+                     .with(Argument.withName("float")
+                                   .withAction(params -> this.setFloatWindow(true)))
                      .ignoreUnknown()
                      .consume(args);
         } catch (ArgumentParsingException e) {
@@ -118,7 +121,8 @@ public class RogueliteLauncher {
 
         try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider, GameState>(
                 this.windowWidth,
-                this.windowHeight
+                this.windowHeight,
+                this.floatWindow
         )) {
             try (val renderer = new RogueliteGameRenderer(
                     this.assetRoot,

@@ -9,8 +9,8 @@ class RogueliteCamera extends LWJGLCamera {
     }
 
     void updateConfigurationFromState(GameState state) {
-        if (state.targetWorldSize != getTargetScreenSizeInUnits()) {
-            setTargetScreenSizeInUnits(state.targetWorldSize);
+        if (state.targetWorldVisibleOnScreen != getTargetScreenSizeInUnits()) {
+            setTargetScreenSizeInUnits(state.targetWorldVisibleOnScreen);
         }
 
         // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
