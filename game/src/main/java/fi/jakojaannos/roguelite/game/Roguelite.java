@@ -100,6 +100,7 @@ public class Roguelite extends GameBase<GameState> {
             double delta
     ) {
         super.tick(state, inputEvents, delta);
+        LOG.info("This is a test modification");
         state.world.applyModifications();
 
         while (!inputEvents.isEmpty()) {
