@@ -15,6 +15,7 @@ switch (OperatingSystem.current()) {
 dependencies {
     implementation project(':engine')
     implementation project(':engine.ecs')
+    implementation project(':engine.lwjgl')
 
     // LWJGL and its components
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")

@@ -26,6 +26,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     private static final Matrix4f DEFAULT_TRANSFORM = new Matrix4f().identity();
     private static final int MAX_SPRITES_PER_BATCH = 256; // TODO: This should probably be considerably larger value
     private static final int VERTICES_PER_SPRITE = 4;
+    private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
 
     private final ShaderProgram shader;
     private final int uniformProjectionMatrix;
@@ -60,9 +61,9 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
         val indices = constructIndicesArray();
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
-        this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_SPRITES_PER_BATCH * VERTICES_PER_SPRITE * Vertex.SIZE_IN_BYTES);
+        this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_SPRITES_PER_BATCH * VERTICES_PER_SPRITE * SIZE_IN_BYTES);
         for (int i = 0; i < MAX_SPRITES_PER_BATCH * VERTICES_PER_SPRITE; ++i) {
-            updateVertex(i * Vertex.SIZE_IN_BYTES, 0, 0, 0, 0, 0, 0, 0);
+            updateVertex(i * SIZE_IN_BYTES, 0, 0, 0, 0, 0, 0, 0);
         }
 
     }
@@ -74,11 +75,11 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
 
     @Override
     protected void queueFrame(@NonNull LWJGLTexture texture, int frame, double x, double y) {
-        val offset = getNFrames() * VERTICES_PER_SPRITE * Vertex.SIZE_IN_BYTES;
-        updateVertex(offset + (0 * Vertex.SIZE_IN_BYTES), x + 0, y + 0, 0, 0, 1.0f, 1.0f, 1.0f);
-        updateVertex(offset + (1 * Vertex.SIZE_IN_BYTES), x + 1, y + 0, 1, 0, 1.0f, 1.0f, 1.0f);
-        updateVertex(offset + (2 * Vertex.SIZE_IN_BYTES), x + 1, y + 1, 1, 1, 1.0f, 1.0f, 1.0f);
-        updateVertex(offset + (3 * Vertex.SIZE_IN_BYTES), x + 0, y + 1, 0, 1, 1.0f, 1.0f, 1.0f);
+        val offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
+        updateVertex(offset + (0 * SIZE_IN_BYTES), x + 0, y + 0, 0, 0, 1.0f, 1.0f, 1.0f);
+        updateVertex(offset + (1 * SIZE_IN_BYTES), x + 1, y + 0, 1, 0, 1.0f, 1.0f, 1.0f);
+        updateVertex(offset + (2 * SIZE_IN_BYTES), x + 1, y + 1, 1, 1, 1.0f, 1.0f, 1.0f);
+        updateVertex(offset + (3 * SIZE_IN_BYTES), x + 0, y + 1, 0, 1, 1.0f, 1.0f, 1.0f);
     }
 
     private void updateVertex(
@@ -118,7 +119,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
 
         glBindVertexArray(this.vao);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        this.vertexDataBuffer.limit(getNFrames() * VERTICES_PER_SPRITE * Vertex.SIZE_IN_BYTES);
+        this.vertexDataBuffer.limit(getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES);
         // FIXME: BufferSubData causes segfault in native code
         //glBufferSubData(GL_ARRAY_BUFFER, 0, this.vertexDataBuffer);
         glBufferData(GL_ARRAY_BUFFER, this.vertexDataBuffer, GL_STATIC_DRAW);
@@ -128,21 +129,21 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
                               2,
                               GL_FLOAT,
                               false,
-                              Vertex.SIZE_IN_BYTES,
+                              SIZE_IN_BYTES,
                               0); // offset: pos is first attribute -> 0
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1,
                               2,
                               GL_FLOAT,
                               false,
-                              Vertex.SIZE_IN_BYTES,
+                              SIZE_IN_BYTES,
                               2 * 4); // offset: pos = 2 * sizeof(float)
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2,
                               3,
                               GL_FLOAT,
                               true,
-                              Vertex.SIZE_IN_BYTES,
+                              SIZE_IN_BYTES,
                               4 * 4); // offset: pos + uv = 4 * sizeof(float)
 
         glDrawElements(GL_TRIANGLES,
@@ -188,9 +189,5 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
                         Map.entry(0, "out_fragColor")
                 )
         );
-    }
-
-    private static class Vertex {
-        private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
     }
 }

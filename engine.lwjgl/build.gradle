@@ -1,8 +1,5 @@
 import org.gradle.internal.os.OperatingSystem
 
-apply plugin: 'application'
-apply plugin: 'java'
-
 switch (OperatingSystem.current()) {
     case OperatingSystem.LINUX:
         project.ext.lwjglNatives = "natives-linux"
@@ -16,9 +13,8 @@ switch (OperatingSystem.current()) {
 }
 
 dependencies {
-    implementation project(':engine')
-    implementation project(':engine.lwjgl')
-    implementation project(':game')
+    implementation project(":engine")
+    implementation project(":engine.utilities")
 
     // LWJGL and its components
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
@@ -36,41 +32,4 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
-
-
-    // Lombok
-    compileOnly "org.projectlombok:lombok:1.18.10"
-    testCompileOnly "org.projectlombok:lombok:1.18.10"
-    annotationProcessor "org.projectlombok:lombok:1.18.10"
-
-    // Logging
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    runtimeOnly "org.slf4j:slf4j-simple:$slf4jVersion"
 }
-
-application {
-    mainClassName = "$moduleName/fi.jakojaannos.roguelite.launcher.Main"
-    //applicationDefaultJvmArgs = ['-XX:+PrintGCDetails']
-}
-
-run {
-    moduleOptions {
-        addModules = [
-                "org.lwjgl.natives",
-                "org.lwjgl.opengl.natives",
-                "org.lwjgl.glfw.natives",
-        ]
-        addReads = ["launcher": "org.lwjgl.natives,org.lwjgl.opengl.natives,org.lwjgl.glfw.natives"]
-    }
-
-    //jvmArgs = ['-XX:+PrintGCDetails']
-    setArgsString("--debug --assetRoot ../assets/")
-}
-
-
-test {
-    moduleOptions {
-        runOnClasspath = true
-    }
-}
-

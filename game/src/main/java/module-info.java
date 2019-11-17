@@ -5,6 +5,7 @@ module roguelite.game {
     requires org.joml;
 
     requires roguelite.engine;
+    requires transitive roguelite.engine.lwjgl;
     requires roguelite.engine.ecs;
 
     exports fi.jakojaannos.roguelite.game;
