@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':engine')
+    implementation project(':engine.utilities')
 }
 
 test {

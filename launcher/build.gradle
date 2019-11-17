@@ -17,6 +17,7 @@ switch (OperatingSystem.current()) {
 
 dependencies {
     implementation project(':engine')
+    implementation project(':engine.lwjgl')
     implementation project(':game')
 
     // LWJGL and its components
