@@ -19,21 +19,6 @@ switch (OperatingSystem.current()) {
 dependencies {
     implementation project(":engine.utilities")
 
-    // LWJGL and its components
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-
-    implementation "org.lwjgl:lwjgl"
-    implementation "org.lwjgl:lwjgl-assimp"
-    implementation "org.lwjgl:lwjgl-glfw"
-    implementation "org.lwjgl:lwjgl-openal"
-    implementation "org.lwjgl:lwjgl-stb"
-    implementation "org.lwjgl:lwjgl-opengl"
-    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
 }
 
