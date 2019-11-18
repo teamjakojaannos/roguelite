@@ -30,6 +30,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("character_attack", new CharacterAttackSystem(), "player_input")
                 .withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
                 .withSystem("ai_move", new CharacterAIControllerSystem(), "character_move")
+                .withSystem("stalker_move", new StalkerAIControllerSystem())
                 .build();
     }
 
@@ -44,6 +45,7 @@ public class Roguelite extends GameBase<GameState> {
         cluster.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);
         cluster.registerComponentType(ProjectileTag.class, ProjectileTag[]::new);
         cluster.registerComponentType(EnemyAI.class, EnemyAI[]::new);
+        cluster.registerComponentType(StalkerAI.class, StalkerAI[]::new);
         cluster.registerComponentType(SpriteInfo.class, SpriteInfo[]::new);
 
         return cluster;
@@ -73,10 +75,11 @@ public class Roguelite extends GameBase<GameState> {
         state.world.addComponentTo(state.crosshair, new CrosshairTag());
 
 
+        // Spawn "followers"
         final double x_max = 20.0f, y_max = 15.0f;
         Random random = new Random(123);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 0; i++) {
             var e = state.world.createEntity();
             double xpos = random.nextDouble() * x_max;
             double ypos = random.nextDouble() * y_max;
@@ -93,6 +96,23 @@ public class Roguelite extends GameBase<GameState> {
 
             state.world.addComponentTo(e, new EnemyAI(25.0f, 1.0f));
         }
+
+
+        // Spawn stalker(s)
+        var e = state.world.createEntity();
+        state.world.addComponentTo(e, new Transform(10.0f, 15.0f, 0.75f));
+        state.world.addComponentTo(e, new Velocity());
+        state.world.addComponentTo(e, new CharacterInput());
+        state.world.addComponentTo(e, new CharacterStats(
+                1.0,
+                100.0,
+                800.0,
+                4.0,
+                20.0
+        ));
+        state.world.addComponentTo(e,
+                new StalkerAI(250.0f, 50.0f, 8.0f));
+
 
         state.world.applyModifications();
         return state;
