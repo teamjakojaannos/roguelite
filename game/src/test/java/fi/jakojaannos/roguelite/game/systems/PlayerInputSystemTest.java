@@ -28,10 +28,7 @@ class PlayerInputSystemTest {
                 .withSystem("test", new PlayerInputSystem())
                 .build();
         this.state = new GameState();
-        this.state.world = new Cluster(256);
-        this.state.world.registerComponentType(CharacterAbilities.class, CharacterAbilities[]::new);
-        this.state.world.registerComponentType(CharacterInput.class, CharacterInput[]::new);
-        this.state.world.registerComponentType(PlayerTag.class, PlayerTag[]::new);
+        this.state.world = new Cluster(256, 32);
 
         this.player = this.state.world.createEntity();
         this.input = new CharacterInput();

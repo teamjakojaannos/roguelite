@@ -34,25 +34,8 @@ public class Roguelite extends GameBase<GameState> {
                 .build();
     }
 
-    public static Cluster createCluster(int capacity) {
-        val cluster = new Cluster(capacity);
-        cluster.registerComponentType(Transform.class, Transform[]::new);
-        cluster.registerComponentType(Velocity.class, Velocity[]::new);
-        cluster.registerComponentType(CharacterInput.class, CharacterInput[]::new);
-        cluster.registerComponentType(CharacterStats.class, CharacterStats[]::new);
-        cluster.registerComponentType(CharacterAbilities.class, CharacterAbilities[]::new);
-        cluster.registerComponentType(PlayerTag.class, PlayerTag[]::new);
-        cluster.registerComponentType(CrosshairTag.class, CrosshairTag[]::new);
-        cluster.registerComponentType(ProjectileTag.class, ProjectileTag[]::new);
-        cluster.registerComponentType(EnemyAI.class, EnemyAI[]::new);
-        cluster.registerComponentType(StalkerAI.class, StalkerAI[]::new);
-        cluster.registerComponentType(SpriteInfo.class, SpriteInfo[]::new);
-
-        return cluster;
-    }
-
     public static GameState createInitialState() {
-        val state = new GameState(createCluster(256));
+        val state = new GameState(new Cluster(256, 32));
         state.player = state.world.createEntity();
         state.world.addComponentTo(state.player, new Transform(4.0f, 4.0f));
         state.world.addComponentTo(state.player, new Velocity());

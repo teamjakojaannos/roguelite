@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.game.data;
 
 import fi.jakojaannos.roguelite.engine.ecs.Cluster;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.Roguelite;
 import lombok.NonNull;
 
 public class GameState {
@@ -30,7 +29,7 @@ public class GameState {
     @NonNull public Cluster world;
 
     public GameState() {
-        this(new Cluster(256));
+        this(new Cluster(256, 32));
     }
 
     public GameState(@NonNull Cluster world) {

@@ -8,25 +8,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SystemDispatcherTest {
     @Test
-    void dispatchThrowsIfClusterIsIncompatible() {
+    void componentsAreAutomaticallyRegisteredDuringDispatch() {
         SystemDispatcher<State> dispatcher = new SystemDispatcher<>(List.of(
                 new DispatcherBuilder.SystemEntry<>("system_1", new MockECSSystem<>(List.of(MockComponent.class)), new String[0])
         ));
-        Cluster cluster = new Cluster(256);
-        // MockComponent NOT registered to cluster
-        assertThrows(IllegalStateException.class,
-                     () -> dispatcher.dispatch(cluster, new State(), 0.0));
+        Cluster cluster = new Cluster(256, 32);
+
+        assertDoesNotThrow(() -> dispatcher.dispatch(cluster, new State(), 0.0));
+        assertDoesNotThrow(() -> cluster.getComponentTypeIndexFor(MockComponent.class));
     }
 
     @Test
     void dispatchRunsTickOnRegisteredSystems() {
-        Cluster cluster = new Cluster(256);
-        cluster.registerComponentType(MockComponent.class, MockComponent[]::new);
+        Cluster cluster = new Cluster(256, 32);
 
         TestSystem system = new TestSystem();
         SystemDispatcher<State> dispatcher = new SystemDispatcher<>(List.of(

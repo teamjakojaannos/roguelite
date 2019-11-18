@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
+import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.engine.utilities.IdSupplier;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -15,40 +16,42 @@ import java.util.function.Function;
 class ComponentStorage<TComponent extends Component> {
     /**
      * <code>ComponentTypeIndex</code> for fast checks if some entity has this type of component.
-     *
-     * @see Entity#hasComponentBit(int)
      */
     private final int componentTypeIndex;
 
     private final Queue<StorageTask> taskQueue = new ArrayDeque<>();
     private final ComponentMap<TComponent> componentMap;
 
-    ComponentStorage(int entityCapacity, int componentTypeIndex, @NonNull Function<Integer, TComponent[]> componentArraySupplier) {
+    ComponentStorage(
+            int entityCapacity,
+            int componentTypeIndex,
+            @NonNull Function<Integer, TComponent[]> componentArraySupplier
+    ) {
         this.componentTypeIndex = componentTypeIndex;
         this.componentMap = new ComponentMap<>(entityCapacity, componentArraySupplier);
     }
 
     void addComponent(@NonNull Entity entity, @NonNull TComponent component) {
         this.taskQueue.offer(() -> {
-            if (entity.hasComponentBit(this.componentTypeIndex)) {
+            if (BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), this.componentTypeIndex)) {
                 LOG.warn("Add task executed when component bit is already set!");
                 return;
             }
 
             this.componentMap.put(entity, component);
-            entity.addComponentBit(this.componentTypeIndex);
+            BitMaskUtils.setNthBit(entity.getComponentBitmask(), this.componentTypeIndex);
         });
     }
 
     void removeComponent(@NonNull Entity entity) {
         this.taskQueue.offer(() -> {
             this.componentMap.remove(entity);
-            entity.removeComponentBit(this.componentTypeIndex);
+            BitMaskUtils.unsetNthBit(entity.getComponentBitmask(), this.componentTypeIndex);
         });
     }
 
     Optional<TComponent> getComponent(@NonNull Entity entity) {
-        if (!entity.hasComponentBit(this.componentTypeIndex)) {
+        if (!BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), this.componentTypeIndex)) {
             return Optional.empty();
         }
 
@@ -79,7 +82,10 @@ class ComponentStorage<TComponent extends Component> {
         private final Function<Integer, TComponent[]> componentArraySupplier;
         private TComponent[] components;
 
-        private ComponentMap(int entityCapacity, Function<Integer, TComponent[]> componentArraySupplier) {
+        private ComponentMap(
+                int entityCapacity,
+                Function<Integer, TComponent[]> componentArraySupplier
+        ) {
             this.entityCapacity = entityCapacity;
             this.componentArraySupplier = componentArraySupplier;
 

@@ -22,9 +22,9 @@ class EntityStorage {
         resize(capacity);
     }
 
-    Entity create(int nComponentTypes) {
+    Entity create(int maxComponentTypes) {
         val entityId = this.idSupplier.get();
-        return new Entity(entityId, nComponentTypes);
+        return new Entity(entityId, maxComponentTypes);
     }
 
     void spawn(@NonNull Entity entity) {

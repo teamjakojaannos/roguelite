@@ -27,17 +27,13 @@ public class SystemDispatcher<TState> implements AutoCloseable {
             @NonNull TState state,
             double delta
     ) {
-        verifyClusterIsCompatible(cluster);
-
         this.systems.forEachPrioritized(
                 (system) -> {
                     val requiredComponentsBitMask =
                             system.getRequiredComponents()
                                   .stream()
                                   .map(cluster::getComponentTypeIndexFor)
-                                  .filter(Optional::isPresent)
-                                  .map(Optional::get)
-                                  .reduce(new byte[BitMaskUtils.calculateMaskSize(cluster.getNumberOfComponentTypes())],
+                                  .reduce(new byte[BitMaskUtils.calculateMaskSize(cluster.getMaxComponentTypes())],
                                           BitMaskUtils::setNthBit,
                                           BitMaskUtils::combineMasks);
 
@@ -50,32 +46,6 @@ public class SystemDispatcher<TState> implements AutoCloseable {
                                 cluster);
                 }
         );
-    }
-
-    /**
-     * Checks that all of the component types required by this dispatcher's systems are registered
-     * to the given cluster.
-     *
-     * @param cluster cluster to check against
-     *
-     * @throws IllegalStateException if any of the required component types is not registered
-     */
-    private void verifyClusterIsCompatible(@NonNull Cluster cluster) {
-        val allRequiredComponentTypesAreRegistered =
-                this.systems.nonPrioritizedStream()
-                            .flatMap(s -> s.getRequiredComponents().stream())
-                            .map(cluster::getComponentTypeIndexFor)
-                            .allMatch(Optional::isPresent);
-        if (!allRequiredComponentTypesAreRegistered) {
-            val notRegistered = this.systems.nonPrioritizedStream()
-                                            .flatMap(s -> s.getRequiredComponents().stream())
-                                            .filter(c -> !cluster.getComponentTypeIndexFor(c).isPresent())
-                                            .collect(Collectors.toList());
-            throw new IllegalStateException(String.format(
-                    "Dispatcher requires component types %s which are not registered to the cluster being processed!",
-                    notRegistered.toString()
-            ));
-        }
     }
 
     @Override

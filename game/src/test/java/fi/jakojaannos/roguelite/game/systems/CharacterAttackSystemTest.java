@@ -26,13 +26,7 @@ class CharacterAttackSystemTest {
                 .withSystem("test", new CharacterAttackSystem())
                 .build();
         this.state = new GameState();
-        this.state.world = new Cluster(256);
-        this.state.world.registerComponentType(CharacterInput.class, CharacterInput[]::new);
-        this.state.world.registerComponentType(CharacterStats.class, CharacterStats[]::new);
-        this.state.world.registerComponentType(CharacterAbilities.class, CharacterAbilities[]::new);
-        this.state.world.registerComponentType(Velocity.class, Velocity[]::new);
-        this.state.world.registerComponentType(Transform.class, Transform[]::new);
-        this.state.world.registerComponentType(ProjectileTag.class, ProjectileTag[]::new);
+        this.state.world = new Cluster(256, 32);
 
         Entity player = this.state.world.createEntity();
         this.characterInput = new CharacterInput();

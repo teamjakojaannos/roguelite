@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
+import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,7 +24,7 @@ class ComponentStorageTest {
         Entity entity = new Entity(0, 100);
 
         storage.addComponent(entity, new MockComponent());
-        assertFalse(entity.hasComponentBit(8));
+        assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertFalse(storage.getComponent(entity).isPresent());
     }
 
@@ -34,7 +35,7 @@ class ComponentStorageTest {
 
         storage.addComponent(entity, new MockComponent());
         storage.applyModifications();
-        assertTrue(entity.hasComponentBit(8));
+        assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertTrue(storage.getComponent(entity).isPresent());
     }
 
@@ -49,7 +50,7 @@ class ComponentStorageTest {
         storage.applyModifications();
 
         storage.removeComponent(entity);
-        assertTrue(entity.hasComponentBit(8));
+        assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertTrue(storage.getComponent(entity).isPresent());
     }
 
@@ -64,7 +65,7 @@ class ComponentStorageTest {
         storage.removeComponent(entity);
         storage.applyModifications();
 
-        assertFalse(entity.hasComponentBit(8));
+        assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertFalse(storage.getComponent(entity).isPresent());
     }
 
@@ -77,7 +78,7 @@ class ComponentStorageTest {
         storage.removeComponent(entity);
         storage.applyModifications();
 
-        assertFalse(entity.hasComponentBit(8));
+        assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertFalse(storage.getComponent(entity).isPresent());
     }
 
@@ -93,7 +94,7 @@ class ComponentStorageTest {
         storage.addComponent(entity, new MockComponent());
         storage.applyModifications();
 
-        assertTrue(entity.hasComponentBit(8));
+        assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertTrue(storage.getComponent(entity).isPresent());
     }
 
@@ -111,7 +112,7 @@ class ComponentStorageTest {
         storage.addComponent(entity, new MockComponent());
         storage.applyModifications();
 
-        assertTrue(entity.hasComponentBit(8));
+        assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertTrue(storage.getComponent(entity).isPresent());
     }
 }

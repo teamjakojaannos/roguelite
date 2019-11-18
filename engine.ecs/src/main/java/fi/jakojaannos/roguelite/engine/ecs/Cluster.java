@@ -1,12 +1,10 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-import lombok.val;
+import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
+import lombok.*;
 
+import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 // TODO: Prevent component type registration after first entity is created
@@ -16,6 +14,7 @@ import java.util.stream.Stream;
  * Provides accessors for entity components.
  */
 public class Cluster {
+    @Getter(AccessLevel.PACKAGE) private final int maxComponentTypes;
     private final EntityStorage entityStorage;
     private final List<ComponentStorage> componentTypes = new ArrayList<>();
     private final Map<Class<? extends Component>, Integer> componentTypeIndices = new HashMap<>();
@@ -23,13 +22,14 @@ public class Cluster {
 
     private int entityCapacity;
 
-    public Cluster(int entityCapacity) {
+    public Cluster(int entityCapacity, int maxComponentTypes) {
         this.entityStorage = new EntityStorage(entityCapacity);
         this.entityCapacity = entityCapacity;
+        this.maxComponentTypes = maxComponentTypes;
     }
 
     public Entity createEntity() {
-        val entity = this.entityStorage.create(this.componentTypes.size());
+        val entity = this.entityStorage.create(this.maxComponentTypes);
         if (entity.getId() >= this.entityCapacity) {
             resize(this.entityCapacity * 2);
         }
@@ -66,27 +66,6 @@ public class Cluster {
     }
 
     /**
-     * Registers a new component type. Initializes component storage for the component type.
-     *
-     * @param componentClass         Class of the component type to register
-     * @param componentArraySupplier Constructor for creating new storage arrays
-     * @param <TComponent>           Type of the component
-     */
-    public <TComponent extends Component> void registerComponentType(
-            Class<TComponent> componentClass,
-            Function<Integer, TComponent[]> componentArraySupplier
-    ) {
-        val index = this.componentTypes.size();
-        this.componentTypeIndices.put(componentClass, index);
-
-        this.componentTypes.add(new ComponentStorage<>(
-                this.entityCapacity,
-                index,
-                componentArraySupplier
-        ));
-    }
-
-    /**
      * Adds the component to the entity.
      *
      * @param entity       Entity to add the component to
@@ -94,12 +73,9 @@ public class Cluster {
      * @param <TComponent> Type of the component
      */
     public <TComponent extends Component> void addComponentTo(Entity entity, TComponent component) {
-        val componentTypeIndex = getComponentTypeIndexFor(component)
-                .orElseThrow(() -> new IllegalStateException("Tried adding component of an unregistered type: " + component.getClass()));
-
-        val componentStorage = componentTypes.get(componentTypeIndex);
         // noinspection unchecked
-        componentStorage.addComponent(entity, component);
+        this.componentTypes.get(getComponentTypeIndexFor(component.getClass()))
+                           .addComponent(entity, component);
     }
 
     /**
@@ -109,11 +85,8 @@ public class Cluster {
      * @param component Component to remove
      */
     public void removeComponentFrom(Entity entity, Component component) {
-        val componentTypeIndex = getComponentTypeIndexFor(component)
-                .orElseThrow(() -> new IllegalStateException("Tried adding component of an unregistered type: " + component.getClass()));
-
-        val componentStorage = componentTypes.get(componentTypeIndex);
-        componentStorage.removeComponent(entity);
+        this.componentTypes.get(getComponentTypeIndexFor(component.getClass()))
+                           .removeComponent(entity);
     }
 
     /**
@@ -130,20 +103,24 @@ public class Cluster {
             Entity entity,
             Class<? extends TComponent> componentClass
     ) {
-        val componentTypeIndex = getComponentTypeIndexFor(componentClass)
-                .orElseThrow(() -> new IllegalStateException("Tried adding component of an unregistered type: " + componentClass));
-
-        val componentStorage = componentTypes.get(componentTypeIndex);
+        val componentStorage = componentTypes.get(getComponentTypeIndexFor(componentClass));
         // noinspection unchecked
         return (Optional<TComponent>) componentStorage.getComponent(entity);
     }
 
-    private Optional<Integer> getComponentTypeIndexFor(Component component) {
-        return Optional.ofNullable(componentTypeIndices.get(component.getClass()));
-    }
+    <TComponent extends  Component> Integer getComponentTypeIndexFor(Class<TComponent> componentClass) {
+        return this.componentTypeIndices.computeIfAbsent(componentClass,
+                                                         clazz -> {
+                                                             val index = this.componentTypes.size();
 
-    Optional<Integer> getComponentTypeIndexFor(Class<? extends Component> componentClass) {
-        return Optional.ofNullable(componentTypeIndices.get(componentClass));
+                                                             //noinspection unchecked
+                                                             this.componentTypes.add(new ComponentStorage<>(
+                                                                     this.entityCapacity,
+                                                                     index,
+                                                                     size -> (TComponent[]) Array.newInstance(clazz, size)
+                                                             ));
+                                                             return index;
+                                                         });
     }
 
     private void resize(int entityCapacity) {
@@ -152,19 +129,12 @@ public class Cluster {
         this.componentTypes.forEach(storage -> storage.resize(entityCapacity));
     }
 
-    int getNumberOfComponentTypes() {
-        return this.componentTypeIndices.size();
-    }
-
     public <TComponent extends Component> Stream<EntityComponentPair> getEntitiesWith(
             @NonNull Class<? extends TComponent> componentType
     ) {
-        val componentTypeIndex = getComponentTypeIndexFor(componentType)
-                .orElseThrow(() -> new IllegalArgumentException(String.format(
-                        "Component type \"%s\" cannot be found!",
-                        componentType.getSimpleName())));
+        val componentTypeIndex = getComponentTypeIndexFor(componentType);
         return this.entityStorage.stream()
-                                 .filter(e -> e.hasComponentBit(componentTypeIndex))
+                                 .filter(e -> BitMaskUtils.isNthBitSet(e.getComponentBitmask(), componentTypeIndex))
                                  .map(e -> new EntityComponentPair<TComponent>(e, getComponentOf(e, componentType).orElseThrow()));
     }
 

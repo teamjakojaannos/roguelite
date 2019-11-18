@@ -16,11 +16,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CharacterAIControllerSystemTest {
-    SystemDispatcher<GameState> dispatcher;
-    GameState state;
-    Entity player, follower;
-    Transform playerPos, followerPos;
-    CharacterInput followerInput;
+    private SystemDispatcher<GameState> dispatcher;
+    private GameState state;
+    private Entity player, follower;
+    private Transform playerPos, followerPos;
+    private CharacterInput followerInput;
 
     @BeforeEach
     void beforeEach() {
@@ -28,11 +28,7 @@ public class CharacterAIControllerSystemTest {
                 .withSystem("test", new CharacterAIControllerSystem())
                 .build();
         this.state = new GameState();
-        this.state.world = new Cluster(256);
-        this.state.world.registerComponentType(CharacterInput.class, CharacterInput[]::new);
-        this.state.world.registerComponentType(Transform.class, Transform[]::new);
-        this.state.world.registerComponentType(PlayerTag.class, PlayerTag[]::new);
-        this.state.world.registerComponentType(EnemyAI.class, EnemyAI[]::new);
+        this.state.world = new Cluster(256, 32);
 
         this.player = this.state.world.createEntity();
         this.playerPos = new Transform();
