@@ -36,6 +36,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
                 .withSystem("ai_move", new CharacterAIControllerSystem(), "character_move")
                 .withSystem("stalker_move", new StalkerAIControllerSystem())
+                .withSystem("spawner", new SpawnerSystem())
                 .build();
     }
 
@@ -101,7 +102,13 @@ public class Roguelite extends GameBase<GameState> {
                 20.0
         ));
         entities.addComponentTo(e,
-                                new StalkerAI(250.0f, 50.0f, 8.0f));
+                new StalkerAI(250.0f, 50.0f, 8.0f));
+
+        // Create spawner
+        var spawn = entities.createEntity();
+        entities.addComponentTo(spawn, new Transform(5.0f, 15.0f, 0.5f));
+        entities.addComponentTo(spawn, new SpawnerComponent(5.0f, SpawnerComponent.FACTORY_STALKER));
+
 
         val level = new TileMap<Integer>(8, 8, new Integer[]{
                 1, 1, 1, 1, 1, 1, 1, 1,
