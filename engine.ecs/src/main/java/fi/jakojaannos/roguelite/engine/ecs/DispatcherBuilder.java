@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
+import fi.jakojaannos.roguelite.engine.ecs.systems.SystemDispatcherImpl;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -7,26 +8,26 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class DispatcherBuilder<TState> {
-    private Collection<SystemEntry<TState>> systems = new ArrayList<>();
+public class DispatcherBuilder {
+    private Collection<SystemEntry> systems = new ArrayList<>();
 
-    public DispatcherBuilder<TState> withSystem(
+    public DispatcherBuilder withSystem(
             @NonNull String name,
-            @NonNull ECSSystem<TState> system,
+            @NonNull ECSSystem system,
             @NonNull String... dependencies
     ) {
-        this.systems.add(new SystemEntry<>(name, system, dependencies));
+        this.systems.add(new SystemEntry(name, system, dependencies));
         return this;
     }
 
-    public SystemDispatcher<TState> build() {
-        return new SystemDispatcher<>(this.systems);
+    public SystemDispatcher build() {
+        return new SystemDispatcherImpl(this.systems);
     }
 
     @RequiredArgsConstructor
-    static class SystemEntry<TState> {
+    public static class SystemEntry {
         @Getter private final String name;
-        @Getter private final ECSSystem<TState> system;
+        @Getter private final ECSSystem system;
         @Getter private final String[] dependencies;
     }
 }

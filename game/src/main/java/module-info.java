@@ -8,7 +8,9 @@ module roguelite.game {
     requires transitive roguelite.engine.lwjgl;
     requires roguelite.engine.ecs;
 
-    exports fi.jakojaannos.roguelite.game;
-    exports fi.jakojaannos.roguelite.game.view;
-    exports fi.jakojaannos.roguelite.game.data;
+    opens fi.jakojaannos.roguelite.game.data.resources to roguelite.engine.ecs;
+
+    exports fi.jakojaannos.roguelite.game to roguelite.launcher;
+    exports fi.jakojaannos.roguelite.game.view to roguelite.launcher;
+    exports fi.jakojaannos.roguelite.game.data to roguelite.launcher;
 }

@@ -14,7 +14,7 @@ import lombok.val;
 
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
-    private final SystemDispatcher<GameState> rendererDispatcher;
+    private final SystemDispatcher rendererDispatcher;
     private final RogueliteCamera camera;
 
     public RogueliteGameRenderer(@NonNull String assetRoot, @NonNull LWJGLWindow window) {
@@ -23,7 +23,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
 
 
         this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
-        val builder = new DispatcherBuilder<GameState>()
+        val builder = new DispatcherBuilder()
                 .withSystem("render_sprites", new SpriteRenderingSystem(assetRoot, this.camera));
 
         if (DebugConfig.debugModeEnabled) {
@@ -41,12 +41,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     public void render(GameState state, double partialTickAlpha) {
         // Make sure that the camera configuration matches the current state
         this.camera.updateConfigurationFromState(state);
-
-        // 1. Find entity tagged as camera target
-        // 2. Snap camera position to target entity position
-        // 3. Render
-
-        this.rendererDispatcher.dispatch(state.world, state, partialTickAlpha);
+        this.rendererDispatcher.dispatch(state.getWorld(), partialTickAlpha);
     }
 
     @Override

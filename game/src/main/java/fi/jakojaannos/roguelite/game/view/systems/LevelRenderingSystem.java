@@ -1,38 +1,30 @@
-package fi.jakojaannos.roguelite.test.mock.engine.ecs;
+package fi.jakojaannos.roguelite.game.view.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.components.Level;
 import lombok.NonNull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MockECSSystem implements ECSSystem {
-    private Collection<Class<? extends Component>> components;
-    public boolean tickCalled = false;
-
-    public MockECSSystem() {
-        this(List.of());
-    }
-
-    public MockECSSystem(Collection<Class<? extends Component>> components) {
-        this.components = components;
-    }
+public class LevelRenderingSystem implements ECSSystem {
+    private static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(Level.class);
 
     @Override
     public Collection<Class<? extends Component>> getRequiredComponents() {
-        return this.components;
+        return REQUIRED_COMPONENTS;
     }
 
     @Override
     public void tick(
             @NonNull Stream<Entity> entities,
             @NonNull World world,
-            double delta
+            double partialTickAlpha
     ) {
-        this.tickCalled = true;
+        
     }
 }

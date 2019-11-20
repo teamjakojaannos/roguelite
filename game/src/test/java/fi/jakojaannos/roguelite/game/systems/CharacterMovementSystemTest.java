@@ -1,11 +1,10 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Cluster;
-import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -16,8 +15,8 @@ class CharacterMovementSystemTest {
     private static final double EPSILON = 0.01;
     private static final double POSITION_EPSILON = 0.2;
 
-    private SystemDispatcher<GameState> dispatcher;
-    private GameState state;
+    private SystemDispatcher dispatcher;
+    private World world;
     private Velocity velocity;
     private Transform transform;
     private CharacterInput characterInput;
@@ -25,23 +24,23 @@ class CharacterMovementSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        this.dispatcher = new DispatcherBuilder<GameState>()
+        this.dispatcher = new DispatcherBuilder()
                 .withSystem("test", new CharacterMovementSystem())
                 .build();
-        this.state = new GameState();
-        this.state.world = new Cluster(256, 32);
+        Entities entities = Entities.createNew(256, 32);
+        this.world = World.createNew(entities);
 
-        Entity player = this.state.world.createEntity();
+        Entity player = entities.createEntity();
         this.characterInput = new CharacterInput();
         this.characterStats = new CharacterStats();
         this.velocity = new Velocity();
         this.transform = new Transform(0.0, 0.0, 0.0);
-        this.state.world.addComponentTo(player, this.transform);
-        this.state.world.addComponentTo(player, this.velocity);
-        this.state.world.addComponentTo(player, this.characterInput);
-        this.state.world.addComponentTo(player, this.characterStats);
+        entities.addComponentTo(player, this.transform);
+        entities.addComponentTo(player, this.velocity);
+        entities.addComponentTo(player, this.characterInput);
+        entities.addComponentTo(player, this.characterStats);
 
-        this.state.world.applyModifications();
+        this.world.getEntities().applyModifications();
     }
 
     @ParameterizedTest
@@ -51,7 +50,7 @@ class CharacterMovementSystemTest {
         this.characterStats.acceleration = acceleration;
         this.characterInput.move.x = 1.0f;
         for (int i = 0; i < 100; ++i) {
-            this.dispatcher.dispatch(this.state.world, this.state, 0.1);
+            this.dispatcher.dispatch(this.world, 0.1);
         }
 
         assertEquals(expectedSpeedAfter10s, this.velocity.velocity.length(), EPSILON);
@@ -70,7 +69,7 @@ class CharacterMovementSystemTest {
         this.characterInput.move.x = inputH;
         this.characterInput.move.y = inputV;
         for (int i = 0; i < 100; ++i) {
-            this.dispatcher.dispatch(this.state.world, this.state, 0.1);
+            this.dispatcher.dispatch(this.world, 0.1);
         }
 
         assertEquals(expectedSpeedAfter10s, this.velocity.velocity.length(), EPSILON);
@@ -89,7 +88,7 @@ class CharacterMovementSystemTest {
         this.characterInput.move.x = inputH;
         this.characterInput.move.y = inputV;
         for (int i = 0; i < 100; ++i) {
-            this.dispatcher.dispatch(this.state.world, this.state, 0.1);
+            this.dispatcher.dispatch(this.world, 0.1);
         }
 
         assertEquals(expectedSpeedAfter10s, this.velocity.velocity.length(), EPSILON);
@@ -102,7 +101,7 @@ class CharacterMovementSystemTest {
         this.characterStats.acceleration = acceleration;
         this.characterInput.move.x = 1.0f;
         for (int i = 0; i < 500; ++i) {
-            this.dispatcher.dispatch(this.state.world, this.state, 0.02);
+            this.dispatcher.dispatch(this.world, 0.02);
         }
 
         assertEquals(expectedPositionAfter10s, this.transform.bounds.minX, POSITION_EPSILON);
@@ -122,7 +121,7 @@ class CharacterMovementSystemTest {
         this.characterInput.move.x = inputH;
         this.characterInput.move.y = inputV;
         for (int i = 0; i < 500; ++i) {
-            this.dispatcher.dispatch(this.state.world, this.state, 0.02);
+            this.dispatcher.dispatch(this.world, 0.02);
         }
 
         assertEquals(expectedX, this.transform.bounds.minX, POSITION_EPSILON);
@@ -143,7 +142,7 @@ class CharacterMovementSystemTest {
         this.characterInput.move.x = inputH;
         this.characterInput.move.y = inputV;
         for (int i = 0; i < 500; ++i) {
-            this.dispatcher.dispatch(this.state.world, this.state, 0.02);
+            this.dispatcher.dispatch(this.world, 0.02);
         }
 
         assertEquals(expectedX, this.transform.bounds.minX, POSITION_EPSILON);

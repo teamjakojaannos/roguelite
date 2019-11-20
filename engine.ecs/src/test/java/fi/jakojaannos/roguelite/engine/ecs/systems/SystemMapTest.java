@@ -1,5 +1,6 @@
-package fi.jakojaannos.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs.systems;
 
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockECSSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,54 +16,54 @@ class SystemMapTest {
     @ParameterizedTest
     @CsvSource({"valid,,valid", ",valid,valid"})
     void putThrowsIfAnyOfParametersAreNull(String name, String system, String dependency) {
-        SystemMap<State> map = new SystemMap<>();
-        map.put("valid", new MockECSSystem<>());
+        SystemMap map = new SystemMap();
+        map.put("valid", new MockECSSystem());
 
         assertThrows(NullPointerException.class,
                      () -> map.put(
                              name,
-                             system == null ? null : new MockECSSystem<>(),
+                             system == null ? null : new MockECSSystem(),
                              dependency
                      ));
     }
 
     @Test
     void putThrowsIfDependencyIsNotRegistered() {
-        SystemMap<State> map = new SystemMap<>();
+        SystemMap map = new SystemMap();
         assertThrows(IllegalStateException.class,
                      () -> map.put("valid",
-                                   new MockECSSystem<>(),
+                                   new MockECSSystem(),
                                    "invalid"));
     }
 
     @Test
     void putSucceedsIfAllParametersAreValid_noDependencies() {
-        SystemMap<State> map = new SystemMap<>();
+        SystemMap map = new SystemMap();
 
         assertDoesNotThrow(() -> map.put("valid",
-                                         new MockECSSystem<>()));
+                                         new MockECSSystem()));
     }
 
     @Test
     void putSucceedsIfAllParametersAreValid_singleDependency() {
-        SystemMap<State> map = new SystemMap<>();
-        map.put("valid_dep_1", new MockECSSystem<>());
+        SystemMap map = new SystemMap();
+        map.put("valid_dep_1", new MockECSSystem());
 
         assertDoesNotThrow(() -> map.put("valid",
-                                         new MockECSSystem<>(),
+                                         new MockECSSystem(),
                                          "valid_dep_1"));
     }
 
     @Test
     void putSucceedsIfAllParametersAreValid_manyDependencies() {
-        SystemMap<State> map = new SystemMap<>();
-        map.put("valid_dep_1", new MockECSSystem<>());
-        map.put("valid_dep_2", new MockECSSystem<>());
-        map.put("valid_dep_3", new MockECSSystem<>());
-        map.put("valid_dep_4", new MockECSSystem<>());
+        SystemMap map = new SystemMap();
+        map.put("valid_dep_1", new MockECSSystem());
+        map.put("valid_dep_2", new MockECSSystem());
+        map.put("valid_dep_3", new MockECSSystem());
+        map.put("valid_dep_4", new MockECSSystem());
 
         assertDoesNotThrow(() -> map.put("valid",
-                                         new MockECSSystem<>(),
+                                         new MockECSSystem(),
                                          "valid_dep_1",
                                          "valid_dep_2",
                                          "valid_dep_3",
@@ -72,12 +73,12 @@ class SystemMapTest {
 
     @Test
     void nonPrioritizedStreamGetsAllRegisteredSystems_noDependencies() {
-        SystemMap<State> map = new SystemMap<>();
-        List<ECSSystem<State>> systems = List.of(
-                new MockECSSystem<>(),
-                new MockECSSystem<>(),
-                new MockECSSystem<>(),
-                new MockECSSystem<>()
+        SystemMap map = new SystemMap();
+        List<ECSSystem> systems = List.of(
+                new MockECSSystem(),
+                new MockECSSystem(),
+                new MockECSSystem(),
+                new MockECSSystem()
         );
         for (int i = 0; i < systems.size(); ++i) {
             map.put("valid_" + i, systems.get(i));
@@ -88,13 +89,13 @@ class SystemMapTest {
 
     @Test
     void nonPrioritizedStreamGetsAllRegisteredSystems_simpleDependencies() {
-        SystemMap<State> map = new SystemMap<>();
-        List<ECSSystem<State>> systems = List.of(
-                new MockECSSystem<>(),
-                new MockECSSystem<>(),
-                new MockECSSystem<>(),
-                new MockECSSystem<>(),
-                new MockECSSystem<>()
+        SystemMap map = new SystemMap();
+        List<ECSSystem> systems = List.of(
+                new MockECSSystem(),
+                new MockECSSystem(),
+                new MockECSSystem(),
+                new MockECSSystem(),
+                new MockECSSystem()
         );
         map.put("valid_0", systems.get(0));
         for (int i = 1; i < systems.size(); ++i) {
@@ -106,26 +107,26 @@ class SystemMapTest {
 
     @Test
     void forEachPrioritizedThrowsIfConsumerIsNull() {
-        SystemMap<State> map = new SystemMap<>();
+        SystemMap map = new SystemMap();
         assertThrows(NullPointerException.class, () -> map.forEachPrioritized(null));
     }
 
     @Test
     void forEachPrioritizedSucceedsWhenMapIsEmpty() {
-        SystemMap<State> map = new SystemMap<>();
+        SystemMap map = new SystemMap();
         assertDoesNotThrow(() -> map.forEachPrioritized(system -> {
         }));
     }
 
     @Test
     void forEachPrioritizedIteratesInExpectedOrder_simpleDependencies() {
-        SystemMap<State> map = new SystemMap<>();
-        List<ECSSystem<State>> systems = new ArrayList<>(List.of(
-                new MockECSSystem<>(),
-                new MockECSSystem<>(),
-                new MockECSSystem<>(),
-                new MockECSSystem<>(),
-                new MockECSSystem<>())
+        SystemMap map = new SystemMap();
+        List<ECSSystem> systems = new ArrayList<>(List.of(
+                new MockECSSystem(),
+                new MockECSSystem(),
+                new MockECSSystem(),
+                new MockECSSystem(),
+                new MockECSSystem())
         );
         map.put("valid_0", systems.get(0));
         for (int i = 1; i < systems.size(); ++i) {
@@ -137,19 +138,19 @@ class SystemMapTest {
 
     @Test
     void forEachPrioritizedIteratesInExpectedOrder_complexDependencies() {
-        SystemMap<State> map = new SystemMap<>();
-        Map<String, ECSSystem<State>> systems = Map.ofEntries(
-                Map.entry("valid_0", new MockECSSystem<>()),
-                Map.entry("valid_1", new MockECSSystem<>()),
-                Map.entry("valid_2", new MockECSSystem<>()),
-                Map.entry("valid_3", new MockECSSystem<>()),
-                Map.entry("valid_4", new MockECSSystem<>()),
-                Map.entry("valid_5", new MockECSSystem<>()),
-                Map.entry("valid_6", new MockECSSystem<>()),
-                Map.entry("valid_7", new MockECSSystem<>()),
-                Map.entry("valid_8", new MockECSSystem<>()),
-                Map.entry("valid_9", new MockECSSystem<>()),
-                Map.entry("valid_10", new MockECSSystem<>())
+        SystemMap map = new SystemMap();
+        Map<String, ECSSystem> systems = Map.ofEntries(
+                Map.entry("valid_0", new MockECSSystem()),
+                Map.entry("valid_1", new MockECSSystem()),
+                Map.entry("valid_2", new MockECSSystem()),
+                Map.entry("valid_3", new MockECSSystem()),
+                Map.entry("valid_4", new MockECSSystem()),
+                Map.entry("valid_5", new MockECSSystem()),
+                Map.entry("valid_6", new MockECSSystem()),
+                Map.entry("valid_7", new MockECSSystem()),
+                Map.entry("valid_8", new MockECSSystem()),
+                Map.entry("valid_9", new MockECSSystem()),
+                Map.entry("valid_10", new MockECSSystem())
         );
 
         //  0
@@ -173,7 +174,7 @@ class SystemMapTest {
         map.put("valid_8", systems.get("valid_8"), "valid_6");
         map.put("valid_9", systems.get("valid_9"), "valid_7", "valid_8");
 
-        List<ECSSystem<State>> processed = new ArrayList<>();
+        List<ECSSystem> processed = new ArrayList<>();
         map.forEachPrioritized(system -> {
             // Ugly hack for finding the name of the system
             String name = systems.entrySet()
@@ -187,8 +188,5 @@ class SystemMapTest {
             assertTrue(map.getDependencies(name).allMatch(processed::contains));
             processed.add(system);
         });
-    }
-
-    private static class State {
     }
 }

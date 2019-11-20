@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -17,6 +16,7 @@ public class LWJGLCamera extends Camera {
 
     @Getter(AccessLevel.PROTECTED)
     private double targetScreenSizeInUnits = 32.0;
+    private boolean targetSizeIsRespectiveToMinorAxis;
 
     @Getter private float viewportWidthInUnits;
     @Getter private float viewportHeightInUnits;
@@ -40,9 +40,15 @@ public class LWJGLCamera extends Camera {
         return projectionMatrix;
     }
 
-    protected void setTargetScreenSizeInUnits(double targetSize) {
-        this.targetScreenSizeInUnits = targetSize;
-        this.projectionMatrixDirty = true;
+    protected void refreshTargetScreenSizeInUnits(
+            double targetScreenSizeInUnits,
+            boolean targetSizeIsRespectiveToMinorAxis
+    ) {
+        if (this.targetScreenSizeInUnits != targetScreenSizeInUnits || this.targetSizeIsRespectiveToMinorAxis != targetSizeIsRespectiveToMinorAxis) {
+            this.projectionMatrixDirty = true;
+            this.targetScreenSizeInUnits = targetScreenSizeInUnits;
+            this.targetSizeIsRespectiveToMinorAxis = targetSizeIsRespectiveToMinorAxis;
+        }
     }
 
     public void resizeViewport(int viewportWidth, int viewportHeight) {

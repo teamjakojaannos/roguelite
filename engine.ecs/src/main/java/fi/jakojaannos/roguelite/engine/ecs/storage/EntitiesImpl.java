@@ -1,20 +1,23 @@
-package fi.jakojaannos.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs.storage;
 
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
-import lombok.*;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
 
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Stream;
 
-// TODO: Prevent component type registration after first entity is created
-
 /**
  * A cluster of entities. Contains storage for components in all of the entities in this cluster.
  * Provides accessors for entity components.
  */
-public class Cluster {
-    @Getter(AccessLevel.PACKAGE) private final int maxComponentTypes;
+public class EntitiesImpl implements Entities {
+    @Getter private final int maxComponentTypes;
     private final EntityStorage entityStorage;
     private final List<ComponentStorage> componentTypes = new ArrayList<>();
     private final Map<Class<? extends Component>, Integer> componentTypeIndices = new HashMap<>();
@@ -22,26 +25,28 @@ public class Cluster {
 
     private int entityCapacity;
 
-    public Cluster(int entityCapacity, int maxComponentTypes) {
+    public EntitiesImpl(int entityCapacity, int maxComponentTypes) {
         this.entityStorage = new EntityStorage(entityCapacity);
         this.entityCapacity = entityCapacity;
         this.maxComponentTypes = maxComponentTypes;
     }
 
+    @NonNull
+    @Override
     public Entity createEntity() {
         val entity = this.entityStorage.create(this.maxComponentTypes);
         if (entity.getId() >= this.entityCapacity) {
             resize(this.entityCapacity * 2);
         }
 
-        this.taskQueue.offer(() -> {
-            this.entityStorage.spawn(entity);
-        });
+        this.taskQueue.offer(() -> this.entityStorage.spawn(entity));
 
         return entity;
     }
 
-    public void destroyEntity(Entity entity) {
+    @Override
+    public void destroyEntity(@NonNull Entity entityRaw) {
+        val entity = (EntityImpl) entityRaw;
         entity.markForRemoval();
         this.taskQueue.offer(() -> {
             for (val storage : this.componentTypes) {
@@ -51,6 +56,7 @@ public class Cluster {
         });
     }
 
+    @Override
     public void applyModifications() {
         for (val storage : this.componentTypes) {
             storage.applyModifications();
@@ -61,54 +67,50 @@ public class Cluster {
         }
     }
 
-    EntityStorage getEntityStorage() {
+    public EntityStorage getEntityStorage() {
         return this.entityStorage;
     }
 
-    /**
-     * Adds the component to the entity.
-     *
-     * @param entity       Entity to add the component to
-     * @param component    Component to add
-     * @param <TComponent> Type of the component
-     */
-    public <TComponent extends Component> void addComponentTo(Entity entity, TComponent component) {
+    @Override
+    public <TComponent extends Component> void addComponentTo(
+            @NonNull Entity entity,
+            @NonNull TComponent component
+    ) {
         // noinspection unchecked
         this.componentTypes.get(getComponentTypeIndexFor(component.getClass()))
-                           .addComponent(entity, component);
+                           .addComponent((EntityImpl) entity, component);
     }
 
-    /**
-     * Removes a component of given type from the entity.
-     *
-     * @param entity    Entity to remove the component from
-     * @param component Component to remove
-     */
-    public void removeComponentFrom(Entity entity, Component component) {
+    @Override
+    public <TComponent extends Component> void removeComponentFrom(
+            @NonNull Entity entity,
+            @NonNull TComponent component
+    ) {
         this.componentTypes.get(getComponentTypeIndexFor(component.getClass()))
-                           .removeComponent(entity);
+                           .removeComponent((EntityImpl) entity);
     }
 
-    /**
-     * Gets the component of given type from the entity.
-     *
-     * @param entity         Entity to get components from
-     * @param componentClass Component class to get
-     * @param <TComponent>   Type of the component
-     *
-     * @return If component exists, component optional of the component. Otherwise, an empty
-     * optional
-     */
+    @Override
     public <TComponent extends Component> Optional<TComponent> getComponentOf(
-            Entity entity,
-            Class<? extends TComponent> componentClass
+            @NonNull Entity entity,
+            @NonNull Class<? extends TComponent> componentClass
     ) {
         val componentStorage = componentTypes.get(getComponentTypeIndexFor(componentClass));
         // noinspection unchecked
-        return (Optional<TComponent>) componentStorage.getComponent(entity);
+        return (Optional<TComponent>) componentStorage.getComponent((EntityImpl) entity);
     }
 
-    <TComponent extends  Component> Integer getComponentTypeIndexFor(Class<TComponent> componentClass) {
+    @Override
+    public <TComponent extends Component> Stream<EntityComponentPair> getEntitiesWith(
+            @NonNull Class<? extends TComponent> componentType
+    ) {
+        val componentTypeIndex = getComponentTypeIndexFor(componentType);
+        return this.entityStorage.stream()
+                                 .filter(e -> BitMaskUtils.isNthBitSet(e.getComponentBitmask(), componentTypeIndex))
+                                 .map(e -> new EntityComponentPair<TComponent>(e, getComponentOf(e, componentType).orElseThrow()));
+    }
+
+    public <TComponent extends Component> Integer getComponentTypeIndexFor(Class<TComponent> componentClass) {
         return this.componentTypeIndices.computeIfAbsent(componentClass,
                                                          clazz -> {
                                                              val index = this.componentTypes.size();
@@ -129,22 +131,7 @@ public class Cluster {
         this.componentTypes.forEach(storage -> storage.resize(entityCapacity));
     }
 
-    public <TComponent extends Component> Stream<EntityComponentPair> getEntitiesWith(
-            @NonNull Class<? extends TComponent> componentType
-    ) {
-        val componentTypeIndex = getComponentTypeIndexFor(componentType);
-        return this.entityStorage.stream()
-                                 .filter(e -> BitMaskUtils.isNthBitSet(e.getComponentBitmask(), componentTypeIndex))
-                                 .map(e -> new EntityComponentPair<TComponent>(e, getComponentOf(e, componentType).orElseThrow()));
-    }
-
     private interface StorageTask {
         void execute();
-    }
-
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class EntityComponentPair<TComponent extends Component> {
-        private final Entity entity;
-        private final TComponent component;
     }
 }

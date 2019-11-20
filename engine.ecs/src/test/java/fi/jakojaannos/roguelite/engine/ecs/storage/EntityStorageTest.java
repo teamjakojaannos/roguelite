@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs.storage;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ class EntityStorageTest {
     @Test
     void streamContainsAllSpawned() {
         EntityStorage storage = new EntityStorage(256);
-        List<Entity> entities = List.of(
+        List<EntityImpl> entities = List.of(
                 storage.create(10),
                 storage.create(10),
                 storage.create(10),
@@ -31,8 +31,8 @@ class EntityStorageTest {
     @Test
     void streamDoesNotContainCreatedButNotYetSpawned() {
         EntityStorage storage = new EntityStorage(256);
-        Entity created = storage.create(10);
-        Entity spawned = storage.create(10);
+        EntityImpl created = storage.create(10);
+        EntityImpl spawned = storage.create(10);
         storage.spawn(spawned);
 
         assertEquals(0, storage.stream().filter(e -> created.getId() == e.getId()).count());
@@ -42,8 +42,8 @@ class EntityStorageTest {
     @Test
     void streamDoesNotContainRemoved() {
         EntityStorage storage = new EntityStorage(256);
-        Entity removed = storage.create(10);
-        Entity spawned = storage.create(10);
+        EntityImpl removed = storage.create(10);
+        EntityImpl spawned = storage.create(10);
         storage.spawn(removed);
         storage.spawn(spawned);
 

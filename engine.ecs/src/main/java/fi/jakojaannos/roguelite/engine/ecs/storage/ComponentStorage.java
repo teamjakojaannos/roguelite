@@ -1,5 +1,6 @@
-package fi.jakojaannos.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs.storage;
 
+import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.engine.utilities.IdSupplier;
 import lombok.NonNull;
@@ -31,7 +32,7 @@ class ComponentStorage<TComponent extends Component> {
         this.componentMap = new ComponentMap<>(entityCapacity, componentArraySupplier);
     }
 
-    void addComponent(@NonNull Entity entity, @NonNull TComponent component) {
+    void addComponent(@NonNull EntityImpl entity, @NonNull TComponent component) {
         this.taskQueue.offer(() -> {
             if (BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), this.componentTypeIndex)) {
                 LOG.warn("Add task executed when component bit is already set!");
@@ -43,14 +44,14 @@ class ComponentStorage<TComponent extends Component> {
         });
     }
 
-    void removeComponent(@NonNull Entity entity) {
+    void removeComponent(@NonNull EntityImpl entity) {
         this.taskQueue.offer(() -> {
             this.componentMap.remove(entity);
             BitMaskUtils.unsetNthBit(entity.getComponentBitmask(), this.componentTypeIndex);
         });
     }
 
-    Optional<TComponent> getComponent(@NonNull Entity entity) {
+    Optional<TComponent> getComponent(@NonNull EntityImpl entity) {
         if (!BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), this.componentTypeIndex)) {
             return Optional.empty();
         }
@@ -93,7 +94,7 @@ class ComponentStorage<TComponent extends Component> {
             this.entityComponentIndexLookup = new int[entityCapacity];
         }
 
-        private Optional<Integer> componentIndexOf(Entity entity) {
+        private Optional<Integer> componentIndexOf(EntityImpl entity) {
             val index = this.entityComponentIndexLookup[entity.getId()];
             if (index == 0) {
                 return Optional.empty();
@@ -102,18 +103,18 @@ class ComponentStorage<TComponent extends Component> {
             return Optional.of(index - 1);
         }
 
-        void put(Entity entity, TComponent component) {
+        void put(EntityImpl entity, TComponent component) {
             val componentIndex = this.idSupplier.get();
             this.entityComponentIndexLookup[entity.getId()] = componentIndex + 1;
             this.components[componentIndex] = component;
         }
 
-        Optional<TComponent> get(Entity entity) {
+        Optional<TComponent> get(EntityImpl entity) {
             return componentIndexOf(entity)
                     .map(componentIndex -> this.components[componentIndex]);
         }
 
-        void remove(Entity entity) {
+        void remove(EntityImpl entity) {
             componentIndexOf(entity)
                     .ifPresent(componentIndex -> {
                         this.components[componentIndex] = null;

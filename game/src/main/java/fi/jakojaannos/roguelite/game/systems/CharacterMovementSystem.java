@@ -1,14 +1,14 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Cluster;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
-public class CharacterMovementSystem implements ECSSystem<GameState> {
+public class CharacterMovementSystem implements ECSSystem {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
             Transform.class, Velocity.class, CharacterInput.class, CharacterStats.class
     );
@@ -33,15 +33,14 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            GameState state,
-            double delta,
-            Cluster cluster
+            @NonNull Stream<Entity> entities,
+            @NonNull World world,
+            double delta
     ) {
         entities.forEach(entity -> {
-            val input = cluster.getComponentOf(entity, CharacterInput.class).get();
-            val stats = cluster.getComponentOf(entity, CharacterStats.class).get();
-            val velocity = cluster.getComponentOf(entity, Velocity.class).get();
+            val input = world.getEntities().getComponentOf(entity, CharacterInput.class).get();
+            val stats = world.getEntities().getComponentOf(entity, CharacterStats.class).get();
+            val velocity = world.getEntities().getComponentOf(entity, Velocity.class).get();
 
             // Accelerate
             if (input.move.lengthSquared() > INPUT_EPSILON * INPUT_EPSILON) {
@@ -62,7 +61,7 @@ public class CharacterMovementSystem implements ECSSystem<GameState> {
                                       Math.signum(yVel) * Math.max(0.0f, Math.abs(yVel) - decelerationThisFrame));
             }
 
-            val transform = cluster.getComponentOf(entity, Transform.class).get();
+            val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
             velocity.velocity.mul(delta, tmpVelocity);
             transform.bounds.translate(tmpVelocity);
         });

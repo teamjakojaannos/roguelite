@@ -3,17 +3,24 @@ package fi.jakojaannos.roguelite.engine.ecs;
 import lombok.NonNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
-public interface ECSSystem<TState> {
-    Collection<Class<? extends Component>> getRequiredComponents();
+public interface ECSSystem {
+    Collection<Class<? extends Resource>> EMPTY_REQUIRED_RESOURCES = List.of();
+    Collection<Class<? extends Component>> EMPTY_REQUIRED_COMPONENTS = List.of();
 
-    // TODO: This is sub-optimal performance-wise; components should be stored so that they can
-    //  be efficiently passed here via some specialized parameter data-structure
+    default Collection<Class<? extends Resource>> getRequiredResources() {
+        return EMPTY_REQUIRED_RESOURCES;
+    }
+
+    default Collection<Class<? extends Component>> getRequiredComponents() {
+        return EMPTY_REQUIRED_COMPONENTS;
+    }
+
     void tick(
             @NonNull Stream<Entity> entities,
-            @NonNull TState state,
-            double delta,
-            @NonNull Cluster cluster
+            @NonNull World world,
+            double delta
     );
 }

@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -18,11 +20,12 @@ class RogueliteTest {
         Roguelite roguelite = new Roguelite();
         roguelite.tick(state, new ArrayDeque<>(), 1.0);
 
-        assertFalse(state.inputLeft);
-        assertFalse(state.inputRight);
-        assertFalse(state.inputUp);
-        assertFalse(state.inputDown);
-        assertFalse(state.inputAttack);
+        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        assertFalse(inputs.inputLeft);
+        assertFalse(inputs.inputRight);
+        assertFalse(inputs.inputUp);
+        assertFalse(inputs.inputDown);
+        assertFalse(inputs.inputAttack);
     }
 
     @ParameterizedTest
@@ -47,10 +50,11 @@ class RogueliteTest {
 
         roguelite.tick(state, events, 1.0);
 
-        assertEquals(state.inputLeft, left);
-        assertEquals(state.inputRight, right);
-        assertEquals(state.inputUp, up);
-        assertEquals(state.inputDown, down);
+        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        assertEquals(inputs.inputLeft, left);
+        assertEquals(inputs.inputRight, right);
+        assertEquals(inputs.inputUp, up);
+        assertEquals(inputs.inputDown, down);
     }
 
     @ParameterizedTest
@@ -58,7 +62,7 @@ class RogueliteTest {
                        "true,0.0,1.0", "false,0.0,1.0",
                        "true,0.0,0.0", "false,0.0,0.0",
                        "true,0.2,0.3", "false,0.2,0.3",
-    })
+               })
     void mouseInputEventsUpdateGameState(
             boolean horizontal,
             double initial,
@@ -66,10 +70,11 @@ class RogueliteTest {
     ) {
         InputAxis.Mouse axisPos = horizontal ? InputAxis.Mouse.X_POS : InputAxis.Mouse.Y_POS;
         GameState state = Roguelite.createInitialState();
+        Mouse mouse = state.getWorld().getResource(Mouse.class);
         if (horizontal) {
-            state.mouseX = initial;
+            mouse.pos.x = initial;
         } else {
-            state.mouseY = initial;
+            mouse.pos.y = initial;
         }
         Roguelite roguelite = new Roguelite();
 
@@ -78,7 +83,7 @@ class RogueliteTest {
 
         roguelite.tick(state, events, 1.0);
 
-        assertEquals(newPos, horizontal ? state.mouseX : state.mouseY);
+        assertEquals(newPos, horizontal ? mouse.pos.x : mouse.pos.y);
     }
 
     @Test
@@ -91,7 +96,8 @@ class RogueliteTest {
 
         roguelite.tick(state, events, 1.0);
 
-        assertTrue(state.inputAttack);
+        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        assertTrue(inputs.inputAttack);
     }
 
     @Test
@@ -107,7 +113,8 @@ class RogueliteTest {
 
         roguelite.tick(state, events, 1.0);
 
-        assertFalse(state.inputAttack);
+        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        assertFalse(inputs.inputAttack);
     }
 
     @Test
@@ -124,6 +131,7 @@ class RogueliteTest {
         events.offer(ButtonInput.released(InputButton.Mouse.button(0)));
         roguelite.tick(state, events, 1.0);
 
-        assertFalse(state.inputAttack);
+        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        assertFalse(inputs.inputAttack);
     }
 }

@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.game.view;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.resources.CameraBounds;
+import lombok.val;
 
 class RogueliteCamera extends LWJGLCamera {
     public RogueliteCamera(int viewportWidth, int viewportHeight) {
@@ -9,13 +11,12 @@ class RogueliteCamera extends LWJGLCamera {
     }
 
     void updateConfigurationFromState(GameState state) {
-        if (state.targetWorldVisibleOnScreen != getTargetScreenSizeInUnits()) {
-            setTargetScreenSizeInUnits(state.targetWorldVisibleOnScreen);
-        }
+        val camBounds = state.getWorld().getResource(CameraBounds.class);
+        refreshTargetScreenSizeInUnits(camBounds.targetViewportSizeInWorldUnits, camBounds.targetViewportSizeRespectiveToMinorAxis);
 
         // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
-        //  to make the change, NEVER mutate state on the view.
-        state.realViewWidth = getViewportWidthInUnits();
-        state.realViewHeight = getViewportHeightInUnits();
+        //  to make the change as we NEVER should mutate state on the view.
+        camBounds.viewportWidthInWorldUnits = getViewportWidthInUnits();
+        camBounds.viewportHeightInWorldUnits = getViewportHeightInUnits();
     }
 }

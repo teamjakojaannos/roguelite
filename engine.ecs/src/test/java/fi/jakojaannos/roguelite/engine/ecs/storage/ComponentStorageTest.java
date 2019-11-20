@@ -1,5 +1,7 @@
-package fi.jakojaannos.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs.storage;
 
+import fi.jakojaannos.roguelite.engine.ecs.storage.ComponentStorage;
+import fi.jakojaannos.roguelite.engine.ecs.storage.EntityImpl;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockComponent;
 import org.junit.jupiter.api.Test;
@@ -14,14 +16,14 @@ class ComponentStorageTest {
     void addComponentThrowsIfAnyOfTheArgsAreNull(String entity, String component) {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         assertThrows(NullPointerException.class,
-                     () -> storage.addComponent(entity == null ? null : new Entity(0, 100),
+                     () -> storage.addComponent(entity == null ? null : new EntityImpl(0, 100),
                                                 component == null ? null : new MockComponent()));
     }
 
     @Test
     void addComponentDoesNotImmediatelyModifyComponentStatus() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        Entity entity = new Entity(0, 100);
+        EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
         assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
@@ -31,7 +33,7 @@ class ComponentStorageTest {
     @Test
     void addComponentIsAppliedOnApplyModifications() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        Entity entity = new Entity(0, 100);
+        EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
         storage.applyModifications();
@@ -44,7 +46,7 @@ class ComponentStorageTest {
     @Test
     void removeComponentDoesNotImmediatelyModifyComponentStatus() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        Entity entity = new Entity(0, 100);
+        EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
         storage.applyModifications();
@@ -57,7 +59,7 @@ class ComponentStorageTest {
     @Test
     void removeComponentIsAppliedOnApplyModifications() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        Entity entity = new Entity(0, 100);
+        EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
         storage.applyModifications();
@@ -72,7 +74,7 @@ class ComponentStorageTest {
     @Test
     void tasksAreAppliedInOrderTheyAreQueued_addFirst() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        Entity entity = new Entity(0, 100);
+        EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
         storage.removeComponent(entity);
@@ -85,7 +87,7 @@ class ComponentStorageTest {
     @Test
     void tasksAreAppliedInOrderTheyAreQueued_removeFirst() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        Entity entity = new Entity(0, 100);
+        EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
         storage.applyModifications();
@@ -101,7 +103,7 @@ class ComponentStorageTest {
     @Test
     void tasksAreAppliedInOrderTheyAreQueued_complex() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        Entity entity = new Entity(0, 100);
+        EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
         storage.removeComponent(entity);

@@ -1,5 +1,6 @@
-package fi.jakojaannos.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs.systems;
 
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -8,7 +9,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-class SystemMap<TState> {
+class SystemMap {
     private final Map<String, Integer> systemIdLookup = new HashMap<>();
     private final List<Entry> systemsById = new ArrayList<>();
 
@@ -25,7 +26,7 @@ class SystemMap<TState> {
 
     void put(
             @NonNull String name,
-            @NonNull ECSSystem<TState> system,
+            @NonNull ECSSystem system,
             String... dependencies
     ) {
         val id = getSystemCount();
@@ -41,13 +42,13 @@ class SystemMap<TState> {
         this.systemIdLookup.put(name, id);
     }
 
-    void forEachPrioritized(@NonNull Consumer<ECSSystem<TState>> forEach) {
+    void forEachPrioritized(@NonNull Consumer<ECSSystem> forEach) {
         if (this.getSystemCount() == 0) {
             return;
         }
 
         boolean[] processed = new boolean[getSystemCount()];
-        int nextEntryPoint = -1;
+        int nextEntryPoint;
         while ((nextEntryPoint = indexOfFistFalse(processed)) != -1) {
             Deque<Entry> queue = new ArrayDeque<>();
             queue.add(this.systemsById.get(nextEntryPoint));
@@ -81,14 +82,14 @@ class SystemMap<TState> {
         return -1;
     }
 
-    Stream<ECSSystem<TState>> nonPrioritizedStream() {
+    Stream<ECSSystem> nonPrioritizedStream() {
         return this.systemsById.stream().map(entry -> entry.system);
     }
 
     @RequiredArgsConstructor
-    private class Entry {
+    private static class Entry {
         private final int id;
-        private final ECSSystem<TState> system;
+        private final ECSSystem system;
         private final List<Entry> dependencies = new ArrayList<>(0);
         private final List<Entry> dependents = new ArrayList<>(0);
 

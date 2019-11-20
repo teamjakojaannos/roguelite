@@ -1,44 +1,61 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Cluster;
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.resources.CameraBounds;
+import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import fi.jakojaannos.roguelite.game.data.resources.Mouse;
+import lombok.NonNull;
 import lombok.val;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class PlayerInputSystem implements ECSSystem<GameState> {
+public class PlayerInputSystem implements ECSSystem {
+    private static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
+            CharacterInput.class,
+            CharacterAbilities.class,
+            PlayerTag.class
+    );
+
+    private static final List<Class<? extends Resource>> REQUIRED_RESOURCES = List.of(
+            Inputs.class, Mouse.class, CameraBounds.class
+    );
+
     @Override
     public Collection<Class<? extends Component>> getRequiredComponents() {
-        return List.of(CharacterInput.class, CharacterAbilities.class, PlayerTag.class);
+        return REQUIRED_COMPONENTS;
+    }
+
+    @Override
+    public Collection<Class<? extends Resource>> getRequiredResources() {
+        return REQUIRED_RESOURCES;
     }
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            GameState state,
-            double delta,
-            Cluster cluster
+            @NonNull Stream<Entity> entities,
+            @NonNull World world,
+            double delta
     ) {
-        val inputHorizontal = (state.inputRight ? 1 : 0) - (state.inputLeft ? 1 : 0);
-        val inputVertical = (state.inputDown ? 1 : 0) - (state.inputUp ? 1 : 0);
-        boolean inputAttack = state.inputAttack;
+        val inputs = world.getResource(Inputs.class);
+        val mouse = world.getResource(Mouse.class);
+        val camBounds = world.getResource(CameraBounds.class);
+        val inputHorizontal = (inputs.inputRight ? 1 : 0) - (inputs.inputLeft ? 1 : 0);
+        val inputVertical = (inputs.inputDown ? 1 : 0) - (inputs.inputUp ? 1 : 0);
+        boolean inputAttack = inputs.inputAttack;
 
         entities.forEach(entity -> {
-            val input = cluster.getComponentOf(entity, CharacterInput.class).get();
-            val abilities = cluster.getComponentOf(entity, CharacterAbilities.class).get();
+            val input = world.getEntities().getComponentOf(entity, CharacterInput.class).get();
+            val abilities = world.getEntities().getComponentOf(entity, CharacterAbilities.class).get();
             input.move.set(inputHorizontal,
                            inputVertical);
             input.attack = inputAttack;
-            abilities.attackTarget.set(state.mouseX * state.realViewWidth,
-                                       state.mouseY * state.realViewHeight);
+            abilities.attackTarget.set(mouse.pos.x * camBounds.viewportWidthInWorldUnits,
+                                       mouse.pos.y * camBounds.viewportHeightInWorldUnits);
         });
     }
 }

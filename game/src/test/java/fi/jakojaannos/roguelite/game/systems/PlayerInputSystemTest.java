@@ -1,13 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Cluster;
-import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.resources.CameraBounds;
+import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,28 +15,27 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerInputSystemTest {
-    private SystemDispatcher<GameState> dispatcher;
-    private GameState state;
-    private Entity player;
+    private SystemDispatcher dispatcher;
+    private World world;
     private CharacterInput input;
     private CharacterAbilities abilities;
 
     @BeforeEach
     void beforeEach() {
-        this.dispatcher = new DispatcherBuilder<GameState>()
+        this.dispatcher = new DispatcherBuilder()
                 .withSystem("test", new PlayerInputSystem())
                 .build();
-        this.state = new GameState();
-        this.state.world = new Cluster(256, 32);
+        Entities entities = Entities.createNew(256, 32);
+        this.world = World.createNew(entities);
 
-        this.player = this.state.world.createEntity();
+        Entity player = entities.createEntity();
         this.input = new CharacterInput();
         this.abilities = new CharacterAbilities();
-        this.state.world.addComponentTo(this.player, this.input);
-        this.state.world.addComponentTo(this.player, this.abilities);
-        this.state.world.addComponentTo(this.player, new PlayerTag());
+        entities.addComponentTo(player, this.input);
+        entities.addComponentTo(player, this.abilities);
+        entities.addComponentTo(player, new PlayerTag());
 
-        this.state.world.applyModifications();
+        entities.applyModifications();
     }
 
     @ParameterizedTest
@@ -59,12 +57,13 @@ class PlayerInputSystemTest {
             boolean up,
             boolean down
     ) {
-        this.state.inputLeft = left;
-        this.state.inputRight = right;
-        this.state.inputUp = up;
-        this.state.inputDown = down;
-        this.dispatcher.dispatch(this.state.world, this.state, 1.0);
-        state.world.applyModifications();
+        Inputs inputs = this.world.getResource(Inputs.class);
+        inputs.inputLeft = left;
+        inputs.inputRight = right;
+        inputs.inputUp = up;
+        inputs.inputDown = down;
+        this.dispatcher.dispatch(this.world, 1.0);
+        world.getEntities().applyModifications();
 
         assertEquals(expectedHorizontal, this.input.move.x);
         assertEquals(expectedVertical, this.input.move.y);
@@ -78,13 +77,15 @@ class PlayerInputSystemTest {
             double expectedX,
             double expectedY
     ) {
-        this.state.realViewWidth = 32.0f;
-        this.state.realViewHeight = 32.0f;
-        this.state.mouseX = mouseX;
-        this.state.mouseY = mouseY;
+        Mouse mouse = this.world.getResource(Mouse.class);
+        CameraBounds camBounds = this.world.getResource(CameraBounds.class);
+        camBounds.viewportWidthInWorldUnits = 32.0f;
+        camBounds.viewportHeightInWorldUnits = 32.0f;
+        mouse.pos.x = mouseX;
+        mouse.pos.y = mouseY;
 
-        this.dispatcher.dispatch(this.state.world, this.state, 1.0);
-        state.world.applyModifications();
+        this.dispatcher.dispatch(this.world, 1.0);
+        this.world.getEntities().applyModifications();
 
         assertEquals(expectedX, abilities.attackTarget.x);
         assertEquals(expectedY, abilities.attackTarget.y);
@@ -92,22 +93,21 @@ class PlayerInputSystemTest {
 
     @Test
     void havingInputAttackSetUpdatesAttack() {
-        this.state.realViewWidth = 32.0f;
-        this.state.realViewHeight = 32.0f;
-        this.state.inputAttack = false;
+        Inputs inputs = this.world.getResource(Inputs.class);
+        inputs.inputAttack = false;
 
-        this.dispatcher.dispatch(this.state.world, this.state, 1.0);
-        state.world.applyModifications();
+        this.dispatcher.dispatch(this.world, 1.0);
+        this.world.getEntities().applyModifications();
         assertFalse(input.attack);
 
-        this.state.inputAttack = true;
-        this.dispatcher.dispatch(this.state.world, this.state, 1.0);
-        state.world.applyModifications();
+        inputs.inputAttack = true;
+        this.dispatcher.dispatch(this.world, 1.0);
+        this.world.getEntities().applyModifications();
         assertTrue(input.attack);
 
-        this.state.inputAttack = false;
-        this.dispatcher.dispatch(this.state.world, this.state, 1.0);
-        state.world.applyModifications();
+        inputs.inputAttack = false;
+        this.dispatcher.dispatch(this.world, 1.0);
+        this.world.getEntities().applyModifications();
         assertFalse(input.attack);
     }
 }

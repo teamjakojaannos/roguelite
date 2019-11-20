@@ -14,4 +14,19 @@ public class CharacterStats implements Component {
 
     public double attackRate = 2.0; // Attacks per second
     public double attackProjectileSpeed = 20.0;
+    public double attackSpread = 2.5;
+
+    public CharacterStats(
+            double speed,
+            double acceleration,
+            double friction,
+            double attackRate,
+            double attackProjectileSpeed
+    ) {
+        this.speed = speed;
+        this.acceleration = acceleration;
+        this.friction = friction;
+        this.attackRate = attackRate;
+        this.attackProjectileSpeed = attackProjectileSpeed;
+    }
 }

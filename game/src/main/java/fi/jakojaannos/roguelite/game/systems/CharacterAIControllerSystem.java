@@ -1,11 +1,11 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Cluster;
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.EnemyAI;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
@@ -15,9 +15,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
-public class CharacterAIControllerSystem implements ECSSystem<GameState> {
+public class CharacterAIControllerSystem implements ECSSystem {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
             CharacterInput.class, EnemyAI.class, Transform.class
+    );
+
+    private static final List<Class<? extends Resource>> REQUIRED_RESOURCES = List.of(
+            Players.class
     );
 
     @Override
@@ -25,22 +29,32 @@ public class CharacterAIControllerSystem implements ECSSystem<GameState> {
         return REQUIRED_COMPONENTS;
     }
 
+    @Override
+    public Collection<Class<? extends Resource>> getRequiredResources() {
+        return REQUIRED_RESOURCES;
+    }
+
     private final Vector2d tmpDirection = new Vector2d();
 
     @Override
-    public void tick(Stream<Entity> entities, GameState gameState, double delta, Cluster cluster) {
-        Vector2d playerPos = new Vector2d();
-        cluster.getComponentOf(gameState.player, Transform.class)
-                .orElse(new Transform(5.0f, 5.0f))
-                .getCenter(playerPos);
+    public void tick(
+            @NonNull Stream<Entity> entities,
+            @NonNull World world,
+            double delta
+    ) {
+        val player = world.getResource(Players.class).player;
+        val playerPos = new Vector2d();
+        world.getEntities().getComponentOf(player, Transform.class)
+             .orElse(new Transform(5.0f, 5.0f))
+             .getCenter(playerPos);
 
         entities.forEach(entity -> {
-            val myPos = new Vector2d();
-            cluster.getComponentOf(entity, Transform.class).get()
-                    .getCenter(myPos);
+            val aiPos = new Vector2d();
+            world.getEntities().getComponentOf(entity, Transform.class).get()
+                 .getCenter(aiPos);
 
-            tmpDirection.set(playerPos).sub(myPos);
-            val input = cluster.getComponentOf(entity, CharacterInput.class).get();
+            tmpDirection.set(playerPos).sub(aiPos);
+            val input = world.getEntities().getComponentOf(entity, CharacterInput.class).get();
             input.move.set(tmpDirection);
         });
     }

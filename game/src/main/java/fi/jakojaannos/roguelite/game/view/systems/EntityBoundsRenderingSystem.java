@@ -1,13 +1,11 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Cluster;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
-import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +21,7 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
 @Slf4j
-public class EntityBoundsRenderingSystem implements ECSSystem<GameState>, AutoCloseable {
+public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
             Transform.class
     );
@@ -93,9 +91,8 @@ public class EntityBoundsRenderingSystem implements ECSSystem<GameState>, AutoCl
     @Override
     public void tick(
             Stream<Entity> entities,
-            GameState state,
-            double partialTickAlpha,
-            Cluster cluster
+            World world,
+            double partialTickAlpha
     ) {
         this.shader.use();
         this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());
@@ -104,7 +101,7 @@ public class EntityBoundsRenderingSystem implements ECSSystem<GameState>, AutoCl
         glBindVertexArray(this.vao);
         entities.forEach(
                 entity -> {
-                    val transform = state.world.getComponentOf(entity, Transform.class).get();
+                    Transform transform = world.getEntities().getComponentOf(entity, Transform.class).get();
                     this.shader.setUniformMat4x4(this.uniformModelMatrix,
                                                  modelMatrix.identity()
                                                             .translate((float) transform.bounds.minX,

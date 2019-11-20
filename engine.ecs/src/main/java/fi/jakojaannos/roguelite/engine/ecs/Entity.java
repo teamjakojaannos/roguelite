@@ -1,23 +1,19 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
-import lombok.AccessLevel;
-import lombok.Getter;
+public interface Entity {
+    /**
+     * Gets the unique identifier for this entity. Entity IDs are guaranteed to be unique.
+     *
+     * @return the unique ID of this entity.
+     */
+    int getId();
 
-public class Entity {
-    @Getter private final int id;
-    @Getter(AccessLevel.PACKAGE) private final byte[] componentBitmask;
-    @Getter(AccessLevel.PACKAGE) private boolean markedForRemoval;
-
-    Entity(int id, int maxComponentTypes) {
-        this.id = id;
-        this.markedForRemoval = false;
-
-        int nBytes = BitMaskUtils.calculateMaskSize(maxComponentTypes);
-        this.componentBitmask = new byte[nBytes];
-    }
-
-    void markForRemoval() {
-        this.markedForRemoval = true;
-    }
+    /**
+     * Indicates whether or not this entity is flagged for removal. Entities marked to be removed
+     * are destroyed the next time {@link Entities#applyModifications()} is called.
+     *
+     * @return <code>true</code> if this entity is removed or will be removed during the next
+     * modification tick. <code>false</code> otherwise.
+     */
+    boolean isMarkedForRemoval();
 }
