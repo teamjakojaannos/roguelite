@@ -107,7 +107,12 @@ public class Roguelite extends GameBase<GameState> {
         // Create spawner
         var spawn = entities.createEntity();
         entities.addComponentTo(spawn, new Transform(5.0f, 15.0f, 0.5f));
-        entities.addComponentTo(spawn, new SpawnerComponent(5.0f, SpawnerComponent.FACTORY_STALKER));
+        entities.addComponentTo(spawn, new SpawnerComponent(0.7f, SpawnerComponent.FACTORY_DUMMY, 5.0f, 543));
+
+        var spawn2 = entities.createEntity();
+        entities.addComponentTo(spawn2, new Transform(15.0f, 5.0f, 0.5f));
+        entities.addComponentTo(spawn2, new SpawnerComponent(2.0f, SpawnerComponent.FACTORY_FOLLOWER, 2.0f, 123));
+
 
 
         val level = new TileMap<Integer>(8, 8, new Integer[]{

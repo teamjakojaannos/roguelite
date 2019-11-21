@@ -23,8 +23,6 @@ public class SpawnerSystem implements ECSSystem {
         return REQUIRED_COMPONENTS;
     }
 
-    private final Vector2d temp = new Vector2d();
-
     @Override
     public void tick(
             Stream<Entity> entities,
@@ -43,20 +41,14 @@ public class SpawnerSystem implements ECSSystem {
             if (spawnComp.spawnCoolDown <= 0.0f) {
                 spawnComp.spawnCoolDown = spawnComp.spawnFrequency;
 
-                Entity spawned = spawnComp.entityFactory.apply(cluster);
-                cluster.applyModifications();
-
-                cluster.getComponentOf(spawned, Transform.class).ifPresent(spawnedPos -> {
-                    myPos.getCenter(temp);
-
-                    spawnedPos.setPosition(
-                            temp.x - spawnedPos.getWidth() / 2,
-                            temp.y - spawnedPos.getHeight() / 2);
-
-
-                });
+                spawnComp.entityFactory.get(cluster, myPos, spawnComp);
             }
         });
 
     }
+
+
+
+
+
 }
