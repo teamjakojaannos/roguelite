@@ -10,6 +10,7 @@ import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.GenerateStream;
 import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
@@ -39,8 +40,9 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("camera", new CameraControlSystem(), "character_move")
                 .withSystem("spawner", new SpawnerSystem())
                 .withSystem("simple_collision", new SimpleColliderSystem())
-                .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "simple_collision")
-                .withSystem("collision_event_remover", new CollisionEventRemoverSystem(), "simple_collision_handler")
+                .withSystem("tile_collision", new TileMapCollisionSystem())
+                .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "simple_collision", "tile_collision")
+                .withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler")
                 .build();
     }
 
@@ -48,22 +50,8 @@ public class Roguelite extends GameBase<GameState> {
         val entities = Entities.createNew(256, 32);
         val state = new GameState(World.createNew(entities));
 
-        val player = entities.createEntity();
-        entities.addComponentTo(player, new Transform(4.0f, 4.0f));
-        entities.addComponentTo(player, new Velocity());
-        entities.addComponentTo(player, new CharacterInput());
-        entities.addComponentTo(player, new CharacterAbilities());
-        entities.addComponentTo(player, new CharacterStats(
-                10.0f,
-                100.0f,
-                150.0f,
-                20.0f,
-                20.0f
-        ));
-        entities.addComponentTo(player, new PlayerTag());
-        val sprite = new SpriteInfo();
-        sprite.spriteName = "sprites/sheep";
-        entities.addComponentTo(player, sprite);
+        val player = PlayerArchetype.create(state.getWorld(),
+                                            new Transform(4.0, 4.0));
         state.getWorld().getResource(Players.class).player = player;
 
         val camera = entities.createEntity();
@@ -128,7 +116,7 @@ public class Roguelite extends GameBase<GameState> {
         // create dummy targets
         for (int i = 0; i < 5; i++) {
             Entity dummy = entities.createEntity();
-            entities.addComponentTo(dummy, new Transform(3.0f + i*2.0f, 5.0f));
+            entities.addComponentTo(dummy, new Transform(3.0f + i * 2.0f, 5.0f));
             entities.addComponentTo(dummy, new Health());
             entities.addComponentTo(dummy, new Collider());
         }
@@ -149,7 +137,7 @@ public class Roguelite extends GameBase<GameState> {
                       .forEach(pos -> tileMap.setTile(pos, floor));
 
         val levelEntity = entities.createEntity();
-        entities.addComponentTo(levelEntity, new Level(tileMap));
+        entities.addComponentTo(levelEntity, new TileMapLayer(tileMap));
 
         entities.applyModifications();
         return state;

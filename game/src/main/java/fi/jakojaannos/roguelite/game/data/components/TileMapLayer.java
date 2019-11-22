@@ -3,11 +3,14 @@ package fi.jakojaannos.roguelite.game.data.components;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
+import lombok.Getter;
+import lombok.NonNull;
 
-public class Level implements Component {
-    public TileMap<TileType> tileMap;
+public class TileMapLayer implements Component {
+    @Getter public TileMap<TileType> tileMap;
+    @Getter public boolean collisionEnabled = true;
 
-    public Level(TileMap<TileType> tileMap) {
+    public TileMapLayer(TileMap<TileType> tileMap) {
         this.tileMap = tileMap;
     }
 }

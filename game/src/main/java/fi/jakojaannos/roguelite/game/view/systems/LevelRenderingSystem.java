@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
-import fi.jakojaannos.roguelite.game.data.components.Level;
+import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import lombok.NonNull;
 import lombok.val;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 public class LevelRenderingSystem implements ECSSystem {
     private static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            Level.class
+            TileMapLayer.class
     );
 
     @Override
@@ -55,7 +55,7 @@ public class LevelRenderingSystem implements ECSSystem {
 
         this.batch.begin(this.camera);
         entities.forEach(entity -> {
-            val level = world.getEntities().getComponentOf(entity, Level.class).get();
+            val level = world.getEntities().getComponentOf(entity, TileMapLayer.class).get();
 
             val tileSize = 1.0;
             for (int x = regionX; x < regionX + regionW; ++x) {
