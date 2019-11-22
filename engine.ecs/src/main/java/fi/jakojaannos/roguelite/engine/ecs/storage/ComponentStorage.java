@@ -20,7 +20,6 @@ class ComponentStorage<TComponent extends Component> {
      */
     private final int componentTypeIndex;
 
-    private final Queue<StorageTask> taskQueue = new ArrayDeque<>();
     private final ComponentMap<TComponent> componentMap;
 
     ComponentStorage(
@@ -33,22 +32,18 @@ class ComponentStorage<TComponent extends Component> {
     }
 
     void addComponent(@NonNull EntityImpl entity, @NonNull TComponent component) {
-        this.taskQueue.offer(() -> {
-            if (BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), this.componentTypeIndex)) {
-                LOG.warn("Add task executed when component bit is already set!");
-                return;
-            }
+        if (BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), this.componentTypeIndex)) {
+            LOG.warn("Add task executed when component bit is already set!");
+            return;
+        }
 
-            this.componentMap.put(entity, component);
-            BitMaskUtils.setNthBit(entity.getComponentBitmask(), this.componentTypeIndex);
-        });
+        this.componentMap.put(entity, component);
+        BitMaskUtils.setNthBit(entity.getComponentBitmask(), this.componentTypeIndex);
     }
 
     void removeComponent(@NonNull EntityImpl entity) {
-        this.taskQueue.offer(() -> {
-            this.componentMap.remove(entity);
-            BitMaskUtils.unsetNthBit(entity.getComponentBitmask(), this.componentTypeIndex);
-        });
+        this.componentMap.remove(entity);
+        BitMaskUtils.unsetNthBit(entity.getComponentBitmask(), this.componentTypeIndex);
     }
 
     Optional<TComponent> getComponent(@NonNull EntityImpl entity) {
@@ -59,18 +54,8 @@ class ComponentStorage<TComponent extends Component> {
         return this.componentMap.get(entity);
     }
 
-    void applyModifications() {
-        while (!this.taskQueue.isEmpty()) {
-            this.taskQueue.remove().execute();
-        }
-    }
-
     void resize(int entityCapacity) {
         this.componentMap.resize(entityCapacity);
-    }
-
-    private interface StorageTask {
-        void execute();
     }
 
     private static class ComponentMap<TComponent> {

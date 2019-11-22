@@ -45,6 +45,17 @@ public interface Entities {
     );
 
     /**
+     * Removes a component of given type from the entity.
+     *
+     * @param entity         Entity to remove the component from
+     * @param componentClass Type of the component to remove
+     */
+    void removeComponentFrom(
+            @NonNull Entity entity,
+            @NonNull Class<? extends Component> componentClass
+    );
+
+    /**
      * Gets the component of given type from the entity.
      *
      * @param entity         Entity to get components from

@@ -57,10 +57,6 @@ public class EntitiesImpl implements Entities {
 
     @Override
     public void applyModifications() {
-        for (val storage : this.componentTypes) {
-            storage.applyModifications();
-        }
-
         while (!this.taskQueue.isEmpty()) {
             this.taskQueue.remove().execute();
         }
@@ -82,6 +78,15 @@ public class EntitiesImpl implements Entities {
             @NonNull TComponent component
     ) {
         this.componentTypes.get(getComponentTypeIndexFor(component.getClass()))
+                           .removeComponent((EntityImpl) entity);
+    }
+
+    @Override
+    public void removeComponentFrom(
+            @NonNull Entity entity,
+            @NonNull Class<? extends Component> componentClass
+    ) {
+        this.componentTypes.get(getComponentTypeIndexFor(componentClass))
                            .removeComponent((EntityImpl) entity);
     }
 

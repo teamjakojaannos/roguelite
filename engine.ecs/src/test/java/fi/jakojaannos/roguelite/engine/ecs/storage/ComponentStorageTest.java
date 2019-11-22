@@ -19,87 +19,54 @@ class ComponentStorageTest {
     }
 
     @Test
-    void addComponentDoesNotImmediatelyModifyComponentStatus() {
+    void addComponentAddsTheComponent() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
-        assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
-        assertFalse(storage.getComponent(entity).isPresent());
-    }
-
-    @Test
-    void addComponentIsAppliedOnApplyModifications() {
-        ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        EntityImpl entity = new EntityImpl(0, 100);
-
-        storage.addComponent(entity, new MockComponent());
-        storage.applyModifications();
-        assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
-        assertTrue(storage.getComponent(entity).isPresent());
-    }
-
-
-
-    @Test
-    void removeComponentDoesNotImmediatelyModifyComponentStatus() {
-        ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        EntityImpl entity = new EntityImpl(0, 100);
-
-        storage.addComponent(entity, new MockComponent());
-        storage.applyModifications();
-
-        storage.removeComponent(entity);
         assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertTrue(storage.getComponent(entity).isPresent());
     }
 
     @Test
-    void removeComponentIsAppliedOnApplyModifications() {
+    void removeComponentRemovesTheComponent() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
-        storage.applyModifications();
-
         storage.removeComponent(entity);
-        storage.applyModifications();
 
         assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertFalse(storage.getComponent(entity).isPresent());
     }
 
     @Test
-    void tasksAreAppliedInOrderTheyAreQueued_addFirst() {
+    void tasksAreAppliedInOrderTheyAreCalled_addFirst() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
         storage.removeComponent(entity);
-        storage.applyModifications();
 
         assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertFalse(storage.getComponent(entity).isPresent());
     }
 
     @Test
-    void tasksAreAppliedInOrderTheyAreQueued_removeFirst() {
+    void tasksAreAppliedInOrderTheyAreCalled_removeFirst() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
-        storage.applyModifications();
-
         storage.removeComponent(entity);
         storage.addComponent(entity, new MockComponent());
-        storage.applyModifications();
 
         assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertTrue(storage.getComponent(entity).isPresent());
     }
 
     @Test
-    void tasksAreAppliedInOrderTheyAreQueued_complex() {
+    void tasksAreAppliedInOrderTheyAreCalled_complex() {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
@@ -110,7 +77,6 @@ class ComponentStorageTest {
         storage.addComponent(entity, new MockComponent());
         storage.removeComponent(entity);
         storage.addComponent(entity, new MockComponent());
-        storage.applyModifications();
 
         assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
         assertTrue(storage.getComponent(entity).isPresent());
