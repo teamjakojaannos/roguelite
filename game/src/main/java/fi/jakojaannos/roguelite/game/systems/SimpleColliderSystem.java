@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class SimpleColliderSystem implements ECSSystem {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            ColliderTag.class, Transform.class
+            Collider.class, Transform.class
     );
 
     private static final List<Class<? extends Resource>> REQUIRED_RESOURCES = List.of(
@@ -40,20 +40,23 @@ public class SimpleColliderSystem implements ECSSystem {
             double delta)
     {
         var entityList = entities.collect(Collectors.toList());
-
         val cluster = world.getEntities();
 
         for (val entityA : entityList) {
             val posA = cluster.getComponentOf(entityA, Transform.class).get();
+            val collider = cluster.getComponentOf(entityA, Collider.class).get();
 
             for (val entityB : entityList) {
                 if (entityA.getId() == entityB.getId()) continue;
 
                 val posB = cluster.getComponentOf(entityB, Transform.class).get();
 
+
                 if (posA.bounds.intersects(posB.bounds)) {
-                    cluster.addComponentTo(entityA, new CollisionEvent(entityA, entityB));
-                    cluster.addComponentTo(entityB, new CollisionEvent(entityB, entityA));
+                    collider.collisions.add(new CollisionEvent(entityB));
+                    if (!cluster.hasComponent(entityA, RecentCollisionTag.class))
+                        cluster.addComponentTo(entityA, new RecentCollisionTag());
+
                 }
 
 

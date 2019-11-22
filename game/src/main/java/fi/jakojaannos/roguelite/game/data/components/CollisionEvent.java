@@ -6,11 +6,10 @@ import lombok.NonNull;
 
 public class CollisionEvent implements Component {
 
-    public final Entity entityA, entityB;
+    public final Entity other;
 
-    public CollisionEvent(@NonNull Entity entityA, @NonNull Entity entityB) {
-        this.entityA = entityA;
-        this.entityB = entityB;
+    public CollisionEvent(@NonNull Entity other) {
+        this.other = other;
     }
 
 }

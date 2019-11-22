@@ -129,7 +129,8 @@ public class Roguelite extends GameBase<GameState> {
         for (int i = 0; i < 5; i++) {
             Entity dummy = entities.createEntity();
             entities.addComponentTo(dummy, new Transform(3.0f + i*2.0f, 5.0f));
-            entities.addComponentTo(dummy, new ColliderTag());
+            entities.addComponentTo(dummy, new Health());
+            entities.addComponentTo(dummy, new Collider());
         }
 
         val emptiness = new TileType(0, false);

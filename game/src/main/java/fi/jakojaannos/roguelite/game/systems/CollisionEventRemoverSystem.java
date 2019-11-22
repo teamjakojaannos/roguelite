@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.CollisionEvent;
+import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 import lombok.NonNull;
 
 import java.util.Collection;
@@ -10,7 +11,7 @@ import java.util.stream.Stream;
 
 public class CollisionEventRemoverSystem implements ECSSystem {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            CollisionEvent.class
+            RecentCollisionTag.class
     );
 
     private static final List<Class<? extends Resource>> REQUIRED_RESOURCES = List.of(
@@ -37,9 +38,7 @@ public class CollisionEventRemoverSystem implements ECSSystem {
     {
 
         entities.forEach(entity -> {
-            var collisionEvent = world.getEntities().getComponentOf(entity, CollisionEvent.class).get();
-            world.getEntities().removeComponentFrom(entity, collisionEvent);
-            //world.getEntities().removeComponentFrom(entity, CollisionEvent.class);
+            world.getEntities().removeComponentFrom(entity, RecentCollisionTag.class);
         });
 
     }
