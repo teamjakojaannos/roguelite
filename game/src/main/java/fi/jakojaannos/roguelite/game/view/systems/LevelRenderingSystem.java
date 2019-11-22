@@ -48,10 +48,10 @@ public class LevelRenderingSystem implements ECSSystem {
                                           Camera.class)
                           .get();
 
-        val regionX = (int) Math.floor(camera.pos.x - this.camera.getViewportWidthInUnits() / 2.0) + 2;
-        val regionY = (int) Math.floor(camera.pos.y - this.camera.getViewportHeightInUnits() / 2.0) + 2;
-        val regionW = (int) Math.ceil(this.camera.getViewportWidthInUnits()) - 4;
-        val regionH = (int) Math.ceil(this.camera.getViewportHeightInUnits()) - 4;
+        val regionX = (int) Math.floor(camera.pos.x - this.camera.getViewportWidthInUnits() / 2.0);
+        val regionY = (int) Math.floor(camera.pos.y - this.camera.getViewportHeightInUnits() / 2.0);
+        val regionW = (int) Math.ceil(this.camera.getViewportWidthInUnits()) + 1;
+        val regionH = (int) Math.ceil(this.camera.getViewportHeightInUnits()) + 1;
 
         this.batch.begin(this.camera);
         entities.forEach(entity -> {
