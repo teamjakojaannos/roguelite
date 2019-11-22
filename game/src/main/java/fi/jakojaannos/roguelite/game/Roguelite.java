@@ -1,10 +1,7 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
-import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
@@ -41,6 +38,9 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("stalker_move", new StalkerAIControllerSystem())
                 .withSystem("camera", new CameraControlSystem(), "character_move")
                 .withSystem("spawner", new SpawnerSystem())
+                .withSystem("simple_collision", new SimpleColliderSystem())
+                .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "simple_collision")
+                .withSystem("collision_event_remover", new CollisionEventRemoverSystem(), "simple_collision_handler")
                 .build();
     }
 
@@ -77,15 +77,60 @@ public class Roguelite extends GameBase<GameState> {
         entities.addComponentTo(crosshair, new Transform(-999.0, -999.0, 0.5, 0.5, 0.25, 0.25));
         entities.addComponentTo(crosshair, new CrosshairTag());
 
+        // Spawn "followers"
+        final double x_max = 20.0f, y_max = 15.0f;
+        Random random = new Random(123);
+
+        for (int i = 0; i < 0; i++) {
+            var e = entities.createEntity();
+            double xpos = random.nextDouble() * x_max;
+            double ypos = random.nextDouble() * y_max;
+            entities.addComponentTo(e, new Transform(xpos, ypos));
+            entities.addComponentTo(e, new Velocity());
+            entities.addComponentTo(e, new CharacterInput());
+            entities.addComponentTo(e, new CharacterStats(
+                    4.0,
+                    100.0,
+                    800.0,
+                    4.0,
+                    20.0
+            ));
+
+            entities.addComponentTo(e, new EnemyAI(25.0f, 1.0f));
+        }
+
+
+        // Spawn stalker(s)
+        /*val e = entities.createEntity();
+        entities.addComponentTo(e, new Transform(10.0f, 15.0f, 0.75f));
+        entities.addComponentTo(e, new Velocity());
+        entities.addComponentTo(e, new CharacterInput());
+        entities.addComponentTo(e, new CharacterStats(
+                1.0,
+                100.0,
+                800.0,
+                4.0,
+                20.0
+        ));
+        entities.addComponentTo(e,
+                new StalkerAI(250.0f, 50.0f, 8.0f));*/
+
         // Create spawner
-        var spawn = entities.createEntity();
-        entities.addComponentTo(spawn, new Transform(5.0f, 15.0f, 0.5f));
-        entities.addComponentTo(spawn, new SpawnerComponent(0.7f, SpawnerComponent.FACTORY_DUMMY, 5.0f, 543));
 
-        var spawn2 = entities.createEntity();
-        entities.addComponentTo(spawn2, new Transform(15.0f, 5.0f, 0.5f));
-        entities.addComponentTo(spawn2, new SpawnerComponent(2.0f, SpawnerComponent.FACTORY_FOLLOWER, 2.0f, 123));
+        //var spawn = entities.createEntity();
+        //entities.addComponentTo(spawn, new Transform(5.0f, 15.0f, 0.5f));
+        //entities.addComponentTo(spawn, new SpawnerComponent(0.7f, SpawnerComponent.FACTORY_DUMMY, 5.0f, 543));
 
+        //var spawn2 = entities.createEntity();
+        //entities.addComponentTo(spawn2, new Transform(15.0f, 5.0f, 0.5f));
+        //entities.addComponentTo(spawn2, new SpawnerComponent(2.0f, SpawnerComponent.FACTORY_FOLLOWER, 2.0f, 123));
+
+        // create dummy targets
+        for (int i = 0; i < 5; i++) {
+            Entity dummy = entities.createEntity();
+            entities.addComponentTo(dummy, new Transform(3.0f + i*2.0f, 5.0f));
+            entities.addComponentTo(dummy, new ColliderTag());
+        }
 
         val emptiness = new TileType(0, false);
         val floor = new TileType(1, false);

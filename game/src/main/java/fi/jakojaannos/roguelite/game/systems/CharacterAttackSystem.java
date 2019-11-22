@@ -43,6 +43,7 @@ public class CharacterAttackSystem implements ECSSystem {
                 val projectileY = character.bounds.minY + character.getHeight() / 2.0;
                 val transform = new Transform(projectileX, projectileY, 0.3, 0.3, 0.15, 0.15);
                 cluster.addComponentTo(projectile, new ProjectileTag());
+                cluster.addComponentTo(projectile, new ColliderTag());
                 cluster.addComponentTo(projectile, transform);
 
 
