@@ -30,25 +30,11 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             @NonNull World world,
             double delta
     ) {
-        val cluster = (EntitiesImpl) world.getEntities();
+        val entities = (EntitiesImpl) world.getEntities();
         this.systems.forEachPrioritized(
-                (system) -> {
-                    val requiredComponentsBitMask =
-                            system.getRequiredComponents()
-                                  .stream()
-                                  .map(cluster::getComponentTypeIndexFor)
-                                  .reduce(new byte[BitMaskUtils.calculateMaskSize(cluster.getMaxComponentTypes())],
-                                          BitMaskUtils::setNthBit,
-                                          BitMaskUtils::combineMasks);
-
-                    system.tick(cluster.getEntityStorage()
-                                       .stream()
-                                       .filter(entity -> BitMaskUtils.hasAllBitsOf(entity.getComponentBitmask(),
-                                                                                   requiredComponentsBitMask))
-                                       .map(e -> (Entity) e),
-                                world,
-                                delta);
-                }
+                (system) -> system.tick(entities.getEntitiesWith(system.getRequiredComponents()),
+                                        world,
+                                        delta)
         );
     }
 

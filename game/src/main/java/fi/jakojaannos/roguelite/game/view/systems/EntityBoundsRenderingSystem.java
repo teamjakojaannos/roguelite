@@ -6,6 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
+import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -90,8 +91,8 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            World world,
+            @NonNull Stream<Entity> entities,
+            @NonNull World world,
             double partialTickAlpha
     ) {
         this.shader.use();
@@ -101,6 +102,10 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
         glBindVertexArray(this.vao);
         entities.forEach(
                 entity -> {
+                    if (world.getEntities().hasComponent(entity, NoDrawTag.class)) {
+                        return;
+                    }
+
                     Transform transform = world.getEntities().getComponentOf(entity, Transform.class).get();
                     this.shader.setUniformMat4x4(this.uniformModelMatrix,
                                                  modelMatrix.identity()

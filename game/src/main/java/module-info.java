@@ -5,12 +5,13 @@ module roguelite.game {
     requires org.joml;
 
     requires roguelite.engine;
-    requires transitive roguelite.engine.lwjgl;
+    requires roguelite.engine.utilities;
     requires roguelite.engine.ecs;
+    requires transitive roguelite.engine.lwjgl;
 
     opens fi.jakojaannos.roguelite.game.data.resources to roguelite.engine.ecs;
 
-    exports fi.jakojaannos.roguelite.game to roguelite.launcher;
-    exports fi.jakojaannos.roguelite.game.view to roguelite.launcher;
-    exports fi.jakojaannos.roguelite.game.data to roguelite.launcher;
+    exports fi.jakojaannos.roguelite.game;
+    exports fi.jakojaannos.roguelite.game.view;
+    exports fi.jakojaannos.roguelite.game.data;
 }

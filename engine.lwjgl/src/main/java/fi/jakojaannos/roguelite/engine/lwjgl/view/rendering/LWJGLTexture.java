@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -22,8 +23,8 @@ import static org.lwjgl.opengl.GL13.GL_CLAMP_TO_BORDER;
 @EqualsAndHashCode
 public class LWJGLTexture implements AutoCloseable {
     private final int texture;
-    private final int width;
-    private final int height;
+    @Getter private final int width;
+    @Getter private final int height;
 
     public LWJGLTexture(
             @NonNull Path assetRoot,

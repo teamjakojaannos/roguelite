@@ -18,6 +18,7 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
     private Matrix4f activeTransformation;
     private TTexture activeTexture;
     @Getter(AccessLevel.PROTECTED) private int nFrames;
+    private int drawCalls;
 
     protected SpriteBatchBase(int maxFramesPerBatch) {
         this.maxFramesPerBatch = maxFramesPerBatch;
@@ -45,22 +46,24 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
      * @return texture which can be used to render the sprite
      */
     @NonNull
-    public abstract TTexture resolveTexture(@NonNull TSpriteID sprite, int frame);
+    public abstract TextureRegion<TTexture> resolveTexture(@NonNull TSpriteID sprite, int frame);
 
     /**
      * Queues a new sprite animation frame for rendering. Passing in -1 as the frame renders the
      * whole texture.
      *
      * @param texture texture to render
-     * @param frame   frame to render. -1 means whole texture
      * @param x       world x-coordinate to place the sprite to
      * @param y       world y-coordinate to place the sprite to
+     * @param width   horizontal size of the sprite in world units
+     * @param height  vertical size of the sprite in world units
      */
     protected abstract void queueFrame(
-            @NonNull TTexture texture,
-            int frame,
+            @NonNull TextureRegion<TTexture> texture,
             double x,
-            double y
+            double y,
+            double width,
+            double height
     );
 
     @Override
@@ -81,29 +84,37 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
             LOG.error("SpriteBatch.end() called without calling .begin() first!");
             return;
         }
-
-        flush(this.activeTexture, this.activeCamera, this.activeTransformation);
+        if (this.nFrames > 0) {
+            flush(this.activeTexture, this.activeCamera, this.activeTransformation);
+            ++this.drawCalls;
+        }
         this.nFrames = 0;
         this.activeTexture = null;
         this.activeCamera = null;
         this.activeTransformation = null;
         this.beginCalled = false;
+
+        //LOG.debug("{} drawcalls", this.drawCalls);
+        this.drawCalls = 0;
     }
 
     @Override
-    public void draw(TSpriteID sprite, int frame, double x, double y) {
-        val texture = resolveTexture(sprite, frame);
+    public void draw(TSpriteID sprite, int frame, double x, double y, double width, double height) {
+        val textureRegion = resolveTexture(sprite, frame);
         if (this.activeTexture == null) {
-            this.activeTexture = texture;
+            this.activeTexture = textureRegion.getTexture();
         }
 
-        if (!texture.equals(this.activeTexture) || this.nFrames == maxFramesPerBatch) {
+        val needToChangeTexture = !textureRegion.getTexture().equals(this.activeTexture);
+        val batchIsFull = this.nFrames >= this.maxFramesPerBatch - 1;
+        if (needToChangeTexture || batchIsFull) {
             flush(this.activeTexture, this.activeCamera, this.activeTransformation);
             this.nFrames = 0;
-            this.activeTexture = texture;
+            this.activeTexture = textureRegion.getTexture();
+            ++this.drawCalls;
         }
 
-        queueFrame(this.activeTexture, frame, x, y);
+        queueFrame(textureRegion, x, y, width, height);
         this.nFrames += 1;
     }
 }

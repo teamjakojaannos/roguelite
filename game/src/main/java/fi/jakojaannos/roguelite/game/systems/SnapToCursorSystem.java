@@ -1,24 +1,27 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.CrosshairTag;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import fi.jakojaannos.roguelite.game.data.resources.CameraBounds;
+import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import lombok.NonNull;
 import lombok.val;
+import org.joml.Vector2d;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class SnapToCursorSystem implements ECSSystem {
-    public static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
+    private static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
             Transform.class, CrosshairTag.class
     );
 
-    public static final List<Class<? extends Resource>> REQUIRED_RESOURCES = List.of(
-            Mouse.class, CameraBounds.class
+    private static final List<Class<? extends Resource>> REQUIRED_RESOURCES = List.of(
+            Mouse.class, CameraProperties.class
     );
 
     @Override
@@ -31,18 +34,27 @@ public class SnapToCursorSystem implements ECSSystem {
         return REQUIRED_RESOURCES;
     }
 
+    private final Vector2d tmpCamPos = new Vector2d();
+
     @Override
     public void tick(
             @NonNull Stream<Entity> entities,
             @NonNull World world,
             double delta
     ) {
+        val mouse = world.getResource(Mouse.class);
+        val camProps = world.getResource(CameraProperties.class);
+
+        val cursorPosition = Optional.ofNullable(camProps.cameraEntity)
+                                     .map(e -> world.getEntities().getComponentOf(e, Camera.class))
+                                     .filter(Optional::isPresent)
+                                     .map(Optional::get)
+                                     .map(cam -> mouse.calculateCursorPositionRelativeToCamera(cam, camProps, tmpCamPos))
+                                     .orElseGet(() -> tmpCamPos.set(0.0, 0.0));
+
         entities.forEach(entity -> {
             val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
-            val mouse = world.getResource(Mouse.class);
-            val camBounds = world.getResource(CameraBounds.class);
-            transform.setPosition(mouse.pos.x * camBounds.viewportWidthInWorldUnits,
-                                  mouse.pos.y * camBounds.viewportHeightInWorldUnits);
+            transform.setPosition(cursorPosition.x, cursorPosition.y);
         });
     }
 }

@@ -16,6 +16,7 @@ dependencies {
     implementation project(':engine')
     implementation project(':engine.ecs')
     implementation project(':engine.lwjgl')
+    implementation project(':engine.utilities')
 
     // LWJGL and its components
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")

@@ -42,7 +42,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
         this.camera = camera;
         val batch = new LWJGLSpriteBatch(assetRoot, "sprite");
         this.batch = batch;
-        this.textureResolver = batch::resolveTexture;
+        this.textureResolver = (s, integer) -> batch.resolveTexture(s, integer).getTexture();
     }
 
     @Override

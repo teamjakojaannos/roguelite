@@ -16,6 +16,11 @@ dependencies {
     implementation project(":engine")
     implementation project(":engine.utilities")
 
+    // Google Gson
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+
+
     // LWJGL and its components
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
@@ -32,4 +37,10 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
+}
+
+test {
+    moduleOptions {
+        runOnClasspath = true
+    }
 }

@@ -4,7 +4,6 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entities;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.val;
 
@@ -17,7 +16,7 @@ import java.util.stream.Stream;
  * Provides accessors for entity components.
  */
 public class EntitiesImpl implements Entities {
-    @Getter private final int maxComponentTypes;
+    private final int maxComponentTypes;
     private final EntityStorage entityStorage;
     private final List<ComponentStorage> componentTypes = new ArrayList<>();
     private final Map<Class<? extends Component>, Integer> componentTypeIndices = new HashMap<>();
@@ -67,10 +66,6 @@ public class EntitiesImpl implements Entities {
         }
     }
 
-    public EntityStorage getEntityStorage() {
-        return this.entityStorage;
-    }
-
     @Override
     public <TComponent extends Component> void addComponentTo(
             @NonNull Entity entity,
@@ -101,13 +96,36 @@ public class EntitiesImpl implements Entities {
     }
 
     @Override
-    public <TComponent extends Component> Stream<EntityComponentPair> getEntitiesWith(
+    public boolean hasComponent(
+            @NonNull Entity entity,
+            @NonNull Class<? extends Component> componentClass
+    ) {
+        return BitMaskUtils.isNthBitSet(((EntityImpl) entity).getComponentBitmask(),
+                                        getComponentTypeIndexFor(componentClass));
+    }
+
+    @Override
+    public <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
             @NonNull Class<? extends TComponent> componentType
     ) {
         val componentTypeIndex = getComponentTypeIndexFor(componentType);
         return this.entityStorage.stream()
                                  .filter(e -> BitMaskUtils.isNthBitSet(e.getComponentBitmask(), componentTypeIndex))
-                                 .map(e -> new EntityComponentPair<TComponent>(e, getComponentOf(e, componentType).orElseThrow()));
+                                 .map(e -> new EntityComponentPair<>(e, getComponentOf(e, componentType).orElseThrow()));
+    }
+
+    @Override
+    public Stream<Entity> getEntitiesWith(
+            @NonNull Collection<Class<? extends Component>> componentTypes
+    ) {
+        val requiredMask = componentTypes.stream()
+                                         .map(this::getComponentTypeIndexFor)
+                                         .reduce(new byte[BitMaskUtils.calculateMaskSize(this.maxComponentTypes)],
+                                                 BitMaskUtils::setNthBit,
+                                                 BitMaskUtils::combineMasks);
+        return this.entityStorage.stream()
+                                 .filter(e -> BitMaskUtils.hasAllBitsOf(e.getComponentBitmask(), requiredMask))
+                                 .map(Entity.class::cast);
     }
 
     public <TComponent extends Component> Integer getComponentTypeIndexFor(Class<TComponent> componentClass) {

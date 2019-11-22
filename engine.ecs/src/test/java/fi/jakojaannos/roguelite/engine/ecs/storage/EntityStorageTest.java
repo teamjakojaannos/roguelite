@@ -55,11 +55,11 @@ class EntityStorageTest {
 
     @Test
     void spawnThrowsIfEntityIsNull() {
-        assertThrows(NullPointerException.class, () -> new EntityStorage(100).spawn(null));
+        assertThrows(AssertionError.class, () -> new EntityStorage(100).spawn(null));
     }
 
     @Test
     void removeThrowsIfEntityIsNull() {
-        assertThrows(NullPointerException.class, () -> new EntityStorage(100).remove(null));
+        assertThrows(AssertionError.class, () -> new EntityStorage(100).remove(null));
     }
 }

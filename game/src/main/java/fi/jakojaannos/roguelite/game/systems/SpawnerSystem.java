@@ -32,7 +32,6 @@ public class SpawnerSystem implements ECSSystem {
         Entities cluster = world.getEntities();
 
         entities.forEach(entity -> {
-
             val myPos = cluster.getComponentOf(entity, Transform.class).get();
             val spawnComp = cluster.getComponentOf(entity, SpawnerComponent.class).get();
 
@@ -40,15 +39,8 @@ public class SpawnerSystem implements ECSSystem {
 
             if (spawnComp.spawnCoolDown <= 0.0f) {
                 spawnComp.spawnCoolDown = spawnComp.spawnFrequency;
-
                 spawnComp.entityFactory.get(cluster, myPos, spawnComp);
             }
         });
-
     }
-
-
-
-
-
 }

@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.view;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.resources.CameraBounds;
+import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import lombok.val;
 
 class RogueliteCamera extends LWJGLCamera {
@@ -11,7 +11,7 @@ class RogueliteCamera extends LWJGLCamera {
     }
 
     void updateConfigurationFromState(GameState state) {
-        val camBounds = state.getWorld().getResource(CameraBounds.class);
+        val camBounds = state.getWorld().getResource(CameraProperties.class);
         refreshTargetScreenSizeInUnits(camBounds.targetViewportSizeInWorldUnits, camBounds.targetViewportSizeRespectiveToMinorAxis);
 
         // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller

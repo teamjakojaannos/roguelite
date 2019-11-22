@@ -3,11 +3,10 @@ package fi.jakojaannos.roguelite.game.data.components;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entities;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+
 import org.joml.Vector2d;
 
 import java.util.Random;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class SpawnerComponent implements Component {
 
@@ -108,6 +107,5 @@ public class SpawnerComponent implements Component {
     public interface EntityFactory {
         Entity get(Entities entities, Transform spawnerPos, SpawnerComponent spawnerComponent);
     }
-
 
 }

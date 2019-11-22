@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -12,8 +13,6 @@ public interface Entities {
     static Entities createNew(int entityCapacity, int maxComponentTypes) {
         return new EntitiesImpl(entityCapacity, maxComponentTypes);
     }
-
-    int getMaxComponentTypes();
 
     @NonNull
     Entity createEntity();
@@ -60,8 +59,40 @@ public interface Entities {
             @NonNull Class<? extends TComponent> componentClass
     );
 
-    <TComponent extends Component> Stream<EntityComponentPair> getEntitiesWith(
+    /**
+     * Checks whether or not the given entity has the specified component.
+     *
+     * @param entity         entity to check
+     * @param componentClass type of the component to look for
+     *
+     * @return <code>true</code> if the entity has the component, <code>false</code> otherwise
+     */
+    boolean hasComponent(
+            @NonNull Entity entity,
+            @NonNull Class<? extends Component> componentClass
+    );
+
+    /**
+     * Gets all entities with given component.
+     *
+     * @param componentType component type to look for
+     * @param <TComponent>  type of the component to look for
+     *
+     * @return <code>EntityComponentPair</code>s of all the entities and their respective components
+     */
+    <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
             @NonNull Class<? extends TComponent> componentType
+    );
+
+    /**
+     * Gets all entities with components of all given types.
+     *
+     * @param componentTypes types of the components to look for
+     *
+     * @return Stream of entities with all given component types
+     */
+    Stream<Entity> getEntitiesWith(
+            @NonNull Collection<Class<? extends Component>> componentTypes
     );
 
     @RequiredArgsConstructor

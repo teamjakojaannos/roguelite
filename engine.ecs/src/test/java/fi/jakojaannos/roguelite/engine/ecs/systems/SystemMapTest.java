@@ -19,7 +19,7 @@ class SystemMapTest {
         SystemMap map = new SystemMap();
         map.put("valid", new MockECSSystem());
 
-        assertThrows(NullPointerException.class,
+        assertThrows(AssertionError.class,
                      () -> map.put(
                              name,
                              system == null ? null : new MockECSSystem(),
@@ -108,7 +108,7 @@ class SystemMapTest {
     @Test
     void forEachPrioritizedThrowsIfConsumerIsNull() {
         SystemMap map = new SystemMap();
-        assertThrows(NullPointerException.class, () -> map.forEachPrioritized(null));
+        assertThrows(AssertionError.class, () -> map.forEachPrioritized(null));
     }
 
     @Test

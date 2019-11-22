@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
+import org.joml.Vector2d;
 
 import static org.lwjgl.opengl.GL11.glViewport;
 
@@ -61,7 +61,7 @@ public class LWJGLCamera extends Camera {
     }
 
     @Override
-    public void setPosition(float x, float y) {
+    public void setPosition(double x, double y) {
         double dx = x - getX();
         double dy = y - getY();
         if (dx * dx + dy * dy > CAMERA_MOVE_EPSILON || this.viewMatrixDirty) {
@@ -71,7 +71,7 @@ public class LWJGLCamera extends Camera {
     }
 
     public LWJGLCamera(int viewportWidth, int viewportHeight) {
-        super(new Vector2f(0f, 0.0f));
+        super(new Vector2d(0.0, 0.0));
         this.viewportWidth = viewportWidth;
         this.viewportHeight = viewportHeight;
 
@@ -118,10 +118,9 @@ public class LWJGLCamera extends Camera {
 
     private void refreshViewMatrixIfDirty() {
         if (this.viewMatrixDirty) {
-            LOG.trace("Refreshing view matrix");
             this.viewMatrix
                     .identity()
-                    .translate(getX(), getY(), 0.0f)
+                    .translate((float) getX(), (float) getY(), 0.0f)
                     //.scale(this.zoom);
                     .invert();
 

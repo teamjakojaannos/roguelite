@@ -44,7 +44,22 @@ public interface SpriteBatch<TSpriteID, TCamera extends Camera> extends AutoClos
      * @param x      world x-coordinate where the sprite should be placed
      * @param y      world y-coordinate where the sprite should be placed
      */
-    void draw(TSpriteID sprite, int frame, double x, double y);
+    default void draw(TSpriteID sprite, int frame, double x, double y) {
+        draw(sprite, frame, x, y, 1.0, 1.0);
+    }
+
+    /**
+     * Renders the sprite at given coordinates with given size. Only the frame indicated in the
+     * parameter <code>frame</code> is rendered.
+     *
+     * @param sprite identifier of the sprite to render
+     * @param frame  frame to render
+     * @param x      world x-coordinate where the sprite should be placed
+     * @param y      world y-coordinate where the sprite should be placed
+     * @param width  horizontal size of the sprite in world units
+     * @param height vertical size of the sprite in world units
+     */
+    void draw(TSpriteID sprite, int frame, double x, double y, double width, double height);
 
     void end();
 }

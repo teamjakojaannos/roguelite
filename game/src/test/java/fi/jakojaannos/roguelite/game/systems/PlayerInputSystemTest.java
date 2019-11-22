@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
-import fi.jakojaannos.roguelite.game.data.resources.CameraBounds;
+import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +78,7 @@ class PlayerInputSystemTest {
             double expectedY
     ) {
         Mouse mouse = this.world.getResource(Mouse.class);
-        CameraBounds camBounds = this.world.getResource(CameraBounds.class);
+        CameraProperties camBounds = this.world.getResource(CameraProperties.class);
         camBounds.viewportWidthInWorldUnits = 32.0f;
         camBounds.viewportHeightInWorldUnits = 32.0f;
         mouse.pos.x = mouseX;

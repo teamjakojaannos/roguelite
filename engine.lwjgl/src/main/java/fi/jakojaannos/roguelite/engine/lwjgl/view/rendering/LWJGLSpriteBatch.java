@@ -1,17 +1,27 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
+import com.google.gson.*;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.view.rendering.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
+import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -24,9 +34,11 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 @Slf4j
 public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGLTexture> {
     private static final Matrix4f DEFAULT_TRANSFORM = new Matrix4f().identity();
-    private static final int MAX_SPRITES_PER_BATCH = 256; // TODO: This should probably be considerably larger value
+    private static final int MAX_SPRITES_PER_BATCH = 4096;
     private static final int VERTICES_PER_SPRITE = 4;
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
+
+    private final TextureRegion<LWJGLTexture> defaultTextureRegion;
 
     private final ShaderProgram shader;
     private final int uniformProjectionMatrix;
@@ -39,6 +51,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
 
     private ByteBuffer vertexDataBuffer;
     private Map<String, LWJGLTexture> textures = new HashMap<>();
+    private Map<String, Sprite<LWJGLTexture>> sprites = new HashMap<>();
     private Path assetRoot;
 
     public LWJGLSpriteBatch(
@@ -47,6 +60,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     ) {
         super(MAX_SPRITES_PER_BATCH);
         this.assetRoot = Paths.get(assetRoot);
+        this.defaultTextureRegion = new TextureRegion<>(new LWJGLTexture(this.assetRoot, "textures/sheep.png"), 0, 0, 1, 1);
         this.shader = createShader(assetRoot, shader);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
         this.uniformViewMatrix = this.shader.getUniformLocation("view");
@@ -69,33 +83,111 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     }
 
     @Override
-    public LWJGLTexture resolveTexture(@NonNull String sprite, int frame) {
-        return this.textures.computeIfAbsent(sprite, path -> new LWJGLTexture(this.assetRoot, path));
+    public TextureRegion<LWJGLTexture> resolveTexture(@NonNull String spriteName, int frame) {
+        return this.sprites.computeIfAbsent(spriteName,
+                                            key -> loadSprite(spriteName))
+                           .getFrameOrWhole(frame);
+    }
+
+    private Sprite<LWJGLTexture> loadSprite(@NonNull String spriteName) {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Sprite.class, (JsonDeserializer<Sprite<LWJGLTexture>>) this::deserializeSprite)
+                .create();
+        try (val reader = new InputStreamReader(Files.newInputStream(assetRoot.resolve(spriteName + ".json"), StandardOpenOption.READ))) {
+            // noinspection unchecked
+            return gson.fromJson(reader, Sprite.class);
+        } catch (IOException e) {
+            LOG.error("Reading sprite \"{}\" failed!", spriteName);
+            LOG.error("Exception: ", e);
+            return new Sprite<>(List.of(this.defaultTextureRegion));
+        }
+    }
+
+    public Sprite<LWJGLTexture> deserializeSprite(
+            JsonElement json,
+            Type typeOfT,
+            JsonDeserializationContext context
+    ) throws JsonParseException {
+        val jsonObject = json.getAsJsonObject();
+        val framesJson = jsonObject.getAsJsonArray("frames");
+
+        val frames = new ArrayList<TextureRegion<LWJGLTexture>>();
+        for (val frameElement : framesJson) {
+            val frameJson = frameElement.getAsJsonObject();
+            val texturePath = frameJson.get("texture").getAsString();
+            val texture = this.textures.computeIfAbsent(texturePath,
+                                                        key -> new LWJGLTexture(this.assetRoot, texturePath));
+            val x = frameJson.get("x").getAsDouble();
+            val y = frameJson.get("y").getAsDouble();
+            val w = frameJson.get("w").getAsDouble();
+            val h = frameJson.get("h").getAsDouble();
+            val u0 = x / texture.getWidth();
+            val v0 = y / texture.getHeight();
+            val u1 = u0 + w / texture.getWidth();
+            val v1 = v0 + h / texture.getHeight();
+            frames.add(new TextureRegion<>(texture, u0, v0, u1, v1));
+        }
+
+        return new Sprite<>(frames);
     }
 
     @Override
-    protected void queueFrame(@NonNull LWJGLTexture texture, int frame, double x, double y) {
+    protected void queueFrame(
+            @NonNull TextureRegion<LWJGLTexture> region,
+            double x,
+            double y,
+            double width,
+            double height
+    ) {
         val offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
-        updateVertex(offset + (0 * SIZE_IN_BYTES), x + 0, y + 0, 0, 0, 1.0f, 1.0f, 1.0f);
-        updateVertex(offset + (1 * SIZE_IN_BYTES), x + 1, y + 0, 1, 0, 1.0f, 1.0f, 1.0f);
-        updateVertex(offset + (2 * SIZE_IN_BYTES), x + 1, y + 1, 1, 1, 1.0f, 1.0f, 1.0f);
-        updateVertex(offset + (3 * SIZE_IN_BYTES), x + 0, y + 1, 0, 1, 1.0f, 1.0f, 1.0f);
+        updateVertex(offset,
+                     x, y,
+                     (float) region.getU0(), (float) region.getV0(),
+                     1.0f, 1.0f, 1.0f);
+        updateVertex(offset + SIZE_IN_BYTES,
+                     x + width, y,
+                     (float) region.getU1(), (float) region.getV0(),
+                     1.0f, 1.0f, 1.0f);
+        updateVertex(offset + (2 * SIZE_IN_BYTES),
+                     x + width, y + height,
+                     (float) region.getU1(), (float) region.getV1(),
+                     1.0f, 1.0f, 1.0f);
+        updateVertex(offset + (3 * SIZE_IN_BYTES),
+                     x, y + height,
+                     (float) region.getU0(), (float) region.getV1(),
+                     1.0f, 1.0f, 1.0f);
+        /*updateVertex(offset,
+                     x, y,
+                     0.0f, 0.0f,
+                     1.0f, 1.0f, 1.0f);
+        updateVertex(offset + SIZE_IN_BYTES,
+                     x + width, y,
+                     1.0f, 0.0f,
+                     1.0f, 1.0f, 1.0f);
+        updateVertex(offset + (2 * SIZE_IN_BYTES),
+                     x + width, y + height,
+                     1.0f, 1.0f,
+                     1.0f, 1.0f, 1.0f);
+        updateVertex(offset + (3 * SIZE_IN_BYTES),
+                     x, y + height,
+                     0.0f, 1.0f,
+                     1.0f, 1.0f, 1.0f);*/
     }
 
     private void updateVertex(
             int offset,
             double x,
             double y,
-            float u,
-            float v,
+            double u,
+            double v,
             float r,
             float g,
             float b
     ) {
         this.vertexDataBuffer.putFloat(offset, (float) x);
         this.vertexDataBuffer.putFloat(offset + 4, (float) y);
-        this.vertexDataBuffer.putFloat(offset + 8, u);
-        this.vertexDataBuffer.putFloat(offset + 12, v);
+        this.vertexDataBuffer.putFloat(offset + 8, (float) u);
+        this.vertexDataBuffer.putFloat(offset + 12, (float) v);
         this.vertexDataBuffer.putFloat(offset + 16, r);
         this.vertexDataBuffer.putFloat(offset + 20, g);
         this.vertexDataBuffer.putFloat(offset + 24, b);
@@ -142,7 +234,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
         glVertexAttribPointer(2,
                               3,
                               GL_FLOAT,
-                              true,
+                              false,
                               SIZE_IN_BYTES,
                               4 * 4); // offset: pos + uv = 4 * sizeof(float)
 
@@ -150,6 +242,8 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
                        getNFrames() * 6,
                        GL_UNSIGNED_INT,
                        NULL);
+
+        this.vertexDataBuffer.limit(this.vertexDataBuffer.capacity());
     }
 
     @Override
@@ -160,6 +254,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
         glDeleteBuffers(this.ebo);
 
         this.shader.close();
+        this.sprites.clear();
         this.textures.values().forEach(LWJGLTexture::close);
     }
 

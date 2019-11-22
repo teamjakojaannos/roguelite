@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.storage;
 
-import fi.jakojaannos.roguelite.engine.ecs.storage.ComponentStorage;
-import fi.jakojaannos.roguelite.engine.ecs.storage.EntityImpl;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockComponent;
 import org.junit.jupiter.api.Test;
@@ -15,7 +13,7 @@ class ComponentStorageTest {
     @CsvSource({"valid,", ",valid"})
     void addComponentThrowsIfAnyOfTheArgsAreNull(String entity, String component) {
         ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
-        assertThrows(NullPointerException.class,
+        assertThrows(AssertionError.class,
                      () -> storage.addComponent(entity == null ? null : new EntityImpl(0, 100),
                                                 component == null ? null : new MockComponent()));
     }

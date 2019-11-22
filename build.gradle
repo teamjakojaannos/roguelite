@@ -1,15 +1,19 @@
 plugins {
     id 'org.javamodularity.moduleplugin' version '1.5.0' apply false
+    id 'java'
+    id 'jacoco'
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'jacoco'
     apply plugin: 'org.javamodularity.moduleplugin'
-
-    repositories {
-        mavenCentral()
-    }
 
     dependencies {
         // Lombok
@@ -49,7 +53,26 @@ subprojects {
     }
 }
 
+task jacocoRootReport(type: JacocoReport) {
+    dependsOn(subprojects.test)
+
+    additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from files(subprojects.sourceSets.main.output)
+    executionData.from files(subprojects.jacocoTestReport.executionData)
+
+    reports {
+        html.enabled = true
+        xml.enabled = true
+    }
+
+    doFirst {
+        executionData.from files(executionData.findAll { it.exists() })
+    }
+}
+
 task testReport(type: TestReport) {
+    dependsOn(jacocoRootReport)
     destinationDir = file("$buildDir/reports/allTests")
     // Include the results from the 'test' task in all subprojects
     reportOn subprojects*.test.binResultsDir
