@@ -161,10 +161,8 @@ public class Roguelite extends GameBase<GameState> {
             double delta
     ) {
         super.tick(state, inputEvents, delta);
-        val entities = state.getWorld().getEntities();
         val inputs = state.getWorld().getResource(Inputs.class);
         val mouse = state.getWorld().getResource(Mouse.class);
-        entities.applyModifications();
 
         while (!inputEvents.isEmpty()) {
             val event = inputEvents.remove();
@@ -193,5 +191,6 @@ public class Roguelite extends GameBase<GameState> {
         }
 
         this.dispatcher.dispatch(state.getWorld(), delta);
+        state.getWorld().getEntities().applyModifications();
     }
 }

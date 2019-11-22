@@ -53,4 +53,33 @@ class IdSupplierTest {
         assertEquals(44, supplier.get());
         assertEquals(45, supplier.get());
     }
+
+    @Test
+    void getSuppliesCorrectIdsAfterFreedIds() {
+        IdSupplier supplier = new IdSupplier();
+        for (int i = 0; i <= 100; ++i) {
+            supplier.get();
+        }
+
+        supplier.free(42);
+        supplier.free(45);
+        supplier.free(44);
+        supplier.free(20);
+        supplier.free(43);
+        supplier.free(40);
+        supplier.free(41);
+        supplier.get();
+        supplier.get();
+        supplier.get();
+        supplier.get();
+        supplier.get();
+        supplier.get();
+        supplier.get();
+
+        assertEquals(101, supplier.get());
+        assertEquals(102, supplier.get());
+        assertEquals(103, supplier.get());
+        assertEquals(104, supplier.get());
+        assertEquals(105, supplier.get());
+    }
 }

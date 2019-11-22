@@ -104,7 +104,7 @@ class ComponentStorage<TComponent extends Component> {
                     .ifPresent(componentIndex -> {
                         this.components[componentIndex] = null;
                         this.idSupplier.free(componentIndex);
-                        this.entityComponentIndexLookup[componentIndex] = 0;
+                        this.entityComponentIndexLookup[entity.getId()] = 0;
                     });
         }
 
