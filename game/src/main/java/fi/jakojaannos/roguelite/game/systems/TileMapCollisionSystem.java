@@ -58,7 +58,13 @@ public class TileMapCollisionSystem implements ECSSystem {
                                                       .map(tm -> tm.getTile(pos))
                                                       .anyMatch(TileType::isSolid))
                           .map(TileCollisionEvent::new)
-                          .forEach(collider.tileCollisions::add);
+                          .forEach(event -> {
+                              if (!world.getEntities().hasComponent(entity, RecentCollisionTag.class)) {
+                                  world.getEntities().addComponentTo(entity, new RecentCollisionTag());
+                              }
+
+                              collider.tileCollisions.add(event);
+                          });
         });
     }
 }
