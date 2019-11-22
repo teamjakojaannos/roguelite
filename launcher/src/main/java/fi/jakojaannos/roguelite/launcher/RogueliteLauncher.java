@@ -59,9 +59,9 @@ public class RogueliteLauncher {
                                    }))
                      .with(Argument.withName("height")
                                    .withAction(params -> {
-                                       val width = params.parameter(Parameter.integer("height")
+                                       val height = params.parameter(Parameter.integer("height")
                                                                              .withMin(1));
-                                       this.setWindowWidth(width);
+                                       this.setWindowHeight(height);
                                    }))
                      .with(Argument.withName("windowMode")
                                    .withAction(params -> {
