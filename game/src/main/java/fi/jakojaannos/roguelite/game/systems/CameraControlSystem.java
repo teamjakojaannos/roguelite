@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class CameraControlSystem implements ECSSystem {
-
     public static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(Camera.class);
 
     @Override
