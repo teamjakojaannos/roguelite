@@ -15,6 +15,7 @@ public class PlayerArchetype {
         val entities = world.getEntities();
         val player = entities.createEntity();
         entities.addComponentTo(player, transform);
+        entities.addComponentTo(player, new Physics(transform));
         entities.addComponentTo(player, new Velocity());
         entities.addComponentTo(player, new CharacterInput());
         entities.addComponentTo(player, new CharacterAbilities());

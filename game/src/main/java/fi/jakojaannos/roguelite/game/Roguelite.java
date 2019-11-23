@@ -44,6 +44,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "simple_collision", "tile_collision")
                 .withSystem("character_to_tile_collision_handler", new CharacterToTileMapCollisionSystem(), "simple_collision", "tile_collision")
                 .withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler")
+                .withSystem("post_tick_physics", new CollisionEventCleanupSystem(), "collision_event_remover")
                 .build();
     }
 

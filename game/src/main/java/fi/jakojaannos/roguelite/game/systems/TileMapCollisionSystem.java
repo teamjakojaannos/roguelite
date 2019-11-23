@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.joml.Vector2i;
 
 import java.util.Collection;
 import java.util.List;
