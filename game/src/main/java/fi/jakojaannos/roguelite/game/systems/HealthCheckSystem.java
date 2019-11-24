@@ -4,20 +4,19 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
-import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.joml.Vector2d;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ProjectileMovementSystem implements ECSSystem {
+@Slf4j
+public class HealthCheckSystem implements ECSSystem {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            ProjectileStats.class, Transform.class, Velocity.class
+            Health.class
     );
 
     @Override
@@ -25,19 +24,22 @@ public class ProjectileMovementSystem implements ECSSystem {
         return REQUIRED_COMPONENTS;
     }
 
-    private final Vector2d tmpVelocity = new Vector2d();
-
     @Override
     public void tick(
             @NonNull Stream<Entity> entities,
             @NonNull World world,
             double delta
     ) {
-        entities.forEach(entity -> {
-            val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
-            val velocity = world.getEntities().getComponentOf(entity, Velocity.class).get();
-            transform.bounds.translate(velocity.velocity.mul(delta, tmpVelocity));
-        });
+        val cluster = world.getEntities();
 
+        entities.forEach(entity -> {
+
+            val hp = cluster.getComponentOf(entity, Health.class).get();
+            if (hp.currentHealth <= 0.0f) {
+                LOG.debug("Dead");
+                cluster.destroyEntity(entity);
+            }
+
+        });
     }
 }

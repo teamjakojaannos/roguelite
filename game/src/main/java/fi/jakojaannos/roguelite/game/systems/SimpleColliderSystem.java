@@ -17,28 +17,18 @@ public class SimpleColliderSystem implements ECSSystem {
             Collider.class, Transform.class
     );
 
-    private static final List<Class<? extends Resource>> REQUIRED_RESOURCES = List.of(
-    );
-
     @Override
-    public Collection<Class<? extends Component>> getRequiredComponents()
-    {
+    public Collection<Class<? extends Component>> getRequiredComponents() {
         return REQUIRED_COMPONENTS;
     }
 
 
     @Override
-    public Collection<Class<? extends Resource>> getRequiredResources()
-    {
-        return REQUIRED_RESOURCES;
-    }
-
-    @Override
     public void tick(
             @NonNull Stream<Entity> entities,
             @NonNull World world,
-            double delta)
-    {
+            double delta
+    ) {
         var entityList = entities.collect(Collectors.toList());
         val cluster = world.getEntities();
 

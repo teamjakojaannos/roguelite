@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.EnemyAI;
+import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import lombok.NonNull;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class CharacterAIControllerSystem implements ECSSystem {
     private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            CharacterInput.class, EnemyAI.class, Transform.class
+            CharacterInput.class, FollowerEnemyAI.class, Transform.class
     );
 
     private static final List<Class<? extends Resource>> REQUIRED_RESOURCES = List.of(

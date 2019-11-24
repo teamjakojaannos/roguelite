@@ -4,6 +4,9 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entities;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 
+import fi.jakojaannos.roguelite.game.data.archetypes.DummyArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.StalkerArchetype;
 import org.joml.Vector2d;
 
 import java.util.Random;
@@ -32,42 +35,38 @@ public class SpawnerComponent implements Component {
     }
 
     public static final EntityFactory FACTORY_DUMMY = (entities, spawnerPos, spawnerComponent) -> {
-        Vector2d vec = getRandomSpotAround(spawnerPos, spawnerComponent.maxSpawnDistance, spawnerComponent.random, spawnerComponent.temp);
+        Vector2d vec = getRandomSpotAround(
+                spawnerPos,
+                spawnerComponent.maxSpawnDistance,
+                spawnerComponent.random,
+                spawnerComponent.temp
+        );
 
-        Entity e = entities.createEntity();
-        entities.addComponentTo(e, new Transform(vec.x, vec.y));
-        return e;
+        return DummyArchetype.create(entities, new Transform(vec.x, vec.y));
     };
 
 
     public static final EntityFactory FACTORY_FOLLOWER = (entities, spawnerPos, spawnerComponent) -> {
-        Vector2d vec = getRandomSpotAround(spawnerPos, spawnerComponent.maxSpawnDistance, spawnerComponent.random, spawnerComponent.temp);
+        Vector2d vec = getRandomSpotAround(
+                spawnerPos,
+                spawnerComponent.maxSpawnDistance,
+                spawnerComponent.random,
+                spawnerComponent.temp
+        );
 
-        Entity e = entities.createEntity();
-        entities.addComponentTo(e, new Transform(vec.x, vec.y));
-        entities.addComponentTo(e, new Velocity());
-        entities.addComponentTo(e, new CharacterInput());
-        entities.addComponentTo(e, new CharacterStats(
-                4.0,
-                100.0,
-                800.0, 0, 0
-        ));
-        entities.addComponentTo(e, new EnemyAI(25.0f, 1.0f));
-
-        return e;
+        return FollowerArchetype.create(entities, vec.x, vec.y);
     };
 
 
     public static final EntityFactory FACTORY_STALKER = (entities, spawnerPos, spawnerComponent) -> {
-        Vector2d vec = getRandomSpotAround(spawnerPos, spawnerComponent.maxSpawnDistance, spawnerComponent.random, spawnerComponent.temp);
+        Vector2d vec = getRandomSpotAround(
+                spawnerPos,
+                spawnerComponent.maxSpawnDistance,
+                spawnerComponent.random,
+                spawnerComponent.temp
+        );
 
-        Entity e = entities.createEntity();
-        entities.addComponentTo(e, new Transform(vec.x, vec.y));
-        entities.addComponentTo(e, new Velocity());
-        entities.addComponentTo(e, new CharacterInput());
-        entities.addComponentTo(e, new CharacterStats());
-        entities.addComponentTo(e, new StalkerAI(250.0f, 50.0f, 8.0f));
-        return e;
+        return StalkerArchetype.create(entities, vec.x, vec.y);
     };
 
     /**

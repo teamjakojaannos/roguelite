@@ -46,9 +46,7 @@ public class StalkerAIControllerSystemTest {
         this.stalkerStats = new CharacterStats(
                 1.0,
                 100.0,
-                800.0,
-                0.0,
-                0.0
+                800.0
         );
         entities.addComponentTo(stalker, stalkerStats);
 

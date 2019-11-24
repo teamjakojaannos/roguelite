@@ -10,7 +10,10 @@ import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.GenerateStream;
 import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.archetypes.DummyArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.StalkerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
@@ -45,6 +48,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("character_to_tile_collision_handler", new CharacterToTileMapCollisionSystem(), "simple_collision", "tile_collision")
                 .withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler")
                 .withSystem("post_tick_physics", new PostUpdatePhysicsSystem(), "collision_event_remover")
+                .withSystem("health_check", new HealthCheckSystem(), "character_attack")
                 .build();
     }
 
@@ -52,8 +56,8 @@ public class Roguelite extends GameBase<GameState> {
         val entities = Entities.createNew(256, 32);
         val state = new GameState(World.createNew(entities));
 
-        val player = PlayerArchetype.create(state.getWorld(),
-                                            new Transform(4.0, 4.0));
+        val player = PlayerArchetype.create(entities,
+                new Transform(4.0, 4.0));
         state.getWorld().getResource(Players.class).player = player;
 
         val camera = entities.createEntity();
@@ -67,61 +71,28 @@ public class Roguelite extends GameBase<GameState> {
         entities.addComponentTo(crosshair, new Transform(-999.0, -999.0, 0.5, 0.5, 0.25, 0.25));
         entities.addComponentTo(crosshair, new CrosshairTag());
 
-        // Spawn "followers"
-        final double x_max = 20.0f, y_max = 15.0f;
-        Random random = new Random(123);
 
-        for (int i = 0; i < 0; i++) {
-            var e = entities.createEntity();
-            double xpos = random.nextDouble() * x_max;
-            double ypos = random.nextDouble() * y_max;
-            entities.addComponentTo(e, new Transform(xpos, ypos));
-            entities.addComponentTo(e, new Velocity());
-            entities.addComponentTo(e, new CharacterInput());
-            entities.addComponentTo(e, new CharacterStats(
-                    4.0,
-                    100.0,
-                    800.0,
-                    4.0,
-                    20.0
-            ));
+        FollowerArchetype.create(entities, new Transform(5.0f, 1.0f));
+        StalkerArchetype.create(entities, new Transform(1.0f, 2.0f));
+        DummyArchetype.create(entities, new Transform(2.0f, 7.0f));
+        DummyArchetype.create(entities, new Transform(3.0f, 7.0f));
+        DummyArchetype.create(entities, new Transform(4.0f, 7.0f));
+        DummyArchetype.create(entities, new Transform(5.0f, 7.0f));
 
-            entities.addComponentTo(e, new EnemyAI(25.0f, 1.0f));
-        }
+        val spawner_stalker = entities.createEntity();
+        entities.addComponentTo(spawner_stalker, new Transform(15.0f, 15.0f));
+        entities.addComponentTo(spawner_stalker, new SpawnerComponent(
+                10.0f,
+                SpawnerComponent.FACTORY_STALKER)
+        );
 
+        val spawner_follower = entities.createEntity();
+        entities.addComponentTo(spawner_follower, new Transform(2.0f, 15.0f));
+        entities.addComponentTo(spawner_follower, new SpawnerComponent(
+                5.0f,
+                SpawnerComponent.FACTORY_FOLLOWER)
+        );
 
-        // Spawn stalker(s)
-        /*val e = entities.createEntity();
-        entities.addComponentTo(e, new Transform(10.0f, 15.0f, 0.75f));
-        entities.addComponentTo(e, new Velocity());
-        entities.addComponentTo(e, new CharacterInput());
-        entities.addComponentTo(e, new CharacterStats(
-                1.0,
-                100.0,
-                800.0,
-                4.0,
-                20.0
-        ));
-        entities.addComponentTo(e,
-                new StalkerAI(250.0f, 50.0f, 8.0f));*/
-
-        // Create spawner
-
-        //var spawn = entities.createEntity();
-        //entities.addComponentTo(spawn, new Transform(5.0f, 15.0f, 0.5f));
-        //entities.addComponentTo(spawn, new SpawnerComponent(0.7f, SpawnerComponent.FACTORY_DUMMY, 5.0f, 543));
-
-        //var spawn2 = entities.createEntity();
-        //entities.addComponentTo(spawn2, new Transform(15.0f, 5.0f, 0.5f));
-        //entities.addComponentTo(spawn2, new SpawnerComponent(2.0f, SpawnerComponent.FACTORY_FOLLOWER, 2.0f, 123));
-
-        // create dummy targets
-        for (int i = 0; i < 5; i++) {
-            Entity dummy = entities.createEntity();
-            entities.addComponentTo(dummy, new Transform(3.0f + i * 2.0f, 5.0f));
-            entities.addComponentTo(dummy, new Health());
-            entities.addComponentTo(dummy, new Collider());
-        }
 
         val emptiness = new TileType(0, false);
         val floor = new TileType(1, false);
@@ -133,10 +104,10 @@ public class Roguelite extends GameBase<GameState> {
         val roomWidth = 50;
         val roomHeight = 50;
         GenerateStream.ofCoordinates(startX, startY, roomWidth, roomHeight)
-                      .filter(pos -> pos.x == startX + roomWidth - 1 || pos.x == startX || pos.y == startY + roomHeight - 1 || pos.y == startY)
-                      .forEach(pos -> tileMap.setTile(pos, wall));
+                .filter(pos -> pos.x == startX + roomWidth - 1 || pos.x == startX || pos.y == startY + roomHeight - 1 || pos.y == startY)
+                .forEach(pos -> tileMap.setTile(pos, wall));
         GenerateStream.ofCoordinates(startX + 1, startY + 1, roomWidth - 2, roomHeight - 2)
-                      .forEach(pos -> tileMap.setTile(pos, floor));
+                .forEach(pos -> tileMap.setTile(pos, floor));
 
         val levelEntity = entities.createEntity();
         entities.addComponentTo(levelEntity, new TileMapLayer(tileMap));

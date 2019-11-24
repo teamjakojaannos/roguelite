@@ -4,7 +4,11 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectile;
+import fi.jakojaannos.roguelite.game.data.components.BasicWeaponStats;
+import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.NonNull;
 import lombok.val;
 import org.joml.Vector2d;
@@ -15,9 +19,13 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 public class CharacterAttackSystem implements ECSSystem {
+    private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
+            Transform.class, CharacterInput.class, CharacterAbilities.class, BasicWeaponStats.class
+    );
+
     @Override
     public Collection<Class<? extends Component>> getRequiredComponents() {
-        return List.of(Transform.class, CharacterInput.class, CharacterAbilities.class, CharacterStats.class);
+        return REQUIRED_COMPONENTS;
     }
 
     private final Vector2d tmpSpreadOffset = new Vector2d();
@@ -32,31 +40,25 @@ public class CharacterAttackSystem implements ECSSystem {
         val cluster = world.getEntities();
         entities.forEach(entity -> {
             val input = cluster.getComponentOf(entity, CharacterInput.class).get();
-            val stats = cluster.getComponentOf(entity, CharacterStats.class).get();
             val abilities = cluster.getComponentOf(entity, CharacterAbilities.class).get();
+            val weapon = cluster.getComponentOf(entity, BasicWeaponStats.class).get();
 
-            if (input.attack && abilities.attackTimer >= 1.0 / stats.attackRate) {
+            if (input.attack && abilities.attackTimer >= 1.0 / weapon.attackRate) {
                 val character = cluster.getComponentOf(entity, Transform.class).get();
 
-                val projectile = cluster.createEntity();
-                val projectileX = character.bounds.minX + character.getWidth() / 2.0;
-                val projectileY = character.bounds.minY + character.getHeight() / 2.0;
-                val transform = new Transform(projectileX, projectileY, 0.3, 0.3, 0.15, 0.15);
-                cluster.addComponentTo(projectile, new ProjectileTag());
-                cluster.addComponentTo(projectile, new Physics(transform));
-                cluster.addComponentTo(projectile, new Collider());
-                cluster.addComponentTo(projectile, transform);
-
+                val projectileX = character.getCenterX();
+                val projectileY = character.getCenterY();
 
                 val direction = new Vector2d(abilities.attackTarget)
                         .sub(projectileX, projectileY)
                         .normalize();
                 tmpSpreadOffset.set(direction)
-                               .perpendicular()
-                               .mul((random.nextDouble() * 2.0 - 1.0) * stats.attackSpread);
+                        .perpendicular()
+                        .mul((random.nextDouble() * 2.0 - 1.0) * weapon.attackSpread);
 
-                cluster.addComponentTo(projectile, new Velocity(direction.mul(stats.attackProjectileSpeed)
-                                                                         .add(tmpSpreadOffset)));
+                BasicProjectile.create(world, projectileX, projectileY, direction, weapon.attackProjectileSpeed, tmpSpreadOffset);
+
+
                 abilities.attackTimer = 0.0;
             }
             abilities.attackTimer += delta;

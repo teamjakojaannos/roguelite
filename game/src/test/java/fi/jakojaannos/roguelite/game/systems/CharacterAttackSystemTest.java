@@ -13,6 +13,7 @@ class CharacterAttackSystemTest {
     private CharacterInput characterInput;
     private CharacterStats characterStats;
     private CharacterAbilities characterAbilities;
+    private BasicWeaponStats weaponStats;
 
     @BeforeEach
     void beforeEach() {
@@ -28,11 +29,13 @@ class CharacterAttackSystemTest {
         this.characterInput.attack = false;
         this.characterStats = new CharacterStats();
         this.characterAbilities = new CharacterAbilities();
+        this.weaponStats = new BasicWeaponStats();
         entities.addComponentTo(player, new Transform(0.0, 0.0, 0.0));
         entities.addComponentTo(player, new Velocity());
         entities.addComponentTo(player, this.characterInput);
         entities.addComponentTo(player, this.characterAbilities);
         entities.addComponentTo(player, this.characterStats);
+        entities.addComponentTo(player, this.weaponStats);
 
         entities.applyModifications();
 
@@ -46,31 +49,31 @@ class CharacterAttackSystemTest {
     @Test
     void characterDoesNotShootWhenInputIsFalse() {
         characterAbilities.attackTarget.set(10.0, 10.0);
-        characterStats.attackRate = 1.0;
+        weaponStats.attackRate = 1.0;
 
         characterInput.attack = false;
         this.dispatcher.dispatch(this.world, 0.02);
         this.world.getEntities().applyModifications();
 
-        assertEquals(0, this.world.getEntities().getEntitiesWith(ProjectileTag.class).count());
+        assertEquals(0, this.world.getEntities().getEntitiesWith(ProjectileStats.class).count());
     }
 
     @Test
     void characterShootsWhenInputIsTrue() {
         characterAbilities.attackTarget.set(10.0, 10.0);
-        characterStats.attackRate = 1.0;
+        weaponStats.attackRate = 1.0;
 
         characterInput.attack = true;
         this.dispatcher.dispatch(this.world, 0.02);
         this.world.getEntities().applyModifications();
 
-        assertEquals(1, this.world.getEntities().getEntitiesWith(ProjectileTag.class).count());
+        assertEquals(1, this.world.getEntities().getEntitiesWith(ProjectileStats.class).count());
     }
 
     @Test
     void attackRateLimitsWhenCharacterCanShoot() {
         characterAbilities.attackTarget.set(10.0, 10.0);
-        characterStats.attackRate = 1.0;
+        weaponStats.attackRate = 1.0;
 
         characterInput.attack = true;
         for (int i = 0; i < 175; ++i) {
@@ -78,13 +81,13 @@ class CharacterAttackSystemTest {
             this.world.getEntities().applyModifications();
         }
 
-        assertEquals(4, this.world.getEntities().getEntitiesWith(ProjectileTag.class).count());
+        assertEquals(4, this.world.getEntities().getEntitiesWith(ProjectileStats.class).count());
     }
 
     @Test
     void characterStopsAttackingWhenInputIsSetToFalse() {
         characterAbilities.attackTarget.set(10.0, 10.0);
-        characterStats.attackRate = 1.0;
+        weaponStats.attackRate = 1.0;
 
         characterInput.attack = true;
         this.dispatcher.dispatch(this.world, 0.02);
@@ -96,6 +99,6 @@ class CharacterAttackSystemTest {
             this.world.getEntities().applyModifications();
         }
 
-        assertEquals(1, this.world.getEntities().getEntitiesWith(ProjectileTag.class).count());
+        assertEquals(1, this.world.getEntities().getEntitiesWith(ProjectileStats.class).count());
     }
 }

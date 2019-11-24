@@ -6,13 +6,8 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class Health implements Component {
+public class ProjectileStats implements Component {
 
-    public double maxHealth = 100.0, currentHealth = 100.0;
-
-    public Health(double maxHp) {
-        this.maxHealth = maxHp;
-        this.currentHealth = maxHp;
-    }
+    public double damage = 1.0;
 
 }

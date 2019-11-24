@@ -6,8 +6,10 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class CharacterStats implements Component {
-    public double speed = 4.0;
-    public double acceleration = 1.0;
-    public double friction = 2.0;
+public class BasicWeaponStats implements Component {
+
+    public double attackRate = 2.0; // Attacks per second
+    public double attackProjectileSpeed = 20.0;
+    public double attackSpread = 2.5;
+
 }

@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.EnemyAI;
+import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
@@ -38,7 +38,7 @@ public class CharacterAIControllerSystemTest {
         this.followerPos = new Transform();
         entities.addComponentTo(this.follower, followerInput);
         entities.addComponentTo(this.follower, followerPos);
-        entities.addComponentTo(this.follower, new EnemyAI(100.0f, 0.0f));
+        entities.addComponentTo(this.follower, new FollowerEnemyAI(100.0f, 0.0f));
 
         entities.applyModifications();
     }
