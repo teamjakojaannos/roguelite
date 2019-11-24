@@ -15,15 +15,18 @@ public class EntityStorage {
     private EntityImpl[] entities;
 
     private final IdSupplier idSupplier = new IdSupplier();
+    private int entityCount;
 
     public EntityStorage(int capacity) {
         this.capacity = 0;
+        this.entityCount = 0;
         this.entities = new EntityImpl[0];
         resize(capacity);
     }
 
     EntityImpl create(int maxComponentTypes) {
         val entityId = this.idSupplier.get();
+        this.entityCount += 1;
         return new EntityImpl(entityId, maxComponentTypes);
     }
 
@@ -32,6 +35,7 @@ public class EntityStorage {
     }
 
     void remove(@NonNull EntityImpl entity) {
+        this.entityCount -= 1;
         this.idSupplier.free(entity.getId());
         this.entities[entity.getId()] = null;
     }
@@ -43,5 +47,9 @@ public class EntityStorage {
 
     public Stream<EntityImpl> stream() {
         return Arrays.stream(this.entities).filter(Objects::nonNull);
+    }
+
+    public boolean isFull() {
+        return this.entityCount >= this.capacity;
     }
 }

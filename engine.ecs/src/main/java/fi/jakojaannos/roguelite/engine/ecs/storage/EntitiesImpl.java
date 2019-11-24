@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entities;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.lang.reflect.Array;
@@ -15,6 +16,7 @@ import java.util.stream.Stream;
  * A cluster of entities. Contains storage for components in all of the entities in this cluster.
  * Provides accessors for entity components.
  */
+@Slf4j
 public class EntitiesImpl implements Entities {
     private final int maxComponentTypes;
     private final EntityStorage entityStorage;
@@ -34,7 +36,8 @@ public class EntitiesImpl implements Entities {
     @Override
     public Entity createEntity() {
         val entity = this.entityStorage.create(this.maxComponentTypes);
-        if (entity.getId() >= this.entityCapacity) {
+        LOG.debug("Creating entity. EntityID: {}, capacity: {}", entity.getId(), this.entityCapacity);
+        if (this.entityStorage.isFull()) {
             resize(this.entityCapacity * 2);
         }
 
@@ -149,6 +152,7 @@ public class EntitiesImpl implements Entities {
     }
 
     private void resize(int entityCapacity) {
+        LOG.debug("Resizing Entity cluster... Size: {} -> {}", this.entityCapacity, entityCapacity);
         this.entityCapacity = entityCapacity;
         this.entityStorage.resize(entityCapacity);
         this.componentTypes.forEach(storage -> storage.resize(entityCapacity));

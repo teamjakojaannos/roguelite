@@ -7,10 +7,8 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.function.Function;
 
 @Slf4j
@@ -90,6 +88,10 @@ class ComponentStorage<TComponent extends Component> {
 
         void put(EntityImpl entity, TComponent component) {
             val componentIndex = this.idSupplier.get();
+            if (componentIndex >= this.entityCapacity) {
+                resize(this.entityCapacity * 2);
+            }
+
             this.entityComponentIndexLookup[entity.getId()] = componentIndex + 1;
             this.components[componentIndex] = component;
         }
@@ -109,9 +111,11 @@ class ComponentStorage<TComponent extends Component> {
         }
 
         private void resize(int entityCapacity) {
-            this.entityCapacity = entityCapacity;
-            this.entityComponentIndexLookup = Arrays.copyOf(this.entityComponentIndexLookup, this.entityCapacity);
-            this.components = Arrays.copyOf(this.components, this.entityCapacity);
+            if (entityCapacity > this.entityCapacity) {
+                this.entityCapacity = entityCapacity;
+                this.entityComponentIndexLookup = Arrays.copyOf(this.entityComponentIndexLookup, this.entityCapacity);
+                this.components = Arrays.copyOf(this.components, this.entityCapacity);
+            }
         }
     }
 }
