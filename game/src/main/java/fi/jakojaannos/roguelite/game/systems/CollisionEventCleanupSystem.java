@@ -43,7 +43,6 @@ public class CollisionEventCleanupSystem implements ECSSystem {
 
             val collider = world.getEntities().getComponentOf(entity, Collider.class).get();
             collider.collisions.clear();
-            collider.tileCollisions.clear();
         });
     }
 }

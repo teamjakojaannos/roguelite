@@ -60,10 +60,6 @@ public class CharacterMovementSystem implements ECSSystem {
                 velocity.velocity.set(Math.signum(xVel) * Math.max(0.0f, Math.abs(xVel) - decelerationThisFrame),
                                       Math.signum(yVel) * Math.max(0.0f, Math.abs(yVel) - decelerationThisFrame));
             }
-
-            val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
-            velocity.velocity.mul(delta, tmpVelocity);
-            transform.bounds.translate(tmpVelocity);
         });
     }
 }

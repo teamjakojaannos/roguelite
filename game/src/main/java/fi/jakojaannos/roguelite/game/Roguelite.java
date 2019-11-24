@@ -1,7 +1,10 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
@@ -25,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Queue;
-import java.util.Random;
 
 @Slf4j
 public class Roguelite extends GameBase<GameState> {
@@ -34,18 +36,15 @@ public class Roguelite extends GameBase<GameState> {
     public Roguelite() {
         this.dispatcher = new DispatcherBuilder()
                 .withSystem("player_input", new PlayerInputSystem())
-                .withSystem("projectile_move", new ProjectileMovementSystem())
                 .withSystem("character_move", new CharacterMovementSystem(), "player_input")
                 .withSystem("character_attack", new CharacterAttackSystem(), "player_input")
+                .withSystem("process_move", new ApplyVelocitySystem(), "character_move", "character_attack")
                 .withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
                 .withSystem("ai_move", new CharacterAIControllerSystem(), "character_move")
                 .withSystem("stalker_move", new StalkerAIControllerSystem())
                 .withSystem("camera", new CameraControlSystem(), "character_move")
                 .withSystem("spawner", new SpawnerSystem())
-                .withSystem("simple_collision", new SimpleColliderSystem())
-                .withSystem("tile_collision", new TileMapCollisionSystem())
-                .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "simple_collision", "tile_collision")
-                .withSystem("character_to_tile_collision_handler", new CharacterToTileMapCollisionSystem(), "simple_collision", "tile_collision")
+                .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "process_move")
                 .withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler")
                 .withSystem("post_tick_physics", new PostUpdatePhysicsSystem(), "collision_event_remover")
                 .withSystem("health_check", new HealthCheckSystem(), "character_attack")
@@ -57,7 +56,7 @@ public class Roguelite extends GameBase<GameState> {
         val state = new GameState(World.createNew(entities));
 
         val player = PlayerArchetype.create(entities,
-                new Transform(4.0, 4.0));
+                                            new Transform(4.0, 4.0));
         state.getWorld().getResource(Players.class).player = player;
 
         val camera = entities.createEntity();
@@ -104,10 +103,10 @@ public class Roguelite extends GameBase<GameState> {
         val roomWidth = 50;
         val roomHeight = 50;
         GenerateStream.ofCoordinates(startX, startY, roomWidth, roomHeight)
-                .filter(pos -> pos.x == startX + roomWidth - 1 || pos.x == startX || pos.y == startY + roomHeight - 1 || pos.y == startY)
-                .forEach(pos -> tileMap.setTile(pos, wall));
+                      .filter(pos -> pos.x == startX + roomWidth - 1 || pos.x == startX || pos.y == startY + roomHeight - 1 || pos.y == startY)
+                      .forEach(pos -> tileMap.setTile(pos, wall));
         GenerateStream.ofCoordinates(startX + 1, startY + 1, roomWidth - 2, roomHeight - 2)
-                .forEach(pos -> tileMap.setTile(pos, floor));
+                      .forEach(pos -> tileMap.setTile(pos, floor));
 
         val levelEntity = entities.createEntity();
         entities.addComponentTo(levelEntity, new TileMapLayer(tileMap));

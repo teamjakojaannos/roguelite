@@ -46,10 +46,7 @@ public class SimpleColliderSystem implements ECSSystem {
                     collider.collisions.add(new CollisionEvent(entityB));
                     if (!cluster.hasComponent(entityA, RecentCollisionTag.class))
                         cluster.addComponentTo(entityA, new RecentCollisionTag());
-
                 }
-
-
             }
         }
 

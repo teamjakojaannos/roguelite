@@ -36,7 +36,6 @@ public class EntitiesImpl implements Entities {
     @Override
     public Entity createEntity() {
         val entity = this.entityStorage.create(this.maxComponentTypes);
-        LOG.debug("Creating entity. EntityID: {}, capacity: {}", entity.getId(), this.entityCapacity);
         if (this.entityStorage.isFull()) {
             resize(this.entityCapacity * 2);
         }

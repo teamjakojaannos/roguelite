@@ -39,31 +39,4 @@ class CollisionEventCleanupSystemTest {
 
         assertTrue(collider.collisions.isEmpty());
     }
-
-    @Test
-    void tileCollisionEventsAreCleanedUp() {
-        collider.tileCollisions.add(new TileCollisionEvent(new Vector2i()));
-        collider.tileCollisions.add(new TileCollisionEvent(new Vector2i()));
-        collider.tileCollisions.add(new TileCollisionEvent(new Vector2i()));
-
-        dispatcher.dispatch(world, 0.02);
-
-        assertTrue(collider.tileCollisions.isEmpty());
-    }
-
-    @Test
-    void bothTypesOfCollisionEventsAreCleanedUp() {
-        Entity other = world.getEntities().createEntity();
-        collider.collisions.add(new CollisionEvent(other));
-        collider.tileCollisions.add(new TileCollisionEvent(new Vector2i()));
-        collider.collisions.add(new CollisionEvent(other));
-        collider.tileCollisions.add(new TileCollisionEvent(new Vector2i()));
-        collider.collisions.add(new CollisionEvent(other));
-        collider.tileCollisions.add(new TileCollisionEvent(new Vector2i()));
-
-        dispatcher.dispatch(world, 0.02);
-
-        assertTrue(collider.collisions.isEmpty());
-        assertTrue(collider.tileCollisions.isEmpty());
-    }
 }
