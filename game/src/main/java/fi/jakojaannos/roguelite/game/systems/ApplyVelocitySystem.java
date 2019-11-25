@@ -128,12 +128,14 @@ public class ApplyVelocitySystem implements ECSSystem {
         val maxDistance = velocity.length();
         val direction = velocity.normalize(tmpDirection);
         var distanceRemaining = maxDistance;
+        var currentBounds = new Rectangled(initialBounds);
         while (distanceRemaining > stepSize) {
-            val distanceMoved = tryMove(world, entity, collider, stepSize, direction, distanceRemaining, initialBounds, collisions, overlaps, actualOverlaps, targetBounds);
+            val distanceMoved = tryMove(world, entity, collider, stepSize, direction, distanceRemaining, currentBounds, collisions, overlaps, actualOverlaps, targetBounds);
 
             if (distanceMoved < stepSize) {
                 break;
             }
+            currentBounds = new Rectangled(targetBounds);
             distanceRemaining -= distanceMoved;
         }
 
@@ -171,7 +173,7 @@ public class ApplyVelocitySystem implements ECSSystem {
                 gatherOverlapEvents(overlaps, testTargetBounds, actualOverlaps);
             } else {
                 val actualVelocity = direction.mul(steps * stepSize, tmpVelocity);
-                targetBounds = initialBounds.translate(actualVelocity, targetBounds);
+                initialBounds.translate(actualVelocity, targetBounds);
 
                 handleCollision(world, entity, collider, targetBounds, actualCollision.get(), overlaps);
                 break;
