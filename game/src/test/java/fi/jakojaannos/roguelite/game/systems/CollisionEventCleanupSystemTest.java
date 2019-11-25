@@ -1,10 +1,8 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.game.data.TileCollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
-import fi.jakojaannos.roguelite.game.data.components.CollisionEvent;
-import org.joml.Vector2i;
+import fi.jakojaannos.roguelite.game.data.CollisionEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

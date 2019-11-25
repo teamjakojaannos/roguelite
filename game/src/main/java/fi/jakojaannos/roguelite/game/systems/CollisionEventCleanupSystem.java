@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.systems;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.TileCollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
-import fi.jakojaannos.roguelite.game.data.components.CollisionEvent;
+import fi.jakojaannos.roguelite.game.data.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 import lombok.NonNull;
 import lombok.val;

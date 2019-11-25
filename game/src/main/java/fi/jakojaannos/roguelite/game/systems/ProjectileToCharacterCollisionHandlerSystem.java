@@ -1,6 +1,11 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.Collision;
+import fi.jakojaannos.roguelite.game.data.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
@@ -27,30 +32,26 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
-            double delta
+            @NonNull final Stream<Entity> entities,
+            @NonNull final World world,
+            final double delta
     ) {
-
-        val cluster = world.getEntities();
-
+        val entityManager = world.getEntities();
         entities.forEach(entity -> {
+            val collider = entityManager.getComponentOf(entity, Collider.class).get();
+            val stats = entityManager.getComponentOf(entity, ProjectileStats.class).get();
 
-            val collider = cluster.getComponentOf(entity, Collider.class).get();
-            val stats = cluster.getComponentOf(entity, ProjectileStats.class).get();
-
-            for (val event : collider.collisions) {
-                if (cluster.hasComponent(event.other, Health.class)) {
-
-                    val hp = cluster.getComponentOf(event.other, Health.class).get();
-                    LOG.debug("Hit!");
-                    hp.currentHealth -= stats.damage;
-                    cluster.destroyEntity(entity);
-                }
-            }
-
-
+            collider.getCollisions()
+                    .filter(Collision::isEntity)
+                    .map(Collision::getAsEntityCollision)
+                    .forEach(collision -> {
+                        if (entityManager.hasComponent(collision.getOther(), Health.class)) {
+                            val health = entityManager.getComponentOf(collision.getOther(), Health.class).get();
+                            LOG.debug("Hit!");
+                            health.currentHealth -= stats.damage;
+                            entityManager.destroyEntity(entity);
+                        }
+                    });
         });
-
     }
 }
