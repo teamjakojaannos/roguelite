@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 public class BasicWeaponStats implements Component {
 
     public double attackRate = 2.0; // Attacks per second
-    public double attackProjectileSpeed = 20.0;
+    public double attackProjectileSpeed = 40.0;
     public double attackSpread = 2.5;
 
 }

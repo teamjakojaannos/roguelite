@@ -10,14 +10,18 @@ import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Rectangled;
 import org.joml.Vector2d;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 public class ApplyVelocitySystem implements ECSSystem {
     @Override
     public Collection<Class<? extends Component>> getRequiredComponents() {
@@ -25,9 +29,7 @@ public class ApplyVelocitySystem implements ECSSystem {
     }
 
     private final Vector2d tmpVelocity = new Vector2d();
-    private final Vector2d tmpDirection = new Vector2d();
     private final Rectangled tmpTargetBounds = new Rectangled();
-    private final Rectangled tmpTestTargetBounds = new Rectangled();
 
     @Override
     public void tick(
@@ -35,10 +37,6 @@ public class ApplyVelocitySystem implements ECSSystem {
             @NonNull final World world,
             final double delta
     ) {
-        val entitiesWithCollider = world.getEntities()
-                                        .getEntitiesWith(List.of(Collider.class, Transform.class))
-                                        .collect(Collectors.toUnmodifiableList());
-
         val tileMapLayers = world.getEntities()
                                  .getEntitiesWith(TileMapLayer.class)
                                  .map(Entities.EntityComponentPair::getComponent)
@@ -50,163 +48,149 @@ public class ApplyVelocitySystem implements ECSSystem {
             val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
             val velocity = world.getEntities().getComponentOf(entity, Velocity.class).get();
 
-
-            var targetBounds = calculateDestinationBounds(transform, velocity, delta);
-            if (world.getEntities().hasComponent(entity, Collider.class)) {
-                val collider = world.getEntities().getComponentOf(entity, Collider.class).get();
-                targetBounds = moveWithCollisionHandling(world, entitiesWithCollider, tileMapLayers, entity, transform, velocity, collider, targetBounds);
+            if (velocity.velocity.length() < 0.001) {
+                return;
             }
 
-            move(transform, targetBounds);
+            final Rectangled targetBounds;
+            if (world.getEntities().hasComponent(entity, Collider.class)) {
+                targetBounds = updateTargetBoundsWithCollisionDetection(delta, tileMapLayers, transform, velocity.velocity);
+            } else {
+                velocity.velocity.mul(delta, tmpVelocity);
+                targetBounds = transform.bounds.translate(tmpVelocity, new Rectangled());
+            }
+
+            applyBounds(targetBounds, transform.bounds);
         });
     }
 
-    private void move(
-            @NonNull final Transform transform,
-            @NonNull final Rectangled targetBounds
-    ) {
-        transform.bounds.minX = targetBounds.minX;
-        transform.bounds.minY = targetBounds.minY;
-        transform.bounds.maxX = targetBounds.maxX;
-        transform.bounds.maxY = targetBounds.maxY;
-    }
-
-    private Rectangled moveWithCollisionHandling(
-            @NonNull final World world,
-            @NonNull final List<Entity> entitiesWithCollider,
+    private Rectangled updateTargetBoundsWithCollisionDetection(
+            final double delta,
             @NonNull final List<TileMap<TileType>> tileMapLayers,
-            @NonNull final Entity entity,
             @NonNull final Transform transform,
-            @NonNull final Velocity velocity,
-            @NonNull final Collider collider,
-            @NonNull Rectangled targetBounds
+            @NonNull final Vector2d velocityRaw
     ) {
-        val collisions = new ArrayList<CollisionCandidate>();
-        val overlaps = new ArrayList<CollisionCandidate>();
+        val direction = velocityRaw.normalize(new Vector2d());
+        val maxDistance = velocityRaw.length() * delta;
 
-        // TODO: Now, we are checking only coordinates we would end up after moving all
-        //  the way to the targetBounds. Stretch the collider and do more refined checks
-        //  to catch more collision cases with fast-moving entities.
-        gatherPossiblyCollidingEntities(world, entitiesWithCollider, entity, transform, collider, collisions, overlaps);
-        gatherOverlappingTileBounds(tileMapLayers, transform.bounds, targetBounds, collisions);
-
-        if (!collisions.isEmpty()) {
-            targetBounds = moveUntilCollision(world,
-                                              entity,
-                                              collider,
-                                              transform.bounds,
-                                              velocity.velocity,
-                                              collisions,
-                                              overlaps,
-                                              targetBounds);
-        }
-
-        return targetBounds;
-    }
-
-    private Rectangled calculateDestinationBounds(
-            @NonNull final Transform transform,
-            @NonNull final Velocity velocity,
-            final double delta
-    ) {
-        velocity.velocity.mul(delta, tmpVelocity);
-        return transform.bounds.translate(tmpVelocity, tmpTargetBounds);
-    }
-
-    private Rectangled moveUntilCollision(
-            @NonNull final World world,
-            @NonNull final Entity entity,
-            @NonNull final Collider collider,
-            @NonNull final Rectangled initialBounds,
-            @NonNull final Vector2d velocity,
-            @NonNull final List<CollisionCandidate> collisions,
-            @NonNull final List<CollisionCandidate> overlaps,
-            @NonNull Rectangled targetBounds
-    ) {
-        val actualOverlaps = new TreeSet<CollisionCandidate>(Comparator.comparing(candidate -> candidate.getOther().getId()));
+        val initialBounds = transform.bounds;
         val stepSize = 0.01;
-        val maxDistance = velocity.length();
-        val direction = velocity.normalize(tmpDirection);
-        var distanceRemaining = maxDistance;
-        var currentBounds = new Rectangled(initialBounds);
-        while (distanceRemaining > stepSize) {
-            val distanceMoved = tryMove(world, entity, collider, stepSize, direction, distanceRemaining, currentBounds, collisions, overlaps, actualOverlaps, targetBounds);
 
-            if (distanceMoved < stepSize) {
+        val targetBounds = new Rectangled();
+        var distanceRemaining = maxDistance;
+        val currentBounds = new Rectangled(initialBounds);
+        while (distanceRemaining > 0.0) {
+            val distanceMoved = tryMove(tileMapLayers, direction, stepSize, currentBounds, targetBounds);
+
+            if (distanceMoved < 0.0) {
                 break;
             }
-            currentBounds = new Rectangled(targetBounds);
+            applyBounds(targetBounds, currentBounds);
             distanceRemaining -= distanceMoved;
-        }
-
-        for (val candidate : actualOverlaps) {
-            assert !candidate.isTile();
-            fireCollisionEvent(world, entity, collider, Collision.entity(candidate.other, candidate.getOtherBounds()));
-            fireCollisionEvent(world, candidate.other, candidate.getOtherCollider(), Collision.entity(entity, targetBounds));
         }
 
         return targetBounds;
     }
 
     private double tryMove(
-            World world,
-            Entity entity,
-            Collider collider,
-            double stepSize,
+            @NonNull List<TileMap<TileType>> tileMapLayers,
             Vector2d direction,
             double distance,
             Rectangled initialBounds,
-            List<CollisionCandidate> collisions,
-            List<CollisionCandidate> overlaps,
-            Set<CollisionCandidate> actualOverlaps,
+            Rectangled outTargetBounds
+    ) {
+        val distanceMoved = checkForCollisionsInDirection(distance, direction, tileMapLayers, initialBounds, outTargetBounds);
+        if (distanceMoved >= 0.0) {
+            return distanceMoved;
+        }
+
+        val directionX = new Vector2d(direction.x, 0.0);
+        val targetBoundsX = new Rectangled();
+        val distanceX = checkForCollisionsInDirection(distance, directionX, tileMapLayers, initialBounds, targetBoundsX);
+
+        val directionY = new Vector2d(0.0, direction.y);
+        val targetBoundsY = new Rectangled();
+        val distanceY = checkForCollisionsInDirection(distance, directionY, tileMapLayers, initialBounds, targetBoundsY);
+
+        // Both directions succeeded, move on the axis we can travel furthest
+        if (distanceX > 0 && distanceY > 0) {
+            if (distanceX > distanceY) {
+                applyBounds(targetBoundsX, outTargetBounds);
+                return distanceX;
+            } else {
+                applyBounds(targetBoundsY, outTargetBounds);
+                return distanceY;
+            }
+        }
+        // Only X succeeded
+        else if (distanceX > 0) {
+            applyBounds(targetBoundsX,
+                        outTargetBounds);
+            return distanceX;
+        }
+        // Only Y succeeded
+        else if (distanceY > 0) {
+            applyBounds(targetBoundsY,
+                        outTargetBounds);
+            return distanceY;
+        }
+        // Neither succeeded
+        else {
+            applyBounds(initialBounds,
+                        outTargetBounds);
+            return -1.0;
+        }
+    }
+
+    private double checkForCollisionsInDirection(
+            final double distance,
+            @NonNull final Vector2d direction,
+            @NonNull final List<TileMap<TileType>> tileMapLayers,
+            @NonNull final Rectangled initialBounds,
+            @NonNull final Rectangled outTargetBounds
+    ) {
+        val targetBounds = initialBounds.translate(direction.mul(distance, new Vector2d()), new Rectangled());
+        val collisions = getCollidingTiles(tileMapLayers, initialBounds, targetBounds);
+
+        if (!collisions.isEmpty()) {
+            applyBounds(initialBounds, outTargetBounds);
+            return -1.0;
+        }
+
+        applyBounds(targetBounds, outTargetBounds);
+        return distance;
+    }
+
+    private void applyBounds(Rectangled from, Rectangled to) {
+        to.minX = from.minX;
+        to.minY = from.minY;
+        to.maxX = from.maxX;
+        to.maxY = from.maxY;
+    }
+
+    private ArrayList<Rectangled> getCollidingTiles(
+            List<TileMap<TileType>> tileMapLayers,
+            Rectangled initialBounds,
             Rectangled targetBounds
     ) {
-        var steps = 0;
-        while (steps * stepSize < distance) {
-            val testVelocity = direction.mul((steps + 1) * stepSize, tmpVelocity);
-            val testTargetBounds = initialBounds.translate(testVelocity, tmpTestTargetBounds);
+        val collisions = new ArrayList<Rectangled>();
+        val startX = Math.min((int) Math.floor(initialBounds.minX), (int) Math.floor(targetBounds.minX));
+        val startY = Math.min((int) Math.floor(initialBounds.minY), (int) Math.floor(targetBounds.minY));
+        val endX = Math.max((int) Math.ceil(initialBounds.maxX), (int) Math.ceil(targetBounds.maxX));
+        val endY = Math.max((int) Math.ceil(initialBounds.maxY), (int) Math.ceil(targetBounds.maxY));
 
-            val actualCollision = collisions.stream()
-                                            .filter(collision -> collision.getOtherBounds().intersects(testTargetBounds))
-                                            .findFirst();
-            if (actualCollision.isEmpty()) {
-                gatherOverlapEvents(overlaps, testTargetBounds, actualOverlaps);
-            } else {
-                val actualVelocity = direction.mul(steps * stepSize, tmpVelocity);
-                initialBounds.translate(actualVelocity, targetBounds);
+        val width = endX - startX;
+        val height = endY - startY;
 
-                handleCollision(world, entity, collider, targetBounds, actualCollision.get(), overlaps);
-                break;
-            }
-            ++steps;
-        }
-        return steps * stepSize;
-    }
-
-    private void gatherOverlapEvents(
-            @NonNull final List<CollisionCandidate> overlaps,
-            @NonNull final Rectangled testTargetBounds,
-            @NonNull Set<CollisionCandidate> actualOverlaps
-    ) {
-        overlaps.stream()
-                .filter(overlap -> overlap.getOtherBounds().intersects(testTargetBounds))
-                .forEach(actualOverlaps::add);
-    }
-
-    private void handleCollision(
-            @NonNull final World world,
-            @NonNull final Entity entity,
-            @NonNull final Collider collider,
-            @NonNull final Rectangled newTargetBounds,
-            @NonNull final CollisionCandidate collision,
-            @NonNull final List<CollisionCandidate> overlaps
-    ) {
-        if (collision.isTile()) {
-            fireCollisionEvent(world, entity, collider, Collision.tile(collision.getOtherBounds()));
-        } else {
-            fireCollisionEvent(world, entity, collider, Collision.entity(collision.getOther(), collision.getOtherBounds()));
-            fireCollisionEvent(world, collision.getOther(), collision.getOtherCollider(), Collision.entity(entity, newTargetBounds));
-        }
+        GenerateStream.ofCoordinates(startX, startY, width, height)
+                      .filter(pos -> tileMapLayers.stream()
+                                                  .map(tm -> tm.getTile(pos))
+                                                  .anyMatch(TileType::isSolid))
+                      .map(pos -> new Rectangled(pos.x, pos.y, pos.x + 1, pos.y + 1))
+                      // TODO: Stretched collider instead of translated AABB
+                      .filter(targetBounds::intersects)
+                      .forEach(collisions::add);
+        return collisions;
     }
 
     private void gatherPossiblyCollidingEntities(
@@ -249,35 +233,6 @@ public class ApplyVelocitySystem implements ECSSystem {
         if (!world.getEntities().hasComponent(entity, RecentCollisionTag.class)) {
             world.getEntities().addComponentTo(entity, new RecentCollisionTag());
         }
-    }
-
-    private void gatherOverlappingTileBounds(
-            @NonNull final List<TileMap<TileType>> tileMapLayers,
-            @NonNull final Rectangled oldBounds,
-            @NonNull final Rectangled targetBounds,
-            @NonNull final List<CollisionCandidate> collisions
-    ) {
-        var startX = (int) Math.floor(targetBounds.minX);
-        var startY = (int) Math.floor(targetBounds.minY);
-        var endX = (int) Math.ceil(targetBounds.maxX);
-        var endY = (int) Math.ceil(targetBounds.maxY);
-
-        startX = Math.min(startX, (int) Math.floor(oldBounds.minX));
-        startY = Math.min(startY, (int) Math.floor(oldBounds.minY));
-        endX = Math.max(endX, (int) Math.ceil(oldBounds.maxX));
-        endY = Math.max(endY, (int) Math.ceil(oldBounds.maxY));
-
-        val width = endX - startX;
-        val height = endY - startY;
-
-        GenerateStream.ofCoordinates(startX, startY, width, height)
-                      .filter(pos -> tileMapLayers.stream()
-                                                  .map(tm -> tm.getTile(pos))
-                                                  .anyMatch(TileType::isSolid))
-                      .map(pos -> new Rectangled(pos.x, pos.y, pos.x + 1, pos.y + 1))
-                      .filter(targetBounds::intersects)
-                      .map(CollisionCandidate::new)
-                      .forEach(collisions::add);
     }
 
 
