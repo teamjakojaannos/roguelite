@@ -7,14 +7,14 @@ import fi.jakojaannos.roguelite.engine.utilities.GenerateStream;
 import fi.jakojaannos.roguelite.game.data.Collision;
 import fi.jakojaannos.roguelite.game.data.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.joml.Rectangled;
 import org.joml.Vector2d;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,17 +51,20 @@ public class ApplyVelocitySystem implements ECSSystem {
             val velocity = world.getEntities().getComponentOf(entity, Velocity.class).get();
 
 
-            var targetBounds = calculateDestinationBounds(delta, transform, velocity);
+            var targetBounds = calculateDestinationBounds(transform, velocity, delta);
             if (world.getEntities().hasComponent(entity, Collider.class)) {
                 val collider = world.getEntities().getComponentOf(entity, Collider.class).get();
                 targetBounds = moveWithCollisionHandling(world, entitiesWithCollider, tileMapLayers, entity, transform, velocity, collider, targetBounds);
             }
 
-            moveTo(transform, targetBounds);
+            move(transform, targetBounds);
         });
     }
 
-    private void moveTo(Transform transform, Rectangled targetBounds) {
+    private void move(
+            @NonNull final Transform transform,
+            @NonNull final Rectangled targetBounds
+    ) {
         transform.bounds.minX = targetBounds.minX;
         transform.bounds.minY = targetBounds.minY;
         transform.bounds.maxX = targetBounds.maxX;
@@ -78,12 +81,13 @@ public class ApplyVelocitySystem implements ECSSystem {
             @NonNull final Collider collider,
             @NonNull Rectangled targetBounds
     ) {
-        val collisions = new ArrayList<Collision>();
+        val collisions = new ArrayList<CollisionCandidate>();
+        val overlaps = new ArrayList<CollisionCandidate>();
 
         // TODO: Now, we are checking only coordinates we would end up after moving all
         //  the way to the targetBounds. Stretch the collider and do more refined checks
         //  to catch more collision cases with fast-moving entities.
-        gatherCollidingEntities(world, entitiesWithCollider, entity, transform, collider, collisions);
+        gatherPossiblyCollidingEntities(world, entitiesWithCollider, entity, transform, collider, collisions, overlaps);
         gatherOverlappingTileBounds(tileMapLayers, transform.bounds, targetBounds, collisions);
 
         if (!collisions.isEmpty()) {
@@ -93,6 +97,7 @@ public class ApplyVelocitySystem implements ECSSystem {
                                               transform.bounds,
                                               velocity.velocity,
                                               collisions,
+                                              overlaps,
                                               targetBounds);
         }
 
@@ -100,71 +105,116 @@ public class ApplyVelocitySystem implements ECSSystem {
     }
 
     private Rectangled calculateDestinationBounds(
-            double delta,
-            Transform transform,
-            Velocity velocity
+            @NonNull final Transform transform,
+            @NonNull final Velocity velocity,
+            final double delta
     ) {
         velocity.velocity.mul(delta, tmpVelocity);
         return transform.bounds.translate(tmpVelocity, tmpTargetBounds);
     }
 
     private Rectangled moveUntilCollision(
+            @NonNull final World world,
+            @NonNull final Entity entity,
+            @NonNull final Collider collider,
+            @NonNull final Rectangled initialBounds,
+            @NonNull final Vector2d velocity,
+            @NonNull final List<CollisionCandidate> collisions,
+            @NonNull final List<CollisionCandidate> overlaps,
+            @NonNull Rectangled targetBounds
+    ) {
+        val actualOverlaps = new TreeSet<CollisionCandidate>(Comparator.comparing(candidate -> candidate.getOther().getId()));
+        val stepSize = 0.01;
+        val maxDistance = velocity.length();
+        val direction = velocity.normalize(tmpDirection);
+        var distanceRemaining = maxDistance;
+        while (distanceRemaining > stepSize) {
+            val distanceMoved = tryMove(world, entity, collider, stepSize, direction, distanceRemaining, initialBounds, collisions, overlaps, actualOverlaps, targetBounds);
+
+            if (distanceMoved < stepSize) {
+                break;
+            }
+            distanceRemaining -= distanceMoved;
+        }
+
+        for (val candidate : actualOverlaps) {
+            assert !candidate.isTile();
+            fireCollisionEvent(world, entity, collider, Collision.entity(candidate.other, candidate.getOtherBounds()));
+            fireCollisionEvent(world, candidate.other, candidate.getOtherCollider(), Collision.entity(entity, targetBounds));
+        }
+
+        return targetBounds;
+    }
+
+    private double tryMove(
             World world,
             Entity entity,
             Collider collider,
+            double stepSize,
+            Vector2d direction,
+            double distance,
             Rectangled initialBounds,
-            Vector2d velocity,
-            List<Collision> collisions,
+            List<CollisionCandidate> collisions,
+            List<CollisionCandidate> overlaps,
+            Set<CollisionCandidate> actualOverlaps,
             Rectangled targetBounds
     ) {
-        val stepSize = 0.01;
-        val maxDistance = velocity.length();
         var steps = 0;
-        while (steps * stepSize < maxDistance) {
-            val testVelocity = velocity.normalize((steps + 1) * stepSize, tmpVelocity);
-            val newTargetBounds = initialBounds.translate(testVelocity, tmpTestTargetBounds);
+        while (steps * stepSize < distance) {
+            val testVelocity = direction.mul((steps + 1) * stepSize, tmpVelocity);
+            val testTargetBounds = initialBounds.translate(testVelocity, tmpTestTargetBounds);
 
-            val intersecting = collisions.stream()
-                                         .filter(other -> other.getBounds().intersects(newTargetBounds))
-                                         .findFirst();
-            if (intersecting.isPresent()) {
-                val collision = intersecting.get();
-                if (collision.getType() == Collision.Type.ENTITY) {
-                    val entityCollision = collision.getAsEntityCollision();
-                    val other = entityCollision.getOther();
-                    val otherCollider = world.getEntities().getComponentOf(other, Collider.class).get();
-                    otherCollider.collisions.add(new CollisionEvent(collision));
-                    collider.collisions.add(new CollisionEvent(Collision.entity(entity, newTargetBounds)));
+            val actualCollision = collisions.stream()
+                                            .filter(collision -> collision.getOtherBounds().intersects(testTargetBounds))
+                                            .findFirst();
+            if (actualCollision.isEmpty()) {
+                gatherOverlapEvents(overlaps, testTargetBounds, actualOverlaps);
+            } else {
+                val actualVelocity = direction.mul(steps * stepSize, tmpVelocity);
+                targetBounds = initialBounds.translate(actualVelocity, targetBounds);
 
-                    if (!world.getEntities().hasComponent(entity, RecentCollisionTag.class)) {
-                        world.getEntities().addComponentTo(entity, new RecentCollisionTag());
-                    }
-                    if (!world.getEntities().hasComponent(other, RecentCollisionTag.class)) {
-                        world.getEntities().addComponentTo(other, new RecentCollisionTag());
-                    }
-                } else {
-                    collider.collisions.add(new CollisionEvent(Collision.tile(collision.getBounds())));
-
-                    if (!world.getEntities().hasComponent(entity, RecentCollisionTag.class)) {
-                        world.getEntities().addComponentTo(entity, new RecentCollisionTag());
-                    }
-                }
+                handleCollision(world, entity, collider, targetBounds, actualCollision.get(), overlaps);
                 break;
             }
             ++steps;
         }
-
-        val actualVelocity = velocity.normalize(steps * stepSize, tmpVelocity);
-        return initialBounds.translate(actualVelocity, targetBounds);
+        return steps * stepSize;
     }
 
-    private void gatherCollidingEntities(
-            @NonNull World world,
-            List<Entity> entitiesWithCollider,
-            Entity entity,
-            Transform transform,
-            Collider collider,
-            List<Collision> collisions
+    private void gatherOverlapEvents(
+            @NonNull final List<CollisionCandidate> overlaps,
+            @NonNull final Rectangled testTargetBounds,
+            @NonNull Set<CollisionCandidate> actualOverlaps
+    ) {
+        overlaps.stream()
+                .filter(overlap -> overlap.getOtherBounds().intersects(testTargetBounds))
+                .forEach(actualOverlaps::add);
+    }
+
+    private void handleCollision(
+            @NonNull final World world,
+            @NonNull final Entity entity,
+            @NonNull final Collider collider,
+            @NonNull final Rectangled newTargetBounds,
+            @NonNull final CollisionCandidate collision,
+            @NonNull final List<CollisionCandidate> overlaps
+    ) {
+        if (collision.isTile()) {
+            fireCollisionEvent(world, entity, collider, Collision.tile(collision.getOtherBounds()));
+        } else {
+            fireCollisionEvent(world, entity, collider, Collision.entity(collision.getOther(), collision.getOtherBounds()));
+            fireCollisionEvent(world, collision.getOther(), collision.getOtherCollider(), Collision.entity(entity, newTargetBounds));
+        }
+    }
+
+    private void gatherPossiblyCollidingEntities(
+            @NonNull final World world,
+            @NonNull final List<Entity> entitiesWithCollider,
+            @NonNull final Entity entity,
+            @NonNull final Transform transform,
+            @NonNull final Collider collider,
+            @NonNull final List<CollisionCandidate> collisions,
+            @NonNull final List<CollisionCandidate> nonSolidCollisionCandidates
     ) {
         for (val other : entitiesWithCollider) {
             if (other.getId() == entity.getId()) {
@@ -176,33 +226,34 @@ public class ApplyVelocitySystem implements ECSSystem {
 
             val intersects = otherTransform.bounds.intersects(transform.bounds);
             if (intersects) {
-                // Solid entities prevent movement
-                val shouldCollide = otherCollider.isSolidTo(entity, collider);
-                if (shouldCollide) {
-                    collisions.add(Collision.entity(other, otherTransform.bounds));
-                }
-                // FIXME: Handle these AFTER we know the final movement, now these can trigger
-                //  false-positives
-                else {
-                    otherCollider.collisions.add(new CollisionEvent(Collision.entity(entity, transform.bounds)));
-                    collider.collisions.add(new CollisionEvent(Collision.entity(other, otherTransform.bounds)));
-
-                    if (!world.getEntities().hasComponent(entity, RecentCollisionTag.class)) {
-                        world.getEntities().addComponentTo(entity, new RecentCollisionTag());
-                    }
-                    if (!world.getEntities().hasComponent(other, RecentCollisionTag.class)) {
-                        world.getEntities().addComponentTo(other, new RecentCollisionTag());
-                    }
+                val candidate = new CollisionCandidate(other, otherTransform.bounds, otherCollider);
+                if (otherCollider.isSolidTo(entity, collider)) {
+                    collisions.add(candidate);
+                } else {
+                    nonSolidCollisionCandidates.add(candidate);
                 }
             }
         }
     }
 
+    private void fireCollisionEvent(
+            @NonNull final World world,
+            @NonNull final Entity entity,
+            @NonNull final Collider collider,
+            @NonNull final Collision collision
+    ) {
+        collider.collisions.add(new CollisionEvent(collision));
+
+        if (!world.getEntities().hasComponent(entity, RecentCollisionTag.class)) {
+            world.getEntities().addComponentTo(entity, new RecentCollisionTag());
+        }
+    }
+
     private void gatherOverlappingTileBounds(
-            List<TileMap<TileType>> tileMapLayers,
-            Rectangled oldBounds,
-            Rectangled targetBounds,
-            List<Collision> collisions
+            @NonNull final List<TileMap<TileType>> tileMapLayers,
+            @NonNull final Rectangled oldBounds,
+            @NonNull final Rectangled targetBounds,
+            @NonNull final List<CollisionCandidate> collisions
     ) {
         var startX = (int) Math.floor(targetBounds.minX);
         var startY = (int) Math.floor(targetBounds.minY);
@@ -223,7 +274,25 @@ public class ApplyVelocitySystem implements ECSSystem {
                                                   .anyMatch(TileType::isSolid))
                       .map(pos -> new Rectangled(pos.x, pos.y, pos.x + 1, pos.y + 1))
                       .filter(targetBounds::intersects)
-                      .forEach(bounds -> collisions.add(Collision.tile(bounds)));
+                      .map(CollisionCandidate::new)
+                      .forEach(collisions::add);
     }
 
+
+    @RequiredArgsConstructor
+    private static class CollisionCandidate {
+        @Getter private final Entity other;
+        @Getter private final Rectangled otherBounds;
+        @Getter private final Collider otherCollider;
+
+        public boolean isTile() {
+            return this.other == null || this.otherCollider == null;
+        }
+
+        public CollisionCandidate(Rectangled otherBounds) {
+            this.otherBounds = otherBounds;
+            this.other = null;
+            this.otherCollider = null;
+        }
+    }
 }
