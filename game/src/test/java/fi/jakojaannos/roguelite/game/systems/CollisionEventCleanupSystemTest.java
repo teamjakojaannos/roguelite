@@ -38,9 +38,9 @@ class CollisionEventCleanupSystemTest {
     @Test
     void collisionEventsAreCleanedUp() {
         Entity other = mock(Entity.class);
-        collider.collisions.add(new CollisionEvent(Collision.entity(other, new Rectangled())));
-        collider.collisions.add(new CollisionEvent(Collision.entity(other, new Rectangled())));
-        collider.collisions.add(new CollisionEvent(Collision.entity(other, new Rectangled())));
+        collider.collisions.add(new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other, new Rectangled())));
+        collider.collisions.add(new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other, new Rectangled())));
+        collider.collisions.add(new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other, new Rectangled())));
 
         system.tick(Stream.of(entity), world, 0.02);
         assertTrue(collider.collisions.isEmpty());

@@ -26,7 +26,7 @@ class TestPlayerInputs {
 
     @BeforeEach
     void beforeEach() {
-        state = Roguelite.createInitialState(1337);
+        state = Roguelite.createInitialState(6969);
         roguelite = new Roguelite();
     }
 
