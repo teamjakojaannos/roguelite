@@ -45,6 +45,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("camera", new CameraControlSystem(), "character_move")
                 .withSystem("spawner", new SpawnerSystem())
                 .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "process_move")
+                .withSystem("projectile_to_wall_collision_handler", new ProjectileToTileCollisionHandlerSystem(), "process_move")
                 .withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler")
                 .withSystem("post_tick_physics", new PostUpdatePhysicsSystem(), "collision_event_remover")
                 .withSystem("health_check", new HealthCheckSystem(), "character_attack")

@@ -42,7 +42,7 @@ public class Collision {
     }
 
     public static Collision tile(Rectangled bounds) {
-        return new Collision(null, bounds);
+        return new Tile(bounds);
     }
 
     public static Collision entity(Entity other, Rectangled bounds) {

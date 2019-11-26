@@ -5,7 +5,6 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.Collision;
-import fi.jakojaannos.roguelite.game.data.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
@@ -41,17 +40,20 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
             val collider = entityManager.getComponentOf(entity, Collider.class).get();
             val stats = entityManager.getComponentOf(entity, ProjectileStats.class).get();
 
-            collider.getCollisions()
-                    .filter(Collision::isEntity)
-                    .map(Collision::getAsEntityCollision)
-                    .forEach(collision -> {
-                        if (entityManager.hasComponent(collision.getOther(), Health.class)) {
-                            val health = entityManager.getComponentOf(collision.getOther(), Health.class).get();
-                            LOG.debug("Hit!");
-                            health.currentHealth -= stats.damage;
-                            entityManager.destroyEntity(entity);
-                        }
-                    });
+            val entityCollisions = collider.getCollisions()
+                                           .filter(Collision::isEntity)
+                                           .map(Collision::getAsEntityCollision);
+
+            for (val collision : (Iterable<Collision.EntityCollision>) entityCollisions::iterator) {
+                if (entityManager.hasComponent(collision.getOther(), Health.class)) {
+                    val health = entityManager.getComponentOf(collision.getOther(), Health.class).get();
+                    LOG.debug("Hit!");
+                    health.currentHealth -= stats.damage;
+                    entityManager.destroyEntity(entity);
+                    // FIXME: Proper damage cool-down / invulnerability frame thingy
+                    break;
+                }
+            }
         });
     }
 }
