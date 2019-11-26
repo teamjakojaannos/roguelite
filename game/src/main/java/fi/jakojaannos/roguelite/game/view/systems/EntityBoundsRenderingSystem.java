@@ -6,7 +6,9 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
+import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
+import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -102,7 +104,7 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
         glBindVertexArray(this.vao);
         entities.forEach(
                 entity -> {
-                    if (world.getEntities().hasComponent(entity, NoDrawTag.class)) {
+                    if (world.getEntities().hasComponent(entity, NoDrawTag.class) || (!DebugConfig.renderBounds && world.getEntities().hasComponent(entity, SpriteInfo.class))) {
                         return;
                     }
 

@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectile;
+import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.BasicWeaponStats;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
@@ -56,7 +56,7 @@ public class CharacterAttackSystem implements ECSSystem {
                         .perpendicular()
                         .mul((random.nextDouble() * 2.0 - 1.0) * weapon.attackSpread);
 
-                BasicProjectile.create(world, projectileX, projectileY, direction, weapon.attackProjectileSpeed, tmpSpreadOffset);
+                BasicProjectileArchetype.create(world, projectileX, projectileY, direction, weapon.attackProjectileSpeed, tmpSpreadOffset);
 
 
                 abilities.attackTimer = 0.0;

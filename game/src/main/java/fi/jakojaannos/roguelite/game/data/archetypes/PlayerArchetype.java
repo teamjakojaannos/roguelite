@@ -37,15 +37,15 @@ public class PlayerArchetype {
 
     private static BasicWeaponStats createWeaponStats() {
         return new BasicWeaponStats(
-                20.0f,
-                40.0f,
-                2.5f
+                20.0,
+                40.0,
+                2.5
         );
     }
 
     private static SpriteInfo createSpriteInfo() {
         val sprite = new SpriteInfo();
-        sprite.spriteName = "sprites/sheep";
+        sprite.spriteName = "sprites/player";
 
         return sprite;
     }

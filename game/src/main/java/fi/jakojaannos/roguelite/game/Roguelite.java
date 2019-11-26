@@ -13,10 +13,7 @@ import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.GenerateStream;
 import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.archetypes.DummyArchetype;
-import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
-import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
-import fi.jakojaannos.roguelite.game.data.archetypes.StalkerArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.*;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
@@ -28,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Queue;
+import java.util.Random;
 
 @Slf4j
 public class Roguelite extends GameBase<GameState> {
@@ -53,11 +51,15 @@ public class Roguelite extends GameBase<GameState> {
     }
 
     public static GameState createInitialState() {
+        return createInitialState(System.nanoTime());
+    }
+
+    public static GameState createInitialState(long seed) {
         val entities = Entities.createNew(256, 32);
         val state = new GameState(World.createNew(entities));
 
         val player = PlayerArchetype.create(entities,
-                                            new Transform(4.0, 4.0));
+                                            new Transform(0, 0, 1.0, 1.0, 0.5, 0.5));
         state.getWorld().getResource(Players.class).player = player;
 
         val camera = entities.createEntity();
@@ -108,6 +110,17 @@ public class Roguelite extends GameBase<GameState> {
                       .forEach(pos -> tileMap.setTile(pos, wall));
         GenerateStream.ofCoordinates(startX + 1, startY + 1, roomWidth - 2, roomHeight - 2)
                       .forEach(pos -> tileMap.setTile(pos, floor));
+
+        val nObstacles = 20;
+        val obstacleMaxSize = 2.0;
+        val obstacleMinSize = 1.0;
+        val random = new Random(seed);
+        for (int i = 0; i < nObstacles; ++i) {
+            val size = obstacleMinSize + (obstacleMaxSize - obstacleMinSize) * random.nextDouble();
+            val x = startX + random.nextDouble() * (roomWidth - size);
+            val y = startY + random.nextDouble() * (roomHeight - size);
+            ObstacleArchetype.create(entities, new Transform(x, y, size));
+        }
 
         val levelEntity = entities.createEntity();
         entities.addComponentTo(levelEntity, new TileMapLayer(tileMap));

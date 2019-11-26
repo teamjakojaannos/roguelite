@@ -7,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.game.Roguelite;
 import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import org.joml.Vector2d;
@@ -25,7 +26,7 @@ class TestPlayerInputs {
 
     @BeforeEach
     void beforeEach() {
-        state = Roguelite.createInitialState();
+        state = Roguelite.createInitialState(1337);
         roguelite = new Roguelite();
     }
 

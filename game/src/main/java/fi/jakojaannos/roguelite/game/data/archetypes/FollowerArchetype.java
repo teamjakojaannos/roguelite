@@ -31,6 +31,7 @@ public class FollowerArchetype {
         entities.addComponentTo(follower, new CharacterInput());
         entities.addComponentTo(follower, createCharacterStats());
         entities.addComponentTo(follower, createEnemyAI());
+        entities.addComponentTo(follower, createSpriteInfo());
 
         return follower;
     }
@@ -48,4 +49,11 @@ public class FollowerArchetype {
         return new FollowerEnemyAI(25.0f, 1.0f);
     }
 
+
+    private static SpriteInfo createSpriteInfo() {
+        val sprite = new SpriteInfo();
+        sprite.spriteName = "sprites/enemy";
+
+        return sprite;
+    }
 }

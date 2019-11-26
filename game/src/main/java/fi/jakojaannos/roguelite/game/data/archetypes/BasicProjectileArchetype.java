@@ -7,7 +7,7 @@ import lombok.NonNull;
 import lombok.val;
 import org.joml.Vector2d;
 
-public class BasicProjectile {
+public class BasicProjectileArchetype {
 
     @NonNull
     public static Entity create(
@@ -21,9 +21,8 @@ public class BasicProjectile {
         return create(
                 world,
                 createTransform(projectileX, projectileY),
-                new Velocity(direction
-                        .normalize(projectileSpeed)
-                        .add(spreadOffset)
+                new Velocity(direction.normalize(projectileSpeed)
+                                      .add(spreadOffset)
                 ));
     }
 
@@ -39,8 +38,7 @@ public class BasicProjectile {
         return create(
                 world,
                 createTransform(projectileX, projectileY),
-                new Velocity(direction
-                        .normalize(projectileSpeed)
+                new Velocity(direction.normalize(projectileSpeed)
                 ));
     }
 
@@ -60,6 +58,7 @@ public class BasicProjectile {
         entities.addComponentTo(projectile, new Collider());
         entities.addComponentTo(projectile, transform);
         entities.addComponentTo(projectile, velocity);
+        entities.addComponentTo(projectile, createSpriteInfo());
 
         return projectile;
     }
@@ -79,4 +78,10 @@ public class BasicProjectile {
     }
 
 
+    private static SpriteInfo createSpriteInfo() {
+        val sprite = new SpriteInfo();
+        sprite.spriteName = "sprites/projectile";
+
+        return sprite;
+    }
 }

@@ -19,11 +19,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Applies velocity read from the {@link Velocity} component to character {@link Transform},
+ * handling collisions and firing {@link CollisionEvent Collision Events} whenever necessary.
+ * Backbone of the physics and collision detection of characters and other simple moving entities.
+ *
+ * @implNote Current implementation utilizes <code>O(n^2)</code> complexity, considering all
+ * entities with a collider to be viable for collisions. Additionally, as implementation uses sort
+ * of a "approach-carefully" -style logic when nearing collision, this might result in a very high
+ * number of iterations required for fast-moving entities. This implementation is to be considered
+ * WIP and better one is currently medium priority TODO
+ * @see CollisionEvent
+ * @see Collision
+ */
 @Slf4j
 public class ApplyVelocitySystem implements ECSSystem {
+    private static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(Transform.class, Velocity.class);
+
     @Override
     public Collection<Class<? extends Component>> getRequiredComponents() {
-        return List.of(Transform.class, Velocity.class);
+        return REQUIRED_COMPONENTS;
     }
 
     private final Vector2d tmpVelocity = new Vector2d();
@@ -38,12 +53,7 @@ public class ApplyVelocitySystem implements ECSSystem {
                                         .getEntitiesWith(List.of(Transform.class, Collider.class))
                                         .collect(Collectors.toUnmodifiableList());
 
-        val tileMapLayers = world.getEntities()
-                                 .getEntitiesWith(TileMapLayer.class)
-                                 .map(Entities.EntityComponentPair::getComponent)
-                                 .filter(TileMapLayer::isCollisionEnabled)
-                                 .map(TileMapLayer::getTileMap)
-                                 .collect(Collectors.toList());
+        val tileMapLayers = getTileMapLayersWithCollision(world);
 
         entities.forEach(entity -> {
             val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
@@ -64,6 +74,15 @@ public class ApplyVelocitySystem implements ECSSystem {
 
             applyBounds(targetBounds, transform.bounds);
         });
+    }
+
+    private List<TileMap<TileType>> getTileMapLayersWithCollision(@NonNull World world) {
+        return world.getEntities()
+                    .getEntitiesWith(TileMapLayer.class)
+                    .map(Entities.EntityComponentPair::getComponent)
+                    .filter(TileMapLayer::isCollisionEnabled)
+                    .map(TileMapLayer::getTileMap)
+                    .collect(Collectors.toList());
     }
 
     private Rectangled updateTargetBoundsWithCollisionDetection(
@@ -88,7 +107,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         while (distanceRemaining > 0.0) {
             val collisions = new ArrayList<CollisionCandidate>();
             val overlaps = new TreeSet<CollisionCandidate>(Comparator.comparingInt(candidate -> candidate.getOther().getId()));
-            val distanceMoved = tryMove(world, entity, collider, tileMapLayers, entitiesWithCollider, direction, stepSize, currentBounds, targetBounds, collisions, overlaps);
+            val distanceMoved = tryMove(world, entity, collider, tileMapLayers, entitiesWithCollider, direction, Math.min(distanceRemaining, stepSize), currentBounds, targetBounds, collisions, overlaps);
 
             for (val candidate : collisions) {
                 if (candidate.isTile()) {
@@ -230,10 +249,10 @@ public class ApplyVelocitySystem implements ECSSystem {
             @NonNull final Rectangled currentBounds,
             @NonNull final Rectangled targetBounds,
             @NonNull final List<CollisionCandidate> outCollisions,
-            Set<CollisionCandidate> outOverlaps
+            @NonNull final Set<CollisionCandidate> outOverlaps
     ) {
         getCollidingTiles(tileMapLayers, currentBounds, targetBounds, outCollisions);
-        gatherPossiblyCollidingEntities(world, entitiesWithCollider, entity, currentBounds, collider, outCollisions, outOverlaps);
+        gatherPossiblyCollidingEntities(world, entitiesWithCollider, entity, targetBounds, collider, outCollisions, outOverlaps);
     }
 
     private void getCollidingTiles(
@@ -264,7 +283,7 @@ public class ApplyVelocitySystem implements ECSSystem {
             @NonNull final World world,
             @NonNull final List<Entity> entitiesWithCollider,
             @NonNull final Entity entity,
-            @NonNull final Rectangled currentBounds,
+            @NonNull final Rectangled targetBounds,
             @NonNull final Collider collider,
             @NonNull final List<CollisionCandidate> outCollisions,
             @NonNull final Set<CollisionCandidate> outOverlaps
@@ -277,7 +296,7 @@ public class ApplyVelocitySystem implements ECSSystem {
             val otherCollider = world.getEntities().getComponentOf(other, Collider.class).get();
             val otherTransform = world.getEntities().getComponentOf(other, Transform.class).get();
 
-            val intersects = otherTransform.bounds.intersects(currentBounds);
+            val intersects = otherTransform.bounds.intersects(targetBounds);
             if (intersects) {
                 val candidate = new CollisionCandidate(other, otherTransform.bounds, otherCollider);
                 if (otherCollider.isSolidTo(entity, collider)) {

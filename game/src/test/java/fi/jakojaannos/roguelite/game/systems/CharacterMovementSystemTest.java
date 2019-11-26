@@ -25,7 +25,8 @@ class CharacterMovementSystemTest {
     @BeforeEach
     void beforeEach() {
         this.dispatcher = new DispatcherBuilder()
-                .withSystem("test", new CharacterMovementSystem())
+                .withSystem("move", new CharacterMovementSystem())
+                .withSystem("velocity", new ApplyVelocitySystem(), "move")
                 .build();
         Entities entities = Entities.createNew(256, 32);
         this.world = World.createNew(entities);

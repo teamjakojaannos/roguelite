@@ -1,40 +1,48 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.game.data.components.Collider;
+import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.Collision;
 import fi.jakojaannos.roguelite.game.data.CollisionEvent;
+import fi.jakojaannos.roguelite.game.data.components.Collider;
+import org.joml.Rectangled;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class CollisionEventCleanupSystemTest {
-    private SystemDispatcher dispatcher;
+    private CollisionEventCleanupSystem system;
     private Collider collider;
     private World world;
+    private Entity entity;
 
     @BeforeEach
     void beforeEach() {
-        dispatcher = new DispatcherBuilder()
-                .withSystem("test", new CollisionEventCleanupSystem())
-                .build();
-        world = World.createNew(Entities.createNew(256, 32));
-        Entity entity = world.getEntities().createEntity();
+        system = new CollisionEventCleanupSystem();
+        world = mock(World.class);
+        entity = mock(Entity.class);
         collider = new Collider();
-        world.getEntities().addComponentTo(entity, collider);
-
-        world.getEntities().applyModifications();
+        Entities entities = mock(Entities.class);
+        when(world.getEntities()).thenReturn(entities);
+        when(entities.getComponentOf(eq(entity), eq(Collider.class))).thenReturn(Optional.of(collider));
     }
 
     @Test
     void collisionEventsAreCleanedUp() {
-        Entity other = world.getEntities().createEntity();
-        collider.collisions.add(new CollisionEvent(other));
-        collider.collisions.add(new CollisionEvent(other));
-        collider.collisions.add(new CollisionEvent(other));
+        Entity other = mock(Entity.class);
+        collider.collisions.add(new CollisionEvent(Collision.entity(other, new Rectangled())));
+        collider.collisions.add(new CollisionEvent(Collision.entity(other, new Rectangled())));
+        collider.collisions.add(new CollisionEvent(Collision.entity(other, new Rectangled())));
 
-        dispatcher.dispatch(world, 0.02);
-
+        system.tick(Stream.of(entity), world, 0.02);
         assertTrue(collider.collisions.isEmpty());
     }
 }

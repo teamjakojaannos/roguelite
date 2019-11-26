@@ -24,14 +24,6 @@ public class Transform implements Component {
         return this.bounds.minY + getHeight() / 2;
     }
 
-    public final double getOriginX() {
-        return this.bounds.minX - this.origin.x;
-    }
-
-    public final double getOriginY() {
-        return this.bounds.minY - this.origin.y;
-    }
-
     public Transform() {
         this(0.0, 0.0, 1.0);
     }

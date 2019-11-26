@@ -76,8 +76,10 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                     spritesForTexture.add(new SpriteRenderEntry(info.spriteName,
                                                                 info.getCurrentFrame(),
                                                                 info.zLayer,
-                                                                transform.getOriginX(),
-                                                                transform.getOriginY()));
+                                                                transform.bounds.minX,
+                                                                transform.bounds.minY,
+                                                                transform.getWidth(),
+                                                                transform.getHeight()));
                 }
         );
 
@@ -91,7 +93,9 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                                                                       entries.forEach(entry -> this.batch.draw(entry.getSpriteId(),
                                                                                                                entry.getFrame(),
                                                                                                                entry.getX(),
-                                                                                                               entry.getY()))));
+                                                                                                               entry.getY(),
+                                                                                                               entry.getWidth(),
+                                                                                                               entry.getHeight()))));
         this.batch.end();
     }
 
@@ -105,7 +109,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
         @Getter private final String spriteId;
         @Getter private final int frame;
         @Getter private final int zLayer;
-        @Getter private final double x;
-        @Getter private final double y;
+        @Getter private final double x, y;
+        @Getter private final double width, height;
     }
 }
