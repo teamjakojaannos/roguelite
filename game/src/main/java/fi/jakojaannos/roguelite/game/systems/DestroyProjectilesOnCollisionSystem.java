@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
-public class ProjectileToTileCollisionHandlerSystem implements ECSSystem {
+public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
     @Override
     public Collection<Class<? extends Component>> getRequiredComponents() {
         return List.of(Collider.class, ProjectileStats.class, RecentCollisionTag.class);
@@ -31,10 +31,8 @@ public class ProjectileToTileCollisionHandlerSystem implements ECSSystem {
     ) {
         entities.forEach(entity -> {
             val collider = world.getEntities().getComponentOf(entity, Collider.class).get();
-            val hasCollidedWithWall = collider.getCollisions()
-                                              .anyMatch(Collision::isTile);
-
-            if (hasCollidedWithWall) {
+            if (collider.getCollisions()
+                        .anyMatch(c -> c.getMode() == Collision.Mode.COLLISION)) {
                 world.getEntities().destroyEntity(entity);
             }
         });

@@ -9,9 +9,7 @@ import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
-import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
-import fi.jakojaannos.roguelite.engine.utilities.GenerateStream;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.archetypes.*;
 import fi.jakojaannos.roguelite.game.data.components.*;
@@ -20,12 +18,12 @@ import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.*;
+import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Queue;
-import java.util.Random;
 
 @Slf4j
 public class Roguelite extends GameBase<GameState> {
@@ -43,8 +41,8 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem("camera", new CameraControlSystem(), "character_move")
                 .withSystem("spawner", new SpawnerSystem())
                 .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "process_move")
-                .withSystem("projectile_to_wall_collision_handler", new ProjectileToTileCollisionHandlerSystem(), "process_move")
-                .withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler")
+                .withSystem("projectile_remover", new DestroyProjectilesOnCollisionSystem(), "simple_collision_handler")
+                .withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler", "projectile_remover")
                 .withSystem("post_tick_physics", new PostUpdatePhysicsSystem(), "collision_event_remover")
                 .withSystem("health_check", new HealthCheckSystem(), "character_attack")
                 .build();
@@ -73,57 +71,14 @@ public class Roguelite extends GameBase<GameState> {
         entities.addComponentTo(crosshair, new Transform(-999.0, -999.0, 0.5, 0.5, 0.25, 0.25));
         entities.addComponentTo(crosshair, new CrosshairTag());
 
-
-        FollowerArchetype.create(entities, new Transform(5.0f, 1.0f));
-        StalkerArchetype.create(entities, new Transform(1.0f, 2.0f));
-        DummyArchetype.create(entities, new Transform(2.0f, 7.0f));
-        DummyArchetype.create(entities, new Transform(3.0f, 7.0f));
-        DummyArchetype.create(entities, new Transform(4.0f, 7.0f));
-        DummyArchetype.create(entities, new Transform(5.0f, 7.0f));
-
-        val spawner_stalker = entities.createEntity();
-        entities.addComponentTo(spawner_stalker, new Transform(15.0f, 15.0f));
-        entities.addComponentTo(spawner_stalker, new SpawnerComponent(
-                10.0f,
-                SpawnerComponent.FACTORY_STALKER)
-        );
-
-        val spawner_follower = entities.createEntity();
-        entities.addComponentTo(spawner_follower, new Transform(2.0f, 15.0f));
-        entities.addComponentTo(spawner_follower, new SpawnerComponent(
-                5.0f,
-                SpawnerComponent.FACTORY_FOLLOWER)
-        );
-
-
         val emptiness = new TileType(0, false);
         val floor = new TileType(1, false);
         val wall = new TileType(2, true);
-        val tileMap = new TileMap<TileType>(emptiness);
-
-        val startX = -25;
-        val startY = -25;
-        val roomWidth = 50;
-        val roomHeight = 50;
-        GenerateStream.ofCoordinates(startX, startY, roomWidth, roomHeight)
-                      .filter(pos -> pos.x == startX + roomWidth - 1 || pos.x == startX || pos.y == startY + roomHeight - 1 || pos.y == startY)
-                      .forEach(pos -> tileMap.setTile(pos, wall));
-        GenerateStream.ofCoordinates(startX + 1, startY + 1, roomWidth - 2, roomHeight - 2)
-                      .forEach(pos -> tileMap.setTile(pos, floor));
-
-        val nObstacles = 20;
-        val obstacleMaxSize = 2.0;
-        val obstacleMinSize = 1.0;
-        val random = new Random(seed);
-        for (int i = 0; i < nObstacles; ++i) {
-            val size = obstacleMinSize + (obstacleMaxSize - obstacleMinSize) * random.nextDouble();
-            val x = startX + random.nextDouble() * (roomWidth - size);
-            val y = startY + random.nextDouble() * (roomHeight - size);
-            ObstacleArchetype.create(entities, new Transform(x, y, size));
-        }
+        val generator = new WorldGenerator<TileType>(emptiness);
+        generator.prepareInitialRoom(seed, state.getWorld(), floor, wall, 25, 45, 5, 5, 2);
 
         val levelEntity = entities.createEntity();
-        entities.addComponentTo(levelEntity, new TileMapLayer(tileMap));
+        entities.addComponentTo(levelEntity, new TileMapLayer(generator.getTileMap()));
 
         entities.applyModifications();
         return state;

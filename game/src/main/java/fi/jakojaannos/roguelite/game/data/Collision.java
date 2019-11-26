@@ -11,7 +11,13 @@ public class Collision {
         TILE
     }
 
+    public enum Mode {
+        OVERLAP,
+        COLLISION
+    }
+
     @Getter @NonNull private final Type type;
+    @Getter @NonNull private final Mode mode;
     @Getter @NonNull private final Rectangled bounds;
 
     public final boolean isEntity() {
@@ -36,31 +42,36 @@ public class Collision {
         return (Tile) this;
     }
 
-    public Collision(@NonNull final Type type, @NonNull final Rectangled bounds) {
+    public Collision(
+            @NonNull final Type type,
+            @NonNull final Mode mode,
+            @NonNull final Rectangled bounds
+    ) {
         this.type = type;
+        this.mode = mode;
         this.bounds = new Rectangled(bounds);
     }
 
-    public static Collision tile(Rectangled bounds) {
-        return new Tile(bounds);
+    public static Collision tile(Mode mode, Rectangled bounds) {
+        return new Tile(mode, bounds);
     }
 
-    public static Collision entity(Entity other, Rectangled bounds) {
-        return new EntityCollision(other, bounds);
+    public static Collision entity(Mode mode, Entity other, Rectangled bounds) {
+        return new EntityCollision(mode, other, bounds);
     }
 
     public static class EntityCollision extends Collision {
         @NonNull @Getter private final Entity other;
 
-        private EntityCollision(Entity other, Rectangled bounds) {
-            super(Type.ENTITY, bounds);
+        private EntityCollision(Mode mode, Entity other, Rectangled bounds) {
+            super(Type.ENTITY, mode, bounds);
             this.other = other;
         }
     }
 
     public static class Tile extends Collision {
-        private Tile(Rectangled bounds) {
-            super(Type.TILE, bounds);
+        private Tile(Mode mode, Rectangled bounds) {
+            super(Type.TILE, mode, bounds);
         }
     }
 }

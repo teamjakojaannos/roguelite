@@ -111,17 +111,17 @@ public class ApplyVelocitySystem implements ECSSystem {
 
             for (val candidate : collisions) {
                 if (candidate.isTile()) {
-                    fireCollisionEvent(world, entity, collider, Collision.tile(candidate.getBounds()));
+                    fireCollisionEvent(world, entity, collider, Collision.tile(Collision.Mode.COLLISION, candidate.getBounds()));
                 } else {
-                    fireCollisionEvent(world, entity, collider, Collision.entity(candidate.getOther(), candidate.getBounds()));
-                    fireCollisionEvent(world, candidate.getOther(), candidate.getOtherCollider(), Collision.entity(entity, targetBounds));
+                    fireCollisionEvent(world, entity, collider, Collision.entity(Collision.Mode.COLLISION, candidate.getOther(), candidate.getBounds()));
+                    fireCollisionEvent(world, candidate.getOther(), candidate.getOtherCollider(), Collision.entity(Collision.Mode.COLLISION, entity, targetBounds));
                 }
             }
 
             for (val candidate : overlaps) {
                 if (!candidate.isTile()) {
-                    fireCollisionEvent(world, entity, collider, Collision.entity(candidate.getOther(), candidate.getBounds()));
-                    fireCollisionEvent(world, candidate.getOther(), candidate.getOtherCollider(), Collision.entity(entity, targetBounds));
+                    fireCollisionEvent(world, entity, collider, Collision.entity(Collision.Mode.OVERLAP, candidate.getOther(), candidate.getBounds()));
+                    fireCollisionEvent(world, candidate.getOther(), candidate.getOtherCollider(), Collision.entity(Collision.Mode.OVERLAP, entity, targetBounds));
                 }
             }
 

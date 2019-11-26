@@ -28,6 +28,8 @@ public class StalkerArchetype {
         entities.addComponentTo(stalker, transform);
         entities.addComponentTo(stalker, new Velocity());
         entities.addComponentTo(stalker, new CharacterInput());
+        entities.addComponentTo(stalker, new Health(3));
+        entities.addComponentTo(stalker, new Collider());
         entities.addComponentTo(stalker, createCharacterStats());
         entities.addComponentTo(stalker, createStalkerAi());
         entities.addComponentTo(stalker, createSpriteInfo());
