@@ -6,13 +6,19 @@ import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class SpawnerSystemTest {
 
+    private SpawnerSystem spawnerSystem;
     private SystemDispatcher dispatcher;
     private World world;
     private Entities entities;
@@ -20,8 +26,9 @@ public class SpawnerSystemTest {
 
     @BeforeEach
     void beforeEach() {
+        this.spawnerSystem = new SpawnerSystem();
         this.dispatcher = new DispatcherBuilder()
-                .withSystem("test", new SpawnerSystem())
+                .withSystem("test", spawnerSystem)
                 .build();
         this.entities = Entities.createNew(256, 32);
         this.world = World.createNew(entities);
@@ -69,5 +76,23 @@ public class SpawnerSystemTest {
         assertEquals(expectedAmount, (enemiesAfter - enemiesBefore));
     }
 
+    @Test
+    void entityFactoryIsCalledCorrectly() {
+        Entity spawnedEnemy = mock(Entity.class);
+        SpawnerComponent.EntityFactory mockFactory = mock(SpawnerComponent.EntityFactory.class);
+        when(mockFactory.get(any(), any(), any())).thenReturn(spawnedEnemy);
+
+        SpawnerComponent spawnerComponent = new SpawnerComponent(1.0f, mockFactory);
+        Entity spawner = entities.createEntity();
+        entities.addComponentTo(spawner, spawnerComponent);
+        entities.addComponentTo(spawner, new Transform());
+
+        for (int i = 0; i < 20; i++) {
+            spawnerSystem.tick(Stream.of(spawner), world, 0.2f);
+        }
+
+        verify(mockFactory, times(4)).get(eq(entities), any(), eq(spawnerComponent));
+
+    }
 
 }
