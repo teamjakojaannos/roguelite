@@ -65,8 +65,8 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
         val renderQueue = new HashMap<Integer, HashMap<LWJGLTexture, List<SpriteRenderEntry>>>();
         entities.forEach(
                 entity -> {
-                    val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
-                    val info = world.getEntities().getComponentOf(entity, SpriteInfo.class).get();
+                    val transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
+                    val info = world.getEntityManager().getComponentOf(entity, SpriteInfo.class).get();
 
                     val texturesForZLayer = renderQueue.computeIfAbsent(info.zLayer,
                                                                         zLayer -> new HashMap<>());

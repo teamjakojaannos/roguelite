@@ -1,11 +1,9 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.storage.EntitiesImpl;
-import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
+import fi.jakojaannos.roguelite.engine.ecs.storage.EntityManagerImpl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -30,7 +28,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             @NonNull World world,
             double delta
     ) {
-        val entities = (EntitiesImpl) world.getEntities();
+        val entities = (EntityManagerImpl) world.getEntityManager();
         this.systems.forEachPrioritized(
                 (system) -> system.tick(entities.getEntitiesWith(system.getRequiredComponents()),
                                         world,

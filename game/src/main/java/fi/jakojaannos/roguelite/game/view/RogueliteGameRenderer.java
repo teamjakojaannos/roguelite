@@ -7,9 +7,7 @@ import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.view.systems.EntityBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.LevelRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
@@ -50,7 +48,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
 
         // Snap camera to active camera
         val cameraEntity = state.getWorld().getResource(CameraProperties.class).cameraEntity;
-        state.getWorld().getEntities().getComponentOf(cameraEntity, Camera.class)
+        state.getWorld().getEntityManager().getComponentOf(cameraEntity, Camera.class)
              .ifPresent(cam -> this.camera.setPosition(cam.pos.x - this.camera.getViewportWidthInUnits() / 2.0,
                                                        cam.pos.y - this.camera.getViewportHeightInUnits() / 2.0));
         this.rendererDispatcher.dispatch(state.getWorld(), partialTickAlpha);

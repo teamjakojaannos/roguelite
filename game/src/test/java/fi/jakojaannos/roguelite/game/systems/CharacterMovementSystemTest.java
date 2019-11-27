@@ -28,20 +28,20 @@ class CharacterMovementSystemTest {
                 .withSystem("move", new CharacterMovementSystem())
                 .withSystem("velocity", new ApplyVelocitySystem(), "move")
                 .build();
-        Entities entities = Entities.createNew(256, 32);
-        this.world = World.createNew(entities);
+        EntityManager entityManager = EntityManager.createNew(256, 32);
+        this.world = World.createNew(entityManager);
 
-        Entity player = entities.createEntity();
+        Entity player = entityManager.createEntity();
         this.characterInput = new CharacterInput();
         this.characterStats = new CharacterStats();
         this.velocity = new Velocity();
         this.transform = new Transform(0.0, 0.0, 0.0);
-        entities.addComponentTo(player, this.transform);
-        entities.addComponentTo(player, this.velocity);
-        entities.addComponentTo(player, this.characterInput);
-        entities.addComponentTo(player, this.characterStats);
+        entityManager.addComponentTo(player, this.transform);
+        entityManager.addComponentTo(player, this.velocity);
+        entityManager.addComponentTo(player, this.characterInput);
+        entityManager.addComponentTo(player, this.characterStats);
 
-        this.world.getEntities().applyModifications();
+        this.world.getEntityManager().applyModifications();
     }
 
     @ParameterizedTest

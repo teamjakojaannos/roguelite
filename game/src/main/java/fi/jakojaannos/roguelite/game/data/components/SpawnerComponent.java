@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 
 import fi.jakojaannos.roguelite.game.data.archetypes.DummyArchetype;
@@ -104,7 +104,7 @@ public class SpawnerComponent implements Component {
 
 
     public interface EntityFactory {
-        Entity get(Entities entities, Transform spawnerPos, SpawnerComponent spawnerComponent);
+        Entity get(EntityManager entityManager, Transform spawnerPos, SpawnerComponent spawnerComponent);
     }
 
 }

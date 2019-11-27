@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs.world;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import lombok.NonNull;
@@ -10,16 +10,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WorldImpl implements World {
-    private final Entities entities;
+    private final EntityManager entityManager;
     private final Map<Class<? extends Resource>, Resource> resourceStorage = new HashMap<>();
 
-    public WorldImpl(@NonNull Entities entities) {
-        this.entities = entities;
+    public WorldImpl(@NonNull EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
-    public Entities getEntities() {
-        return this.entities;
+    public EntityManager getEntityManager() {
+        return this.entityManager;
     }
 
     @Override

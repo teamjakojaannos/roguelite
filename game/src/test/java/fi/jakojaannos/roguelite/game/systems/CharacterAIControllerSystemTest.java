@@ -24,23 +24,23 @@ public class CharacterAIControllerSystemTest {
         this.dispatcher = new DispatcherBuilder()
                 .withSystem("test", new CharacterAIControllerSystem())
                 .build();
-        Entities entities = Entities.createNew(256, 32);
-        this.world = World.createNew(entities);
+        EntityManager entityManager = EntityManager.createNew(256, 32);
+        this.world = World.createNew(entityManager);
 
-        this.player = entities.createEntity();
+        this.player = entityManager.createEntity();
         this.playerPos = new Transform();
-        entities.addComponentTo(this.player, playerPos);
-        entities.addComponentTo(this.player, new PlayerTag());
+        entityManager.addComponentTo(this.player, playerPos);
+        entityManager.addComponentTo(this.player, new PlayerTag());
         this.world.getResource(Players.class).player = player;
 
-        this.follower = entities.createEntity();
+        this.follower = entityManager.createEntity();
         this.followerInput = new CharacterInput();
         this.followerPos = new Transform();
-        entities.addComponentTo(this.follower, followerInput);
-        entities.addComponentTo(this.follower, followerPos);
-        entities.addComponentTo(this.follower, new FollowerEnemyAI(100.0f, 0.0f));
+        entityManager.addComponentTo(this.follower, followerInput);
+        entityManager.addComponentTo(this.follower, followerPos);
+        entityManager.addComponentTo(this.follower, new FollowerEnemyAI(100.0f, 0.0f));
 
-        entities.applyModifications();
+        entityManager.applyModifications();
     }
 
 

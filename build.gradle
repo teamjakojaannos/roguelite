@@ -54,8 +54,6 @@ subprojects {
 }
 
 task jacocoRootReport(type: JacocoReport) {
-    dependsOn(subprojects.test)
-
     additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
     sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
     classDirectories.from files(subprojects.sourceSets.main.output)
@@ -72,7 +70,6 @@ task jacocoRootReport(type: JacocoReport) {
 }
 
 task testReport(type: TestReport) {
-    dependsOn(jacocoRootReport)
     destinationDir = file("$buildDir/reports/allTests")
     // Include the results from the 'test' task in all subprojects
     reportOn subprojects*.test.binResultsDir

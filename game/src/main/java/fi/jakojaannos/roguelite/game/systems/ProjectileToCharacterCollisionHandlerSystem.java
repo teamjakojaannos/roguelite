@@ -35,7 +35,7 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
             @NonNull final World world,
             final double delta
     ) {
-        val entityManager = world.getEntities();
+        val entityManager = world.getEntityManager();
         entities.forEach(entity -> {
             val collider = entityManager.getComponentOf(entity, Collider.class).get();
             val stats = entityManager.getComponentOf(entity, ProjectileStats.class).get();

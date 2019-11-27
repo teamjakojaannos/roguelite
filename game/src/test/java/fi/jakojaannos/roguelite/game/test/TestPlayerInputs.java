@@ -1,13 +1,12 @@
 package fi.jakojaannos.roguelite.game.test;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.game.Roguelite;
 import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import org.joml.Vector2d;
@@ -36,20 +35,20 @@ class TestPlayerInputs {
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(ButtonInput.pressed(InputButton.Keyboard.valueOf(key)));
 
-        Entities entities = state.getWorld().getEntities();
+        EntityManager entityManager = state.getWorld().getEntityManager();
         Entity player = state.getWorld().getResource(Players.class).player;
-        Vector2d initialPosition = entities.getComponentOf(player, Transform.class)
-                                           .get()
-                                           .getCenter(new Vector2d());
+        Vector2d initialPosition = entityManager.getComponentOf(player, Transform.class)
+                                                .get()
+                                                .getCenter(new Vector2d());
 
         // Simulate 1s worth of ticks at 0.02 per tick
         for (int i = 0; i < 50; ++i) {
             roguelite.tick(state, events, 0.02);
         }
 
-        Vector2d newPosition = entities.getComponentOf(player, Transform.class)
-                                       .get()
-                                       .getCenter(new Vector2d());
+        Vector2d newPosition = entityManager.getComponentOf(player, Transform.class)
+                                            .get()
+                                            .getCenter(new Vector2d());
         assertTrue(initialPosition.sub(newPosition).length() > 0.5);
     }
 
@@ -59,7 +58,7 @@ class TestPlayerInputs {
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(ButtonInput.pressed(InputButton.Keyboard.valueOf(key)));
 
-        Entities entities = state.getWorld().getEntities();
+        EntityManager entityManager = state.getWorld().getEntityManager();
         Entity player = state.getWorld().getResource(Players.class).player;
 
         // Simulate 1s worth of ticks at 0.02 per tick
@@ -67,16 +66,16 @@ class TestPlayerInputs {
             roguelite.tick(state, events, 0.02);
         }
 
-        Vector2d newPosition = entities.getComponentOf(player, Transform.class)
-                                       .get()
-                                       .getCenter(new Vector2d());
+        Vector2d newPosition = entityManager.getComponentOf(player, Transform.class)
+                                            .get()
+                                            .getCenter(new Vector2d());
 
         events.offer(ButtonInput.released(InputButton.Keyboard.valueOf(key)));
         roguelite.tick(state, events, 0.02);
 
-        Vector2d finalPosition = entities.getComponentOf(player, Transform.class)
-                                         .get()
-                                         .getCenter(new Vector2d());
+        Vector2d finalPosition = entityManager.getComponentOf(player, Transform.class)
+                                              .get()
+                                              .getCenter(new Vector2d());
         assertTrue(finalPosition.sub(newPosition).length() > 0.05);
     }
 
@@ -86,7 +85,7 @@ class TestPlayerInputs {
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(ButtonInput.pressed(InputButton.Keyboard.valueOf(key)));
 
-        Entities entities = state.getWorld().getEntities();
+        EntityManager entityManager = state.getWorld().getEntityManager();
         Entity player = state.getWorld().getResource(Players.class).player;
 
         // Simulate 1s worth of ticks at 0.02 per tick
@@ -100,18 +99,18 @@ class TestPlayerInputs {
             roguelite.tick(state, events, 0.02);
         }
 
-        Vector2d newPosition = entities.getComponentOf(player, Transform.class)
-                                       .get()
-                                       .getCenter(new Vector2d());
+        Vector2d newPosition = entityManager.getComponentOf(player, Transform.class)
+                                            .get()
+                                            .getCenter(new Vector2d());
 
         // Simulate 2s worth of ticks at 0.02 per tick
         for (int i = 0; i < 100; ++i) {
             roguelite.tick(state, events, 0.02);
         }
 
-        Vector2d finalPosition = entities.getComponentOf(player, Transform.class)
-                                         .get()
-                                         .getCenter(new Vector2d());
+        Vector2d finalPosition = entityManager.getComponentOf(player, Transform.class)
+                                              .get()
+                                              .getCenter(new Vector2d());
         assertTrue(finalPosition.sub(newPosition).length() < 0.0001);
     }
 }

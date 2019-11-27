@@ -1,15 +1,16 @@
 package fi.jakojaannos.roguelite.engine.ecs.storage;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -17,7 +18,7 @@ import java.util.stream.Stream;
  * Provides accessors for entity components.
  */
 @Slf4j
-public class EntitiesImpl implements Entities {
+public class EntityManagerImpl implements EntityManager {
     private final int maxComponentTypes;
     private final EntityStorage entityStorage;
     private final List<ComponentStorage> componentTypes = new ArrayList<>();
@@ -26,7 +27,15 @@ public class EntitiesImpl implements Entities {
 
     private int entityCapacity;
 
-    public EntitiesImpl(int entityCapacity, int maxComponentTypes) {
+    public EntityManagerImpl(int entityCapacity, int maxComponentTypes) {
+        this(entityCapacity, maxComponentTypes, ComponentStorage::new);
+    }
+
+    public EntityManagerImpl(
+            final int entityCapacity,
+            final int maxComponentTypes,
+            @NonNull final ComponentStorageFactory componentStorageFactory
+    ) {
         this.entityStorage = new EntityStorage(entityCapacity);
         this.entityCapacity = entityCapacity;
         this.maxComponentTypes = maxComponentTypes;
@@ -88,8 +97,7 @@ public class EntitiesImpl implements Entities {
             @NonNull Entity entity,
             @NonNull Class<? extends Component> componentClass
     ) {
-        this.componentTypes.get(getComponentTypeIndexFor(componentClass))
-                           .removeComponent((EntityImpl) entity);
+        removeComponentByIndex(entity, getComponentTypeIndexFor(componentClass));
     }
 
     @Override
@@ -135,19 +143,54 @@ public class EntitiesImpl implements Entities {
                                  .map(Entity.class::cast);
     }
 
+    @Override
+    public void clearComponentsExcept(
+            @NonNull final Entity entity,
+            @NonNull final Class<? extends Component> componentType
+    ) {
+        val componentTypeIndex = getComponentTypeIndexFor(componentType);
+        IntStream.range(0, this.componentTypes.size())
+                 .filter(i -> i != componentTypeIndex)
+                 .forEach(index -> removeComponentByIndex(entity, index));
+    }
+
+    @Override
+    public void clearComponentsExcept(
+            @NonNull final Entity entity,
+            @NonNull final Collection<Class<? extends Component>> allowedComponentTypes
+    ) {
+        List<Integer> allowedIndices = allowedComponentTypes.stream()
+                                                            .map(this::getComponentTypeIndexFor)
+                                                            .collect(Collectors.toList());
+        IntStream.range(0, this.componentTypes.size())
+                 .filter(i -> !allowedIndices.contains(i))
+                 .forEach(index -> removeComponentByIndex(entity, index));
+    }
+
     public <TComponent extends Component> Integer getComponentTypeIndexFor(Class<TComponent> componentClass) {
         return this.componentTypeIndices.computeIfAbsent(componentClass,
-                                                         clazz -> {
-                                                             val index = this.componentTypes.size();
+                                                         this::createNewComponentStorage);
+    }
 
-                                                             //noinspection unchecked
-                                                             this.componentTypes.add(new ComponentStorage<>(
-                                                                     this.entityCapacity,
-                                                                     index,
-                                                                     size -> (TComponent[]) Array.newInstance(clazz, size)
-                                                             ));
-                                                             return index;
-                                                         });
+    private int createNewComponentStorage(Class<? extends Component> componentClass) {
+        val index = this.componentTypes.size();
+        if (index >= this.maxComponentTypes) {
+            throw new IllegalStateException("Too many component types registered!");
+        }
+        this.componentTypes.add(new ComponentStorage<>(
+                this.entityCapacity,
+                index,
+                componentClass
+        ));
+        return index;
+    }
+
+    private void removeComponentByIndex(
+            @NonNull final Entity entity,
+            final int componentTypeIndex
+    ) {
+        this.componentTypes.get(componentTypeIndex)
+                           .removeComponent((EntityImpl) entity);
     }
 
     private void resize(int entityCapacity) {
@@ -159,5 +202,13 @@ public class EntitiesImpl implements Entities {
 
     private interface StorageTask {
         void execute();
+    }
+
+    public interface ComponentStorageFactory {
+        <TComponent extends Component> ComponentStorage<TComponent> get(
+                int entityCapacity,
+                int componentTypeIndex,
+                @NonNull Class<TComponent> componentClass
+        );
     }
 }

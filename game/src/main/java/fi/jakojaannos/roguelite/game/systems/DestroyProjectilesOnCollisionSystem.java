@@ -30,10 +30,10 @@ public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
             final double delta
     ) {
         entities.forEach(entity -> {
-            val collider = world.getEntities().getComponentOf(entity, Collider.class).get();
+            val collider = world.getEntityManager().getComponentOf(entity, Collider.class).get();
             if (collider.getCollisions()
                         .anyMatch(c -> c.getMode() == Collision.Mode.COLLISION)) {
-                world.getEntities().destroyEntity(entity);
+                world.getEntityManager().destroyEntity(entity);
             }
         });
     }

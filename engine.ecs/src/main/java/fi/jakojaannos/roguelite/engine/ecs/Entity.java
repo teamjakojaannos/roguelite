@@ -10,7 +10,7 @@ public interface Entity {
 
     /**
      * Indicates whether or not this entity is flagged for removal. Entities marked to be removed
-     * are destroyed the next time {@link Entities#applyModifications()} is called.
+     * are destroyed the next time {@link EntityManager#applyModifications()} is called.
      *
      * @return <code>true</code> if this entity is removed or will be removed during the next
      * modification tick. <code>false</code> otherwise.

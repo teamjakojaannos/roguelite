@@ -1,12 +1,10 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.joml.Vector2d;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +27,7 @@ public class SpawnerSystem implements ECSSystem {
             World world,
             double delta
     ) {
-        Entities cluster = world.getEntities();
+        EntityManager cluster = world.getEntityManager();
 
         entities.forEach(entity -> {
             val myPos = cluster.getComponentOf(entity, Transform.class).get();

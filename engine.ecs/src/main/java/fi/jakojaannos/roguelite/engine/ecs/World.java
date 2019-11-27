@@ -2,11 +2,9 @@ package fi.jakojaannos.roguelite.engine.ecs;
 
 import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
 
-import java.util.function.Supplier;
-
 public interface World {
-    static World createNew(Entities entities) {
-        return new WorldImpl(entities);
+    static World createNew(EntityManager entityManager) {
+        return new WorldImpl(entityManager);
     }
 
     /**
@@ -14,7 +12,7 @@ public interface World {
      *
      * @return entity/component manager instance for this world
      */
-    Entities getEntities();
+    EntityManager getEntityManager();
 
     /**
      * Creates or gets the resource of given type.

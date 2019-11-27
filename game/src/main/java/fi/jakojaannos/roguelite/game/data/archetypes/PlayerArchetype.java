@@ -1,8 +1,7 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.NonNull;
 import lombok.val;
@@ -10,20 +9,20 @@ import lombok.val;
 public class PlayerArchetype {
     @NonNull
     public static Entity create(
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             @NonNull final Transform transform
     ) {
-        val player = entities.createEntity();
-        entities.addComponentTo(player, transform);
-        entities.addComponentTo(player, new Physics(transform));
-        entities.addComponentTo(player, new Velocity());
-        entities.addComponentTo(player, new CharacterInput());
-        entities.addComponentTo(player, new CharacterAbilities());
-        entities.addComponentTo(player, new Collider());
-        entities.addComponentTo(player, new PlayerTag());
-        entities.addComponentTo(player, createCharacterStats());
-        entities.addComponentTo(player, createWeaponStats());
-        entities.addComponentTo(player, createSpriteInfo());
+        val player = entityManager.createEntity();
+        entityManager.addComponentTo(player, transform);
+        entityManager.addComponentTo(player, new Physics(transform));
+        entityManager.addComponentTo(player, new Velocity());
+        entityManager.addComponentTo(player, new CharacterInput());
+        entityManager.addComponentTo(player, new CharacterAbilities());
+        entityManager.addComponentTo(player, new Collider());
+        entityManager.addComponentTo(player, new PlayerTag());
+        entityManager.addComponentTo(player, createCharacterStats());
+        entityManager.addComponentTo(player, createWeaponStats());
+        entityManager.addComponentTo(player, createSpriteInfo());
         return player;
     }
 

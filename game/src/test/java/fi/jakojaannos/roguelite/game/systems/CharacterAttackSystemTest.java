@@ -20,29 +20,29 @@ class CharacterAttackSystemTest {
         this.dispatcher = new DispatcherBuilder()
                 .withSystem("test", new CharacterAttackSystem())
                 .build();
-        Entities entities = Entities.createNew(256, 32);
-        this.world = World.createNew(entities);
+        EntityManager entityManager = EntityManager.createNew(256, 32);
+        this.world = World.createNew(entityManager);
 
-        Entity player = entities.createEntity();
+        Entity player = entityManager.createEntity();
         this.characterInput = new CharacterInput();
         this.characterInput.move.set(0.0);
         this.characterInput.attack = false;
         this.characterStats = new CharacterStats();
         this.characterAbilities = new CharacterAbilities();
         this.weaponStats = new BasicWeaponStats();
-        entities.addComponentTo(player, new Transform(0.0, 0.0, 0.0));
-        entities.addComponentTo(player, new Velocity());
-        entities.addComponentTo(player, this.characterInput);
-        entities.addComponentTo(player, this.characterAbilities);
-        entities.addComponentTo(player, this.characterStats);
-        entities.addComponentTo(player, this.weaponStats);
+        entityManager.addComponentTo(player, new Transform(0.0, 0.0, 0.0));
+        entityManager.addComponentTo(player, new Velocity());
+        entityManager.addComponentTo(player, this.characterInput);
+        entityManager.addComponentTo(player, this.characterAbilities);
+        entityManager.addComponentTo(player, this.characterStats);
+        entityManager.addComponentTo(player, this.weaponStats);
 
-        entities.applyModifications();
+        entityManager.applyModifications();
 
         // Warm-up
         for (int i = 0; i < 100; ++i) {
             this.dispatcher.dispatch(this.world, 0.02);
-            this.world.getEntities().applyModifications();
+            this.world.getEntityManager().applyModifications();
         }
     }
 
@@ -53,9 +53,9 @@ class CharacterAttackSystemTest {
 
         characterInput.attack = false;
         this.dispatcher.dispatch(this.world, 0.02);
-        this.world.getEntities().applyModifications();
+        this.world.getEntityManager().applyModifications();
 
-        assertEquals(0, this.world.getEntities().getEntitiesWith(ProjectileStats.class).count());
+        assertEquals(0, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
     }
 
     @Test
@@ -65,9 +65,9 @@ class CharacterAttackSystemTest {
 
         characterInput.attack = true;
         this.dispatcher.dispatch(this.world, 0.02);
-        this.world.getEntities().applyModifications();
+        this.world.getEntityManager().applyModifications();
 
-        assertEquals(1, this.world.getEntities().getEntitiesWith(ProjectileStats.class).count());
+        assertEquals(1, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
     }
 
     @Test
@@ -78,10 +78,10 @@ class CharacterAttackSystemTest {
         characterInput.attack = true;
         for (int i = 0; i < 175; ++i) {
             this.dispatcher.dispatch(this.world, 0.02);
-            this.world.getEntities().applyModifications();
+            this.world.getEntityManager().applyModifications();
         }
 
-        assertEquals(4, this.world.getEntities().getEntitiesWith(ProjectileStats.class).count());
+        assertEquals(4, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
     }
 
     @Test
@@ -91,14 +91,14 @@ class CharacterAttackSystemTest {
 
         characterInput.attack = true;
         this.dispatcher.dispatch(this.world, 0.02);
-        this.world.getEntities().applyModifications();
+        this.world.getEntityManager().applyModifications();
 
         characterInput.attack = false;
         for (int i = 0; i < 200; ++i) {
             this.dispatcher.dispatch(this.world, 0.02);
-            this.world.getEntities().applyModifications();
+            this.world.getEntityManager().applyModifications();
         }
 
-        assertEquals(1, this.world.getEntities().getEntitiesWith(ProjectileStats.class).count());
+        assertEquals(1, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
     }
 }

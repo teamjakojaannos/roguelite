@@ -44,17 +44,17 @@ public class CharacterAIControllerSystem implements ECSSystem {
     ) {
         val player = world.getResource(Players.class).player;
         val playerPos = new Vector2d();
-        world.getEntities().getComponentOf(player, Transform.class)
+        world.getEntityManager().getComponentOf(player, Transform.class)
              .orElse(new Transform(5.0f, 5.0f))
              .getCenter(playerPos);
 
         entities.forEach(entity -> {
             val aiPos = new Vector2d();
-            world.getEntities().getComponentOf(entity, Transform.class).get()
+            world.getEntityManager().getComponentOf(entity, Transform.class).get()
                  .getCenter(aiPos);
 
             tmpDirection.set(playerPos).sub(aiPos);
-            val input = world.getEntities().getComponentOf(entity, CharacterInput.class).get();
+            val input = world.getEntityManager().getComponentOf(entity, CharacterInput.class).get();
             input.move.set(tmpDirection);
         });
     }

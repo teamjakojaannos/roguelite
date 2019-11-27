@@ -50,7 +50,7 @@ public class PlayerInputSystem implements ECSSystem {
         val camProps = world.getResource(CameraProperties.class);
         val cursorPosition = tmpCursorPos.set(0.0, 0.0);
         if (camProps.cameraEntity != null) {
-            val camera = world.getEntities().getComponentOf(camProps.cameraEntity, Camera.class).get();
+            val camera = world.getEntityManager().getComponentOf(camProps.cameraEntity, Camera.class).get();
             mouse.calculateCursorPositionRelativeToCamera(camera, camProps, tmpCursorPos);
         } else {
             cursorPosition.set(mouse.pos.x * camProps.viewportWidthInWorldUnits,
@@ -62,8 +62,8 @@ public class PlayerInputSystem implements ECSSystem {
         boolean inputAttack = inputs.inputAttack;
 
         entities.forEach(entity -> {
-            val input = world.getEntities().getComponentOf(entity, CharacterInput.class).get();
-            val abilities = world.getEntities().getComponentOf(entity, CharacterAbilities.class).get();
+            val input = world.getEntityManager().getComponentOf(entity, CharacterInput.class).get();
+            val abilities = world.getEntityManager().getComponentOf(entity, CharacterAbilities.class).get();
             input.move.set(inputHorizontal,
                            inputVertical);
             input.attack = inputAttack;

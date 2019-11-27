@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.NonNull;
@@ -10,30 +10,30 @@ public class FollowerArchetype {
 
     @NonNull
     public static Entity create(
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             double x,
             double y
     ) {
         return create(
-                entities,
+                entityManager,
                 new Transform(x, y)
         );
     }
 
     @NonNull
     public static Entity create(
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             @NonNull final Transform transform
     ) {
-        val follower = entities.createEntity();
-        entities.addComponentTo(follower, transform);
-        entities.addComponentTo(follower, new Velocity());
-        entities.addComponentTo(follower, new CharacterInput());
-        entities.addComponentTo(follower, new Health(5));
-        entities.addComponentTo(follower, new Collider());
-        entities.addComponentTo(follower, createCharacterStats());
-        entities.addComponentTo(follower, createEnemyAI());
-        entities.addComponentTo(follower, createSpriteInfo());
+        val follower = entityManager.createEntity();
+        entityManager.addComponentTo(follower, transform);
+        entityManager.addComponentTo(follower, new Velocity());
+        entityManager.addComponentTo(follower, new CharacterInput());
+        entityManager.addComponentTo(follower, new Health(5));
+        entityManager.addComponentTo(follower, new Collider());
+        entityManager.addComponentTo(follower, createCharacterStats());
+        entityManager.addComponentTo(follower, createEnemyAI());
+        entityManager.addComponentTo(follower, createSpriteInfo());
 
         return follower;
     }

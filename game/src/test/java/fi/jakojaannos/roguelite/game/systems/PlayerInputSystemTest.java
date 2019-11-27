@@ -25,17 +25,17 @@ class PlayerInputSystemTest {
         this.dispatcher = new DispatcherBuilder()
                 .withSystem("test", new PlayerInputSystem())
                 .build();
-        Entities entities = Entities.createNew(256, 32);
-        this.world = World.createNew(entities);
+        EntityManager entityManager = EntityManager.createNew(256, 32);
+        this.world = World.createNew(entityManager);
 
-        Entity player = entities.createEntity();
+        Entity player = entityManager.createEntity();
         this.input = new CharacterInput();
         this.abilities = new CharacterAbilities();
-        entities.addComponentTo(player, this.input);
-        entities.addComponentTo(player, this.abilities);
-        entities.addComponentTo(player, new PlayerTag());
+        entityManager.addComponentTo(player, this.input);
+        entityManager.addComponentTo(player, this.abilities);
+        entityManager.addComponentTo(player, new PlayerTag());
 
-        entities.applyModifications();
+        entityManager.applyModifications();
     }
 
     @ParameterizedTest
@@ -63,7 +63,7 @@ class PlayerInputSystemTest {
         inputs.inputUp = up;
         inputs.inputDown = down;
         this.dispatcher.dispatch(this.world, 1.0);
-        world.getEntities().applyModifications();
+        world.getEntityManager().applyModifications();
 
         assertEquals(expectedHorizontal, this.input.move.x);
         assertEquals(expectedVertical, this.input.move.y);
@@ -85,7 +85,7 @@ class PlayerInputSystemTest {
         mouse.pos.y = mouseY;
 
         this.dispatcher.dispatch(this.world, 1.0);
-        this.world.getEntities().applyModifications();
+        this.world.getEntityManager().applyModifications();
 
         assertEquals(expectedX, abilities.attackTarget.x);
         assertEquals(expectedY, abilities.attackTarget.y);
@@ -97,17 +97,17 @@ class PlayerInputSystemTest {
         inputs.inputAttack = false;
 
         this.dispatcher.dispatch(this.world, 1.0);
-        this.world.getEntities().applyModifications();
+        this.world.getEntityManager().applyModifications();
         assertFalse(input.attack);
 
         inputs.inputAttack = true;
         this.dispatcher.dispatch(this.world, 1.0);
-        this.world.getEntities().applyModifications();
+        this.world.getEntityManager().applyModifications();
         assertTrue(input.attack);
 
         inputs.inputAttack = false;
         this.dispatcher.dispatch(this.world, 1.0);
-        this.world.getEntities().applyModifications();
+        this.world.getEntityManager().applyModifications();
         assertFalse(input.attack);
     }
 }

@@ -44,16 +44,16 @@ public class StalkerAIControllerSystem implements ECSSystem {
             double delta
     ) {
         val player = world.getResource(Players.class).player;
-        var opt = world.getEntities().getComponentOf(player, Transform.class);
+        var opt = world.getEntityManager().getComponentOf(player, Transform.class);
         if (opt.isEmpty()) return;
 
         val playerPos = new Vector2d();
         opt.get().getCenter(playerPos);
 
         entities.forEach(entity -> {
-            val stalkerAI = world.getEntities().getComponentOf(entity, StalkerAI.class).get();
-            val characterInput = world.getEntities().getComponentOf(entity, CharacterInput.class).get();
-            val characterStats = world.getEntities().getComponentOf(entity, CharacterStats.class).get();
+            val stalkerAI = world.getEntityManager().getComponentOf(entity, StalkerAI.class).get();
+            val characterInput = world.getEntityManager().getComponentOf(entity, CharacterInput.class).get();
+            val characterStats = world.getEntityManager().getComponentOf(entity, CharacterStats.class).get();
 
             stalkerAI.airTime -= delta;
             stalkerAI.jumpCoolDown -= delta;
@@ -65,7 +65,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
             }
 
             val myPos = new Vector2d();
-            world.getEntities().getComponentOf(entity, Transform.class).get()
+            world.getEntityManager().getComponentOf(entity, Transform.class).get()
                  .getCenter(myPos);
             tmpDirection.set(playerPos).sub(myPos);
 

@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Health;
@@ -26,13 +26,13 @@ public class HealthCheckSystemTest {
             "100.0f,25.0f,5.0f,false"
     })
     void entitiesWithZeroHpAreRemoved(double maxHp, double currentHp, double damage, boolean shouldBeRemoved) {
-        Entities entities = Entities.createNew(256, 32);
-        World world = World.createNew(entities);
+        EntityManager entityManager = EntityManager.createNew(256, 32);
+        World world = World.createNew(entityManager);
         HealthCheckSystem system = new HealthCheckSystem();
 
-        Entity entity = entities.createEntity();
+        Entity entity = entityManager.createEntity();
         Health hp = new Health(maxHp, currentHp);
-        entities.addComponentTo(entity, hp);
+        entityManager.addComponentTo(entity, hp);
         hp.currentHealth -= damage;
 
         system.tick(Stream.of(entity), world, 0.2f);

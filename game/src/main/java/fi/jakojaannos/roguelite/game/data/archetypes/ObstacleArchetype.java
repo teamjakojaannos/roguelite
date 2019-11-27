@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.NonNull;
@@ -8,13 +8,13 @@ import lombok.val;
 
 public class ObstacleArchetype {
     public static Entity create(
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             @NonNull final Transform transform
     ) {
-        val obstacle = entities.createEntity();
-        entities.addComponentTo(obstacle, transform);
-        entities.addComponentTo(obstacle, createCollider());
-        entities.addComponentTo(obstacle, createSpriteInfo());
+        val obstacle = entityManager.createEntity();
+        entityManager.addComponentTo(obstacle, transform);
+        entityManager.addComponentTo(obstacle, createCollider());
+        entityManager.addComponentTo(obstacle, createSpriteInfo());
         return obstacle;
     }
 

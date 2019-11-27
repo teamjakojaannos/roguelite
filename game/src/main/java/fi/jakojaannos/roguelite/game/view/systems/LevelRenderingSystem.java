@@ -43,7 +43,7 @@ public class LevelRenderingSystem implements ECSSystem {
             @NonNull World world,
             double partialTickAlpha
     ) {
-        val camera = world.getEntities()
+        val camera = world.getEntityManager()
                           .getComponentOf(world.getResource(CameraProperties.class).cameraEntity,
                                           Camera.class)
                           .get();
@@ -55,7 +55,7 @@ public class LevelRenderingSystem implements ECSSystem {
 
         this.batch.begin(this.camera);
         entities.forEach(entity -> {
-            val level = world.getEntities().getComponentOf(entity, TileMapLayer.class).get();
+            val level = world.getEntityManager().getComponentOf(entity, TileMapLayer.class).get();
 
             val tileSize = 1.0;
             for (int x = regionX; x < regionX + regionW; ++x) {

@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
 import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
@@ -53,7 +53,7 @@ public class Roguelite extends GameBase<GameState> {
     }
 
     public static GameState createInitialState(long seed) {
-        val entities = Entities.createNew(256, 32);
+        val entities = EntityManager.createNew(256, 32);
         val state = new GameState(World.createNew(entities));
 
         val player = PlayerArchetype.create(entities,
@@ -121,6 +121,6 @@ public class Roguelite extends GameBase<GameState> {
         }
 
         this.dispatcher.dispatch(state.getWorld(), delta);
-        state.getWorld().getEntities().applyModifications();
+        state.getWorld().getEntityManager().applyModifications();
     }
 }

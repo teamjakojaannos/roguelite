@@ -104,11 +104,11 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
         glBindVertexArray(this.vao);
         entities.forEach(
                 entity -> {
-                    if (world.getEntities().hasComponent(entity, NoDrawTag.class) || (!DebugConfig.renderBounds && world.getEntities().hasComponent(entity, SpriteInfo.class))) {
+                    if (world.getEntityManager().hasComponent(entity, NoDrawTag.class) || (!DebugConfig.renderBounds && world.getEntityManager().hasComponent(entity, SpriteInfo.class))) {
                         return;
                     }
 
-                    Transform transform = world.getEntities().getComponentOf(entity, Transform.class).get();
+                    Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
                     this.shader.setUniformMat4x4(this.uniformModelMatrix,
                                                  modelMatrix.identity()
                                                             .translate((float) transform.bounds.minX,

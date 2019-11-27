@@ -23,34 +23,34 @@ public class StalkerAIControllerSystemTest {
         this.dispatcher = new DispatcherBuilder()
                 .withSystem("test", new StalkerAIControllerSystem())
                 .build();
-        Entities entities = Entities.createNew(256, 32);
-        this.world = World.createNew(entities);
+        EntityManager entityManager = EntityManager.createNew(256, 32);
+        this.world = World.createNew(entityManager);
 
 
-        Entity player = entities.createEntity();
+        Entity player = entityManager.createEntity();
         this.playerPos = new Transform();
-        entities.addComponentTo(player, playerPos);
-        entities.addComponentTo(player, new PlayerTag());
+        entityManager.addComponentTo(player, playerPos);
+        entityManager.addComponentTo(player, new PlayerTag());
         this.world.getResource(Players.class).player = player;
 
 
-        Entity stalker = entities.createEntity();
+        Entity stalker = entityManager.createEntity();
         this.stalkerPos = new Transform();
-        entities.addComponentTo(stalker, stalkerPos);
-        entities.addComponentTo(stalker, new CharacterInput());
+        entityManager.addComponentTo(stalker, stalkerPos);
+        entityManager.addComponentTo(stalker, new CharacterInput());
         this.stalkerAI = new StalkerAI(
                 100.0f,
                 25.0f,
                 20.0f);
-        entities.addComponentTo(stalker, stalkerAI);
+        entityManager.addComponentTo(stalker, stalkerAI);
         this.stalkerStats = new CharacterStats(
                 1.0,
                 100.0,
                 800.0
         );
-        entities.addComponentTo(stalker, stalkerStats);
+        entityManager.addComponentTo(stalker, stalkerStats);
 
-        entities.applyModifications();
+        entityManager.applyModifications();
     }
 
     @ParameterizedTest

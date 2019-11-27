@@ -49,23 +49,23 @@ public class ApplyVelocitySystem implements ECSSystem {
             @NonNull final World world,
             final double delta
     ) {
-        val entitiesWithCollider = world.getEntities()
+        val entitiesWithCollider = world.getEntityManager()
                                         .getEntitiesWith(List.of(Transform.class, Collider.class))
                                         .collect(Collectors.toUnmodifiableList());
 
         val tileMapLayers = getTileMapLayersWithCollision(world);
 
         entities.forEach(entity -> {
-            val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
-            val velocity = world.getEntities().getComponentOf(entity, Velocity.class).get();
+            val transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
+            val velocity = world.getEntityManager().getComponentOf(entity, Velocity.class).get();
 
             if (velocity.velocity.length() < 0.001) {
                 return;
             }
 
             final Rectangled targetBounds;
-            if (world.getEntities().hasComponent(entity, Collider.class)) {
-                val collider = world.getEntities().getComponentOf(entity, Collider.class).get();
+            if (world.getEntityManager().hasComponent(entity, Collider.class)) {
+                val collider = world.getEntityManager().getComponentOf(entity, Collider.class).get();
                 targetBounds = updateTargetBoundsWithCollisionDetection(delta, world, entity, transform, collider, tileMapLayers, entitiesWithCollider, velocity.velocity);
             } else {
                 velocity.velocity.mul(delta, tmpVelocity);
@@ -77,9 +77,9 @@ public class ApplyVelocitySystem implements ECSSystem {
     }
 
     private List<TileMap<TileType>> getTileMapLayersWithCollision(@NonNull World world) {
-        return world.getEntities()
+        return world.getEntityManager()
                     .getEntitiesWith(TileMapLayer.class)
-                    .map(Entities.EntityComponentPair::getComponent)
+                    .map(EntityManager.EntityComponentPair::getComponent)
                     .filter(TileMapLayer::isCollisionEnabled)
                     .map(TileMapLayer::getTileMap)
                     .collect(Collectors.toList());
@@ -293,8 +293,8 @@ public class ApplyVelocitySystem implements ECSSystem {
                 continue;
             }
 
-            val otherCollider = world.getEntities().getComponentOf(other, Collider.class).get();
-            val otherTransform = world.getEntities().getComponentOf(other, Transform.class).get();
+            val otherCollider = world.getEntityManager().getComponentOf(other, Collider.class).get();
+            val otherTransform = world.getEntityManager().getComponentOf(other, Transform.class).get();
 
             val intersects = otherTransform.bounds.intersects(targetBounds);
             if (intersects) {
@@ -315,10 +315,7 @@ public class ApplyVelocitySystem implements ECSSystem {
             @NonNull final Collision collision
     ) {
         collider.collisions.add(new CollisionEvent(collision));
-
-        if (!world.getEntities().hasComponent(entity, RecentCollisionTag.class)) {
-            world.getEntities().addComponentTo(entity, new RecentCollisionTag());
-        }
+        world.getEntityManager().addComponentIfAbsent(entity, new RecentCollisionTag());
     }
 
 

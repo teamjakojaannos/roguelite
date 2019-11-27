@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.world;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
@@ -71,7 +71,7 @@ public class WorldGenerator<TTile> {
         }
 
         // Generate hallways
-        val entities = world.getEntities();
+        val entities = world.getEntityManager();
         for (int i = 0; i < hallwaysPerWall; ++i) {
             val hallwayStartX = startX + hallwaySize + i * unitsPerHallwayHorizontal;
             val hallwayStartY = startY + hallwaySize + i * unitsPerHallwayVertical;
@@ -125,13 +125,13 @@ public class WorldGenerator<TTile> {
             final int x,
             final int y,
             final double spawnFrequency,
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             @NonNull final SpawnerComponent.EntityFactory factoryFollower
     ) {
-        val spawner = entities.createEntity();
-        entities.addComponentTo(spawner, new Transform(x, y));
+        val spawner = entityManager.createEntity();
+        entityManager.addComponentTo(spawner, new Transform(x, y));
         val spawnerComponent = new SpawnerComponent(spawnFrequency, factoryFollower);
         spawnerComponent.maxSpawnDistance = 0.25;
-        entities.addComponentTo(spawner, spawnerComponent);
+        entityManager.addComponentTo(spawner, spawnerComponent);
     }
 }

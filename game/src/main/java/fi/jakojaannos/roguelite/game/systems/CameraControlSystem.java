@@ -8,7 +8,6 @@ import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.NonNull;
 import lombok.val;
-import org.joml.Vector2d;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,9 +28,9 @@ public class CameraControlSystem implements ECSSystem {
             double delta
     ) {
         entities.forEach(entity -> {
-            val camera = world.getEntities().getComponentOf(entity, Camera.class).get();
+            val camera = world.getEntityManager().getComponentOf(entity, Camera.class).get();
             if (camera.followTarget != null) {
-                world.getEntities()
+                world.getEntityManager()
                      .getComponentOf(camera.followTarget, Transform.class)
                      .ifPresent(transform -> camera.pos.set(transform.getCenterX(),
                                                             transform.getCenterY()));

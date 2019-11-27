@@ -20,12 +20,12 @@ class CameraControlSystemTest {
         dispatcher = new DispatcherBuilder()
                 .withSystem("test", new CameraControlSystem())
                 .build();
-        world = World.createNew(Entities.createNew(256, 32));
-        Entity cameraEntity = world.getEntities().createEntity();
+        world = World.createNew(EntityManager.createNew(256, 32));
+        Entity cameraEntity = world.getEntityManager().createEntity();
         camera = new Camera();
-        world.getEntities().addComponentTo(cameraEntity, camera);
+        world.getEntityManager().addComponentTo(cameraEntity, camera);
 
-        world.getEntities().applyModifications();
+        world.getEntityManager().applyModifications();
     }
 
     @Test
@@ -38,11 +38,11 @@ class CameraControlSystemTest {
 
     @Test
     void isRelativelyCloseToTargetAfterFiveSecondsWhenFollowingFromAfar() {
-        Entity target = world.getEntities().createEntity();
-        world.getEntities().addComponentTo(target, new Transform(10, 20));
+        Entity target = world.getEntityManager().createEntity();
+        world.getEntityManager().addComponentTo(target, new Transform(10, 20));
         camera.pos.set(42000, 69000);
         camera.followTarget = target;
-        world.getEntities().applyModifications();
+        world.getEntityManager().applyModifications();
 
         for (int i = 0; i < 5 / 0.02; ++i)
         dispatcher.dispatch(world, 0.02);

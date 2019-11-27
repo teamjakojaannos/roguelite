@@ -38,9 +38,9 @@ public class CharacterMovementSystem implements ECSSystem {
             double delta
     ) {
         entities.forEach(entity -> {
-            val input = world.getEntities().getComponentOf(entity, CharacterInput.class).get();
-            val stats = world.getEntities().getComponentOf(entity, CharacterStats.class).get();
-            val velocity = world.getEntities().getComponentOf(entity, Velocity.class).get();
+            val input = world.getEntityManager().getComponentOf(entity, CharacterInput.class).get();
+            val stats = world.getEntityManager().getComponentOf(entity, CharacterStats.class).get();
+            val velocity = world.getEntityManager().getComponentOf(entity, Velocity.class).get();
 
             // Accelerate
             if (input.move.lengthSquared() > INPUT_EPSILON * INPUT_EPSILON) {

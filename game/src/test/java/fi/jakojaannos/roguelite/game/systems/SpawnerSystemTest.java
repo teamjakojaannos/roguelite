@@ -21,7 +21,7 @@ public class SpawnerSystemTest {
     private SpawnerSystem spawnerSystem;
     private SystemDispatcher dispatcher;
     private World world;
-    private Entities entities;
+    private EntityManager entityManager;
 
 
     @BeforeEach
@@ -30,11 +30,11 @@ public class SpawnerSystemTest {
         this.dispatcher = new DispatcherBuilder()
                 .withSystem("test", spawnerSystem)
                 .build();
-        this.entities = Entities.createNew(256, 32);
-        this.world = World.createNew(entities);
+        this.entityManager = EntityManager.createNew(256, 32);
+        this.world = World.createNew(entityManager);
 
 
-        entities.applyModifications();
+        entityManager.applyModifications();
     }
 
 
@@ -52,26 +52,26 @@ public class SpawnerSystemTest {
             double delta,
             long expectedAmount
     ) {
-        Entity spawner = this.entities.createEntity();
-        entities.addComponentTo(spawner, new Transform());
-        entities.addComponentTo(spawner,
-                new SpawnerComponent(spawnFrequency, (entities, spawnerPos, spawnerComponent) -> {
+        Entity spawner = this.entityManager.createEntity();
+        entityManager.addComponentTo(spawner, new Transform());
+        entityManager.addComponentTo(spawner,
+                                     new SpawnerComponent(spawnFrequency, (entities, spawnerPos, spawnerComponent) -> {
                     Entity e = entities.createEntity();
                     entities.addComponentTo(e, new FollowerEnemyAI(0, 0));
                     return e;
                 }));
 
-        entities.applyModifications();
+        entityManager.applyModifications();
 
-        long enemiesBefore = this.world.getEntities().getEntitiesWith(FollowerEnemyAI.class).count();
+        long enemiesBefore = this.world.getEntityManager().getEntitiesWith(FollowerEnemyAI.class).count();
 
         for (int i = 0; i < nTicks; i++) {
             this.dispatcher.dispatch(this.world, delta);
         }
 
-        entities.applyModifications();
+        entityManager.applyModifications();
 
-        long enemiesAfter = this.world.getEntities().getEntitiesWith(FollowerEnemyAI.class).count();
+        long enemiesAfter = this.world.getEntityManager().getEntitiesWith(FollowerEnemyAI.class).count();
 
         assertEquals(expectedAmount, (enemiesAfter - enemiesBefore));
     }
@@ -83,15 +83,15 @@ public class SpawnerSystemTest {
         when(mockFactory.get(any(), any(), any())).thenReturn(spawnedEnemy);
 
         SpawnerComponent spawnerComponent = new SpawnerComponent(1.0f, mockFactory);
-        Entity spawner = entities.createEntity();
-        entities.addComponentTo(spawner, spawnerComponent);
-        entities.addComponentTo(spawner, new Transform());
+        Entity spawner = entityManager.createEntity();
+        entityManager.addComponentTo(spawner, spawnerComponent);
+        entityManager.addComponentTo(spawner, new Transform());
 
         for (int i = 0; i < 20; i++) {
             spawnerSystem.tick(Stream.of(spawner), world, 0.2f);
         }
 
-        verify(mockFactory, times(4)).get(eq(entities), any(), eq(spawnerComponent));
+        verify(mockFactory, times(4)).get(eq(entityManager), any(), eq(spawnerComponent));
 
     }
 

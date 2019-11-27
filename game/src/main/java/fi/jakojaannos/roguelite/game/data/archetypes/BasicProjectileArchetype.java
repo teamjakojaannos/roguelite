@@ -48,7 +48,7 @@ public class BasicProjectileArchetype {
             @NonNull final Transform transform,
             @NonNull final Velocity velocity
     ) {
-        val entities = world.getEntities();
+        val entities = world.getEntityManager();
 
         val projectile = entities.createEntity();
         val projectileStats = createProjectileStats();

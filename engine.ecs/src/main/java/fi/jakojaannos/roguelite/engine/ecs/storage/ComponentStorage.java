@@ -7,9 +7,9 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Slf4j
 class ComponentStorage<TComponent extends Component> {
@@ -21,12 +21,12 @@ class ComponentStorage<TComponent extends Component> {
     private final ComponentMap<TComponent> componentMap;
 
     ComponentStorage(
-            int entityCapacity,
-            int componentTypeIndex,
-            @NonNull Function<Integer, TComponent[]> componentArraySupplier
+            final int entityCapacity,
+            final int componentTypeIndex,
+            @NonNull final Class<TComponent> componentClass
     ) {
         this.componentTypeIndex = componentTypeIndex;
-        this.componentMap = new ComponentMap<>(entityCapacity, componentArraySupplier);
+        this.componentMap = new ComponentMap<>(entityCapacity, componentClass);
     }
 
     void addComponent(@NonNull EntityImpl entity, @NonNull TComponent component) {
@@ -57,24 +57,22 @@ class ComponentStorage<TComponent extends Component> {
     }
 
     private static class ComponentMap<TComponent> {
-        // offset by 1 so that: 0 => null, 1 => 0, 2 => 1, ..., n => n - 1
         private final IdSupplier idSupplier = new IdSupplier();
 
         private int entityCapacity;
         private int[] entityComponentIndexLookup;
-
-        private final Function<Integer, TComponent[]> componentArraySupplier;
         private TComponent[] components;
 
         private ComponentMap(
                 int entityCapacity,
-                Function<Integer, TComponent[]> componentArraySupplier
+                Class<TComponent> componentClass
         ) {
+            this.idSupplier.get();
             this.entityCapacity = entityCapacity;
-            this.componentArraySupplier = componentArraySupplier;
-
-            this.components = this.componentArraySupplier.apply(entityCapacity);
             this.entityComponentIndexLookup = new int[entityCapacity];
+
+            // noinspection unchecked
+            this.components = (TComponent[]) Array.newInstance(componentClass, this.entityCapacity + 1);
         }
 
         private Optional<Integer> componentIndexOf(EntityImpl entity) {
@@ -83,7 +81,7 @@ class ComponentStorage<TComponent extends Component> {
                 return Optional.empty();
             }
 
-            return Optional.of(index - 1);
+            return Optional.of(index);
         }
 
         void put(EntityImpl entity, TComponent component) {
@@ -92,7 +90,7 @@ class ComponentStorage<TComponent extends Component> {
                 resize(this.entityCapacity * 2);
             }
 
-            this.entityComponentIndexLookup[entity.getId()] = componentIndex + 1;
+            this.entityComponentIndexLookup[entity.getId()] = componentIndex;
             this.components[componentIndex] = component;
         }
 
@@ -114,7 +112,7 @@ class ComponentStorage<TComponent extends Component> {
             if (entityCapacity > this.entityCapacity) {
                 this.entityCapacity = entityCapacity;
                 this.entityComponentIndexLookup = Arrays.copyOf(this.entityComponentIndexLookup, this.entityCapacity);
-                this.components = Arrays.copyOf(this.components, this.entityCapacity);
+                this.components = Arrays.copyOf(this.components, this.entityCapacity + 1);
             }
         }
     }

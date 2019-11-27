@@ -46,14 +46,14 @@ public class SnapToCursorSystem implements ECSSystem {
         val camProps = world.getResource(CameraProperties.class);
 
         val cursorPosition = Optional.ofNullable(camProps.cameraEntity)
-                                     .map(e -> world.getEntities().getComponentOf(e, Camera.class))
+                                     .map(e -> world.getEntityManager().getComponentOf(e, Camera.class))
                                      .filter(Optional::isPresent)
                                      .map(Optional::get)
                                      .map(cam -> mouse.calculateCursorPositionRelativeToCamera(cam, camProps, tmpCamPos))
                                      .orElseGet(() -> tmpCamPos.set(0.0, 0.0));
 
         entities.forEach(entity -> {
-            val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
+            val transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
             transform.setPosition(cursorPosition.x, cursorPosition.y);
         });
     }

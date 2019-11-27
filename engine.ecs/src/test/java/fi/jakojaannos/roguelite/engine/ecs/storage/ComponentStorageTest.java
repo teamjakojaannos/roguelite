@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.ecs.storage;
 
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockComponent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -9,10 +10,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ComponentStorageTest {
+    private ComponentStorage<MockComponent> storage;
+
+    @BeforeEach
+    void beforeEach() {
+        storage = new ComponentStorage<>(100, 8, MockComponent.class);
+    }
+
     @ParameterizedTest
     @CsvSource({"valid,", ",valid"})
     void addComponentThrowsIfAnyOfTheArgsAreNull(String entity, String component) {
-        ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         assertThrows(AssertionError.class,
                      () -> storage.addComponent(entity == null ? null : new EntityImpl(0, 100),
                                                 component == null ? null : new MockComponent()));
@@ -20,7 +27,6 @@ class ComponentStorageTest {
 
     @Test
     void addComponentAddsTheComponent() {
-        ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
@@ -30,7 +36,6 @@ class ComponentStorageTest {
 
     @Test
     void removeComponentRemovesTheComponent() {
-        ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
@@ -42,7 +47,6 @@ class ComponentStorageTest {
 
     @Test
     void tasksAreAppliedInOrderTheyAreCalled_addFirst() {
-        ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
@@ -54,7 +58,6 @@ class ComponentStorageTest {
 
     @Test
     void tasksAreAppliedInOrderTheyAreCalled_removeFirst() {
-        ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
@@ -67,7 +70,6 @@ class ComponentStorageTest {
 
     @Test
     void tasksAreAppliedInOrderTheyAreCalled_complex() {
-        ComponentStorage<MockComponent> storage = new ComponentStorage<>(100, 8, MockComponent[]::new);
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());

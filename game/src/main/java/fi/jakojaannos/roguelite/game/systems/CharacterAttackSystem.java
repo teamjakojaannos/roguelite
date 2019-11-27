@@ -37,7 +37,7 @@ public class CharacterAttackSystem implements ECSSystem {
             @NonNull World world,
             double delta
     ) {
-        val cluster = world.getEntities();
+        val cluster = world.getEntityManager();
         entities.forEach(entity -> {
             val input = cluster.getComponentOf(entity, CharacterInput.class).get();
             val abilities = cluster.getComponentOf(entity, CharacterAbilities.class).get();

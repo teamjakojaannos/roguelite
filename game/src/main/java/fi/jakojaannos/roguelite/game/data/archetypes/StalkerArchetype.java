@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.NonNull;
@@ -9,30 +9,30 @@ import lombok.val;
 public class StalkerArchetype {
     @NonNull
     public static Entity create(
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             double x,
             double y
     ) {
         return create(
-                entities,
+                entityManager,
                 new Transform(x, y)
         );
     }
 
     @NonNull
     public static Entity create(
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             @NonNull final Transform transform
     ) {
-        val stalker = entities.createEntity();
-        entities.addComponentTo(stalker, transform);
-        entities.addComponentTo(stalker, new Velocity());
-        entities.addComponentTo(stalker, new CharacterInput());
-        entities.addComponentTo(stalker, new Health(3));
-        entities.addComponentTo(stalker, new Collider());
-        entities.addComponentTo(stalker, createCharacterStats());
-        entities.addComponentTo(stalker, createStalkerAi());
-        entities.addComponentTo(stalker, createSpriteInfo());
+        val stalker = entityManager.createEntity();
+        entityManager.addComponentTo(stalker, transform);
+        entityManager.addComponentTo(stalker, new Velocity());
+        entityManager.addComponentTo(stalker, new CharacterInput());
+        entityManager.addComponentTo(stalker, new Health(3));
+        entityManager.addComponentTo(stalker, new Collider());
+        entityManager.addComponentTo(stalker, createCharacterStats());
+        entityManager.addComponentTo(stalker, createStalkerAi());
+        entityManager.addComponentTo(stalker, createSpriteInfo());
 
         return stalker;
     }

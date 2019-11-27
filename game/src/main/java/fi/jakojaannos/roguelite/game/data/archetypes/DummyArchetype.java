@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Health;
@@ -12,25 +12,25 @@ public class DummyArchetype {
 
     @NonNull
     public static Entity create(
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             double x,
             double y
     ) {
         return create(
-                entities,
+                entityManager,
                 new Transform(x, y)
         );
     }
 
     @NonNull
     public static Entity create(
-            @NonNull final Entities entities,
+            @NonNull final EntityManager entityManager,
             @NonNull final Transform transform
     ) {
-        val dummy = entities.createEntity();
-        entities.addComponentTo(dummy, transform);
-        entities.addComponentTo(dummy, new Health(10));
-        entities.addComponentTo(dummy, new Collider());
+        val dummy = entityManager.createEntity();
+        entityManager.addComponentTo(dummy, transform);
+        entityManager.addComponentTo(dummy, new Health(10));
+        entityManager.addComponentTo(dummy, new Collider());
 
         return dummy;
     }

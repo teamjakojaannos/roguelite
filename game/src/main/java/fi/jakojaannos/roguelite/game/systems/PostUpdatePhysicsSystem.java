@@ -31,8 +31,8 @@ public class PostUpdatePhysicsSystem implements ECSSystem {
             double delta
     ) {
         entities.forEach(entity -> {
-            val physics = world.getEntities().getComponentOf(entity, Physics.class).get();
-            val transform = world.getEntities().getComponentOf(entity, Transform.class).get();
+            val physics = world.getEntityManager().getComponentOf(entity, Physics.class).get();
+            val transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
 
             physics.oldBounds.minX = transform.bounds.minX;
             physics.oldBounds.minY = transform.bounds.minY;
