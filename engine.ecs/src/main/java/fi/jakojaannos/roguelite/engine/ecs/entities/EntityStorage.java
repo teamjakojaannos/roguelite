@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.ecs.storage;
+package fi.jakojaannos.roguelite.engine.ecs.entities;
 
 import fi.jakojaannos.roguelite.engine.utilities.IdSupplier;
 import lombok.AccessLevel;

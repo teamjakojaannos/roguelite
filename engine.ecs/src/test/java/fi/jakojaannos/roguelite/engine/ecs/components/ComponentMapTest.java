@@ -1,5 +1,6 @@
-package fi.jakojaannos.roguelite.engine.ecs.storage;
+package fi.jakojaannos.roguelite.engine.ecs.components;
 
+import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockComponent;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,12 +10,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ComponentStorageTest {
-    private ComponentStorage<MockComponent> storage;
+class ComponentMapTest {
+    private ComponentMap<MockComponent> storage;
 
     @BeforeEach
     void beforeEach() {
-        storage = new ComponentStorage<>(100, 8, MockComponent.class);
+        storage = new ComponentMap<>(100, 8, MockComponent.class);
     }
 
     @ParameterizedTest

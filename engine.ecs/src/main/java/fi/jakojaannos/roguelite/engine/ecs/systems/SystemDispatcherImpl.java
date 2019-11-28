@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.ecs.systems;
 import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.storage.EntityManagerImpl;
+import fi.jakojaannos.roguelite.engine.ecs.entities.EntityManagerImpl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

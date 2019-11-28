@@ -1,22 +1,29 @@
-package fi.jakojaannos.roguelite.engine.ecs.storage;
+package fi.jakojaannos.roguelite.engine.ecs.entities;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 class EntityManagerTest {
     private EntityManager entityManager;
+    private EntityStorage entityStorage;
 
     @BeforeEach
     void beforeEach() {
+        entityStorage = spy(new EntityStorage(16));
         entityManager = new EntityManagerImpl(16,
-                                              32);
+                                              34,
+                                              entityStorage,
+                                              new ComponentStorage(16, 34));
     }
 
     @Test
@@ -37,12 +44,12 @@ class EntityManagerTest {
     }
 
     @Test
-    void addingComponentsToNonAppliedEntitiesDoesNotThrow() {
+    void addingComponentsToNonAppliedEntitiesWorks() {
         Entity entity = entityManager.createEntity();
         ComponentA component = new ComponentA();
         entityManager.addComponentTo(entity, component);
 
-        assertDoesNotThrow(() -> entityManager.getComponentOf(entity, ComponentA.class).get());
+        assertEquals(component, entityManager.getComponentOf(entity, ComponentA.class).get());
     }
 
     @Test
@@ -121,7 +128,7 @@ class EntityManagerTest {
         entityManager.destroyEntity(entity);
 
         assertTrue(entity.isMarkedForRemoval());
-        assertTrue(entityManager.getComponentOf(entity, ComponentA.class).isPresent());
+        verify(entityStorage, times(0)).remove(eq((EntityImpl) entity));
     }
 
     @Test
@@ -133,8 +140,7 @@ class EntityManagerTest {
         entityManager.destroyEntity(entity);
         entityManager.applyModifications();
 
-        assertTrue(entityManager.getEntitiesWith(ComponentA.class)
-                                .noneMatch(e -> e.getEntity().getId() == entity.getId()));
+        verify(entityStorage, times(1)).remove(eq((EntityImpl) entity));
     }
 
     @Test
@@ -146,8 +152,7 @@ class EntityManagerTest {
         entityManager.destroyEntity(entity);
         entityManager.applyModifications();
 
-        assertTrue(entityManager.getEntitiesWith(ComponentA.class)
-                                .noneMatch(e -> e.getEntity().getId() == entity.getId()));
+        verify(entityStorage, times(1)).remove(eq((EntityImpl) entity));
     }
 
     @Test
@@ -274,219 +279,9 @@ class EntityManagerTest {
     }
 
     @Test
-    void registeringSystemsWithTooManyComponentTypesFails() {
+    void registeringTooManyComponentTypesFails() {
         Entity entity = entityManager.createEntity();
         assertThrows(IllegalStateException.class, () -> {
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
             entityManager.addComponentTo(entity, new Component() {
             });
             entityManager.addComponentTo(entity, new Component() {

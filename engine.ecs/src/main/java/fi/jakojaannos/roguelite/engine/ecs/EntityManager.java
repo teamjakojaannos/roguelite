@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojaannos.roguelite.engine.ecs.storage.EntityManagerImpl;
+import fi.jakojaannos.roguelite.engine.ecs.entities.EntityManagerImpl;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -60,10 +60,12 @@ public interface EntityManager {
      * @param entity    Entity to remove the component from
      * @param component Component to remove
      */
-    <TComponent extends Component> void removeComponentFrom(
+    default <TComponent extends Component> void removeComponentFrom(
             @NonNull Entity entity,
             @NonNull TComponent component
-    );
+    ) {
+        removeComponentFrom(entity, component.getClass());
+    }
 
     /**
      * Removes a component of given type from the entity.

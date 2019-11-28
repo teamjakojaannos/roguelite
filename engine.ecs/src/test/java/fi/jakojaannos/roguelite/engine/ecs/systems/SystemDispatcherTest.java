@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.engine.ecs.storage.EntityManagerImpl;
+import fi.jakojaannos.roguelite.engine.ecs.entities.EntityManagerImpl;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockComponent;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockECSSystem;
 import org.junit.jupiter.api.Test;
@@ -15,17 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class SystemDispatcherTest {
-    @Test
-    void componentsAreAutomaticallyRegisteredDuringDispatch() {
-        SystemDispatcher dispatcher = new SystemDispatcherImpl(List.of(
-                new DispatcherBuilder.SystemEntry("system_1", new MockECSSystem(List.of(MockComponent.class)), new String[0])
-        ));
-        EntityManagerImpl entities = new EntityManagerImpl(256, 32);
-
-        assertDoesNotThrow(() -> dispatcher.dispatch(World.createNew(entities), 0.0));
-        assertDoesNotThrow(() -> entities.getComponentTypeIndexFor(MockComponent.class));
-    }
-
     @Test
     void dispatchRunsTickOnRegisteredSystems() {
         EntityManagerImpl entities = new EntityManagerImpl(256, 32);

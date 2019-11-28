@@ -1,5 +1,7 @@
-package fi.jakojaannos.roguelite.engine.ecs.storage;
+package fi.jakojaannos.roguelite.engine.ecs.entities;
 
+import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
+import fi.jakojaannos.roguelite.engine.ecs.entities.EntityStorage;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
