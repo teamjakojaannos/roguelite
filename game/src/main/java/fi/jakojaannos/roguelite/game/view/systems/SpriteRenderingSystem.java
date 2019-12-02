@@ -26,7 +26,8 @@ import java.util.stream.Stream;
 public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
     public void declareRequirements(@NonNull RequirementsBuilder requirements) {
-        requirements.withComponent(Transform.class)
+        requirements.tickAfter(LevelRenderingSystem.class)
+                    .withComponent(Transform.class)
                     .withComponent(SpriteInfo.class);
     }
 
