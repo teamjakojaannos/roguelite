@@ -48,4 +48,26 @@ public class BitMaskUtils {
 
         return true;
     }
+
+    /**
+     * Checks that none of the bits set on mask b are set on mask a
+     *
+     * @param a mask to validate
+     * @param b mask to validate against
+     *
+     * @return true if condition is met, false otherwise
+     */
+    public static boolean hasNoneOfTheBitsOf(byte[] a, byte[] b) {
+        if (a.length != b.length) {
+            return false;
+        }
+
+        for (int i = 0; i < a.length; ++i) {
+            if ((a[i] & b[i]) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

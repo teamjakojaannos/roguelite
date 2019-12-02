@@ -38,6 +38,8 @@ subprojects {
 
     test {
         environment "ENVIRONMENT", "test"
+//        systemProperty("junit.jupiter.execution.parallel.enabled", true)
+//        systemProperty("junit.jupiter.execution.parallel.mode.default", "CONCURRENT")
         useJUnitPlatform()
         testLogging {
             events "passed", "skipped", "failed"

@@ -1,9 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
@@ -19,15 +16,16 @@ import java.util.stream.Stream;
 
 @Slf4j
 public class CharacterMovementSystem implements ECSSystem {
-    private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            Transform.class, Velocity.class, CharacterInput.class, CharacterStats.class
-    );
-    private static final float INPUT_EPSILON = 0.001f;
-
     @Override
-    public Collection<Class<? extends Component>> getRequiredComponents() {
-        return REQUIRED_COMPONENTS;
+    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+        requirements.addToGroup(SystemGroups.CHARACTER_TICK)
+                    .withComponent(Transform.class)
+                    .withComponent(Velocity.class)
+                    .withComponent(CharacterInput.class)
+                    .withComponent(CharacterStats.class);
     }
+
+    private static final float INPUT_EPSILON = 0.001f;
 
     private final Vector2d tmpVelocity = new Vector2d();
 

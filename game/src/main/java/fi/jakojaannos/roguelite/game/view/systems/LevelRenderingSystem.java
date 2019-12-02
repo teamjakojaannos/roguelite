@@ -1,11 +1,9 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
+import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
@@ -18,13 +16,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class LevelRenderingSystem implements ECSSystem {
-    private static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            TileMapLayer.class
-    );
-
     @Override
-    public Collection<Class<? extends Component>> getRequiredComponents() {
-        return REQUIRED_COMPONENTS;
+    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+        requirements.withComponent(TileMapLayer.class);
     }
 
     private final String assetRoot;

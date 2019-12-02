@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.ComponentGroup;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
@@ -9,9 +10,10 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.stream.Stream;
 
 /**
@@ -41,6 +43,11 @@ public class EntityManagerImpl implements EntityManager {
         this.entityCapacity = entityCapacity;
         this.maxComponentTypes = maxComponentTypes;
         this.componentStorage = componentStorage;
+    }
+
+    @Override
+    public void registerComponentGroup(@NonNull final ComponentGroup group) {
+        this.componentStorage.registerGroup(group);
     }
 
     @NonNull
@@ -106,6 +113,14 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
+    public boolean hasAnyComponentFromGroup(
+            @NonNull final Entity entity,
+            @NonNull final ComponentGroup group
+    ) {
+        return this.componentStorage.anyExists((EntityImpl) entity, group);
+    }
+
+    @Override
     public <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
             @NonNull final Class<? extends TComponent> componentClass
     ) {
@@ -120,6 +135,21 @@ public class EntityManagerImpl implements EntityManager {
     ) {
         val requiredMask = this.componentStorage.createComponentBitmask(componentTypes);
         return this.entityStorage.stream()
+                                 .filter(e -> BitMaskUtils.hasAllBitsOf(e.getComponentBitmask(), requiredMask))
+                                 .map(Entity.class::cast);
+    }
+
+    @Override
+    public @NonNull Stream<Entity> getEntitiesWith(
+            @NonNull final Collection<Class<? extends Component>> required,
+            @NonNull final Collection<Class<? extends Component>> excluded,
+            @NonNull final Collection<ComponentGroup> requiredGroups,
+            @NonNull final Collection<ComponentGroup> excludedGroups
+    ) {
+        val requiredMask = this.componentStorage.createComponentBitmask(required, requiredGroups);
+        val excludedMask = this.componentStorage.createComponentBitmask(excluded, excludedGroups);
+        return this.entityStorage.stream()
+                                 .filter(e -> BitMaskUtils.hasNoneOfTheBitsOf(e.getComponentBitmask(), excludedMask))
                                  .filter(e -> BitMaskUtils.hasAllBitsOf(e.getComponentBitmask(), requiredMask))
                                  .map(Entity.class::cast);
     }

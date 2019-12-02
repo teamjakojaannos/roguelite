@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
-import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
@@ -11,7 +11,7 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.GameState;
-import fi.jakojaannos.roguelite.game.data.archetypes.*;
+import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
@@ -23,6 +23,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.util.Arrays;
 import java.util.Queue;
 
 @Slf4j
@@ -30,21 +31,47 @@ public class Roguelite extends GameBase<GameState> {
     private final SystemDispatcher dispatcher;
 
     public Roguelite() {
-        this.dispatcher = new DispatcherBuilder()
-                .withSystem("player_input", new PlayerInputSystem())
-                .withSystem("character_move", new CharacterMovementSystem(), "player_input")
-                .withSystem("character_attack", new CharacterAttackSystem(), "player_input")
-                .withSystem("process_move", new ApplyVelocitySystem(), "character_move", "character_attack")
-                .withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
-                .withSystem("ai_move", new CharacterAIControllerSystem(), "character_move")
-                .withSystem("stalker_move", new StalkerAIControllerSystem())
-                .withSystem("camera", new CameraControlSystem(), "character_move")
-                .withSystem("spawner", new SpawnerSystem())
-                .withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "process_move")
-                .withSystem("projectile_remover", new DestroyProjectilesOnCollisionSystem(), "simple_collision_handler")
-                .withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler", "projectile_remover")
-                .withSystem("post_tick_physics", new PostUpdatePhysicsSystem(), "collision_event_remover")
-                .withSystem("health_check", new HealthCheckSystem(), "character_attack")
+        this.dispatcher = SystemDispatcher
+                .builder()
+                .withGroups(SystemGroups.values())
+                .addGroupDependencies(SystemGroups.CLEANUP, Arrays.stream(SystemGroups.values())
+                                                                  .filter(group -> group != SystemGroups.CLEANUP)
+                                                                  .toArray(SystemGroup[]::new))
+                .addGroupDependencies(SystemGroups.EARLY_TICK, SystemGroups.INPUT)
+                .addGroupDependencies(SystemGroups.CHARACTER_TICK, SystemGroups.INPUT, SystemGroups.EARLY_TICK)
+                .addGroupDependencies(SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK, SystemGroups.EARLY_TICK)
+                .addGroupDependencies(SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK)
+                .addGroupDependencies(SystemGroups.LATE_TICK, SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK)
+                .withSystem(new PlayerInputSystem())
+                .withSystem(new CharacterMovementSystem())
+                .withSystem(new CharacterAttackSystem())
+                .withSystem(new ApplyVelocitySystem())
+                .withSystem(new SnapToCursorSystem())
+                .withSystem(new CharacterAIControllerSystem())
+                .withSystem(new StalkerAIControllerSystem())
+                .withSystem(new CameraControlSystem())
+                .withSystem(new SpawnerSystem())
+                .withSystem(new ProjectileToCharacterCollisionHandlerSystem())
+                .withSystem(new DestroyProjectilesOnCollisionSystem())
+                .withSystem(new CollisionEventCleanupSystem())
+                .withSystem(new PostUpdatePhysicsSystem())
+                .withSystem(new HealthCheckSystem())
+                /*
+                TODO: Move these to system.declareRequirements
+.withSystem("player_input", new PlayerInputSystem())
+.withSystem("character_move", new CharacterMovementSystem(), "player_input")
+.withSystem("character_attack", new CharacterAttackSystem(), "player_input")
+.withSystem("process_move", new ApplyVelocitySystem(), "character_move", "character_attack")
+.withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
+.withSystem("ai_move", new CharacterAIControllerSystem(), "character_move")
+.withSystem("stalker_move", new StalkerAIControllerSystem())
+.withSystem("camera", new CameraControlSystem(), "character_move")
+.withSystem("spawner", new SpawnerSystem())
+.withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "process_move")
+.withSystem("projectile_remover", new DestroyProjectilesOnCollisionSystem(), "simple_collision_handler")
+.withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler", "projectile_remover")
+.withSystem("post_tick_physics", new PostUpdatePhysicsSystem(), "collision_event_remover")
+.withSystem("health_check", new HealthCheckSystem(), "character_attack")*/
                 .build();
     }
 

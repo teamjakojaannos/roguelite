@@ -109,13 +109,12 @@ public class WorldGenerator<TTile> {
         val nObstacles = 10;
         val obstacleMaxSize = 2.0;
         val obstacleMinSize = 1.0;
-        val random = new Random(seed);
         for (int i = 0; i < nObstacles; ++i) {
-            val size = obstacleMinSize + (obstacleMaxSize - obstacleMinSize) * random.nextDouble();
+            val size = obstacleMinSize + (obstacleMaxSize - obstacleMinSize) * this.random.nextDouble();
             double x, y;
             do {
-                x = startX + random.nextDouble() * (mainRoomWidth - size);
-                y = startY + random.nextDouble() * (mainRoomHeight - size);
+                x = startX + this.random.nextDouble() * (mainRoomWidth - size);
+                y = startY + this.random.nextDouble() * (mainRoomHeight - size);
             } while (Vector2d.distance(0, 0, x, y) < 4.0);
             ObstacleArchetype.create(entities, new Transform(x, y, size));
         }

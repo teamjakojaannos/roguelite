@@ -1,6 +1,8 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
@@ -12,23 +14,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerInputSystemTest {
-    private SystemDispatcher dispatcher;
+    private PlayerInputSystem system;
     private World world;
     private CharacterInput input;
+    private Entity player;
     private CharacterAbilities abilities;
 
     @BeforeEach
     void beforeEach() {
-        this.dispatcher = new DispatcherBuilder()
-                .withSystem("test", new PlayerInputSystem())
-                .build();
+        system = new PlayerInputSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
 
-        Entity player = entityManager.createEntity();
+        player = entityManager.createEntity();
         this.input = new CharacterInput();
         this.abilities = new CharacterAbilities();
         entityManager.addComponentTo(player, this.input);
@@ -62,7 +65,7 @@ class PlayerInputSystemTest {
         inputs.inputRight = right;
         inputs.inputUp = up;
         inputs.inputDown = down;
-        this.dispatcher.dispatch(this.world, 1.0);
+        system.tick(Stream.of(player), this.world, 1.0);
         world.getEntityManager().applyModifications();
 
         assertEquals(expectedHorizontal, this.input.move.x);
@@ -84,7 +87,7 @@ class PlayerInputSystemTest {
         mouse.pos.x = mouseX;
         mouse.pos.y = mouseY;
 
-        this.dispatcher.dispatch(this.world, 1.0);
+        system.tick(Stream.of(player), this.world, 1.0);
         this.world.getEntityManager().applyModifications();
 
         assertEquals(expectedX, abilities.attackTarget.x);
@@ -96,17 +99,17 @@ class PlayerInputSystemTest {
         Inputs inputs = this.world.getResource(Inputs.class);
         inputs.inputAttack = false;
 
-        this.dispatcher.dispatch(this.world, 1.0);
+        system.tick(Stream.of(player), this.world, 1.0);
         this.world.getEntityManager().applyModifications();
         assertFalse(input.attack);
 
         inputs.inputAttack = true;
-        this.dispatcher.dispatch(this.world, 1.0);
+        system.tick(Stream.of(player), this.world, 1.0);
         this.world.getEntityManager().applyModifications();
         assertTrue(input.attack);
 
         inputs.inputAttack = false;
-        this.dispatcher.dispatch(this.world, 1.0);
+        system.tick(Stream.of(player), this.world, 1.0);
         this.world.getEntityManager().applyModifications();
         assertFalse(input.attack);
     }

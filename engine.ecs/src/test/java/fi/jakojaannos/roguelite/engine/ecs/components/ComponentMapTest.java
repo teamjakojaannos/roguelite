@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs.components;
 
 import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
-import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,7 @@ class ComponentMapTest {
 
     @BeforeEach
     void beforeEach() {
-        storage = new ComponentMap<>(100, 8, MockComponent.class);
+        storage = new ComponentMap<>(100, MockComponent.class);
     }
 
     @ParameterizedTest
@@ -31,8 +30,7 @@ class ComponentMapTest {
         EntityImpl entity = new EntityImpl(0, 100);
 
         storage.addComponent(entity, new MockComponent());
-        assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
-        assertTrue(storage.getComponent(entity).isPresent());
+        assertNotNull(storage.getComponent(entity));
     }
 
     @Test
@@ -42,8 +40,7 @@ class ComponentMapTest {
         storage.addComponent(entity, new MockComponent());
         storage.removeComponent(entity);
 
-        assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
-        assertFalse(storage.getComponent(entity).isPresent());
+        assertNull(storage.getComponent(entity));
     }
 
     @Test
@@ -53,8 +50,7 @@ class ComponentMapTest {
         storage.addComponent(entity, new MockComponent());
         storage.removeComponent(entity);
 
-        assertFalse(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
-        assertFalse(storage.getComponent(entity).isPresent());
+        assertNull(storage.getComponent(entity));
     }
 
     @Test
@@ -65,8 +61,7 @@ class ComponentMapTest {
         storage.removeComponent(entity);
         storage.addComponent(entity, new MockComponent());
 
-        assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
-        assertTrue(storage.getComponent(entity).isPresent());
+        assertNotNull(storage.getComponent(entity));
     }
 
     @Test
@@ -81,7 +76,6 @@ class ComponentMapTest {
         storage.removeComponent(entity);
         storage.addComponent(entity, new MockComponent());
 
-        assertTrue(BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), 8));
-        assertTrue(storage.getComponent(entity).isPresent());
+        assertNotNull(storage.getComponent(entity));
     }
 }

@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.view;
 
-import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
@@ -26,12 +25,15 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
 
 
         this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
-        val builder = new DispatcherBuilder()
-                .withSystem("render_level", new LevelRenderingSystem(assetRoot, this.camera))
-                .withSystem("render_sprites", new SpriteRenderingSystem(assetRoot, this.camera), "render_level");
+        val builder = SystemDispatcher.builder()
+                                      .withSystem(new LevelRenderingSystem(assetRoot, this.camera))
+                                      .withSystem(new SpriteRenderingSystem(assetRoot, this.camera));
+        //.withSystem("render_level", new LevelRenderingSystem(assetRoot, this.camera))
+        //.withSystem("render_sprites", new SpriteRenderingSystem(assetRoot, this.camera), "render_level");
 
         if (DebugConfig.debugModeEnabled) {
-            builder.withSystem("render_debug", new EntityBoundsRenderingSystem(assetRoot, this.camera));
+            //builder.withSystem("render_debug", new EntityBoundsRenderingSystem(assetRoot, this.camera));
+            builder.withSystem(new EntityBoundsRenderingSystem(assetRoot, this.camera));
         }
 
         this.rendererDispatcher = builder.build();

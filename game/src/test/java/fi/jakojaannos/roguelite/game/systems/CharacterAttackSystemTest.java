@@ -1,15 +1,20 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CharacterAttackSystemTest {
-    private SystemDispatcher dispatcher;
+    private CharacterAttackSystem system;
     private World world;
+    private Entity entity;
     private CharacterInput characterInput;
     private CharacterStats characterStats;
     private CharacterAbilities characterAbilities;
@@ -17,31 +22,29 @@ class CharacterAttackSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        this.dispatcher = new DispatcherBuilder()
-                .withSystem("test", new CharacterAttackSystem())
-                .build();
+        this.system = new CharacterAttackSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
 
-        Entity player = entityManager.createEntity();
+        entity = entityManager.createEntity();
         this.characterInput = new CharacterInput();
         this.characterInput.move.set(0.0);
         this.characterInput.attack = false;
         this.characterStats = new CharacterStats();
         this.characterAbilities = new CharacterAbilities();
         this.weaponStats = new BasicWeaponStats();
-        entityManager.addComponentTo(player, new Transform(0.0, 0.0, 0.0));
-        entityManager.addComponentTo(player, new Velocity());
-        entityManager.addComponentTo(player, this.characterInput);
-        entityManager.addComponentTo(player, this.characterAbilities);
-        entityManager.addComponentTo(player, this.characterStats);
-        entityManager.addComponentTo(player, this.weaponStats);
+        entityManager.addComponentTo(entity, new Transform(0.0, 0.0, 0.0));
+        entityManager.addComponentTo(entity, new Velocity());
+        entityManager.addComponentTo(entity, this.characterInput);
+        entityManager.addComponentTo(entity, this.characterAbilities);
+        entityManager.addComponentTo(entity, this.characterStats);
+        entityManager.addComponentTo(entity, this.weaponStats);
 
         entityManager.applyModifications();
 
         // Warm-up
         for (int i = 0; i < 100; ++i) {
-            this.dispatcher.dispatch(this.world, 0.02);
+            this.system.tick(Stream.of(entity), this.world, 0.02);
             this.world.getEntityManager().applyModifications();
         }
     }
@@ -52,7 +55,7 @@ class CharacterAttackSystemTest {
         weaponStats.attackRate = 1.0;
 
         characterInput.attack = false;
-        this.dispatcher.dispatch(this.world, 0.02);
+        this.system.tick(Stream.of(entity), this.world, 0.02);
         this.world.getEntityManager().applyModifications();
 
         assertEquals(0, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
@@ -64,7 +67,7 @@ class CharacterAttackSystemTest {
         weaponStats.attackRate = 1.0;
 
         characterInput.attack = true;
-        this.dispatcher.dispatch(this.world, 0.02);
+        this.system.tick(Stream.of(entity), this.world, 0.02);
         this.world.getEntityManager().applyModifications();
 
         assertEquals(1, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
@@ -77,7 +80,7 @@ class CharacterAttackSystemTest {
 
         characterInput.attack = true;
         for (int i = 0; i < 175; ++i) {
-            this.dispatcher.dispatch(this.world, 0.02);
+            this.system.tick(Stream.of(entity), this.world, 0.02);
             this.world.getEntityManager().applyModifications();
         }
 
@@ -90,12 +93,12 @@ class CharacterAttackSystemTest {
         weaponStats.attackRate = 1.0;
 
         characterInput.attack = true;
-        this.dispatcher.dispatch(this.world, 0.02);
+        this.system.tick(Stream.of(entity), this.world, 0.02);
         this.world.getEntityManager().applyModifications();
 
         characterInput.attack = false;
         for (int i = 0; i < 200; ++i) {
-            this.dispatcher.dispatch(this.world, 0.02);
+            this.system.tick(Stream.of(entity), this.world, 0.02);
             this.world.getEntityManager().applyModifications();
         }
 

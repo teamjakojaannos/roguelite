@@ -1,9 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.NonNull;
@@ -14,14 +11,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class PostUpdatePhysicsSystem implements ECSSystem {
-    private static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            Physics.class,
-            Transform.class
-    );
-
     @Override
-    public Collection<Class<? extends Component>> getRequiredComponents() {
-        return REQUIRED_COMPONENTS;
+    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+        requirements.addToGroup(SystemGroups.LATE_TICK)
+                    .withComponent(Physics.class)
+                    .withComponent(Transform.class);
     }
 
     @Override

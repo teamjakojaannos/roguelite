@@ -1,8 +1,8 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.Collision;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
@@ -12,15 +12,17 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
 public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
     @Override
-    public Collection<Class<? extends Component>> getRequiredComponents() {
-        return List.of(Collider.class, ProjectileStats.class, RecentCollisionTag.class);
+    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+        requirements.addToGroup(SystemGroups.COLLISION_HANDLER)
+                    .tickAfter(ProjectileToCharacterCollisionHandlerSystem.class)
+                    .withComponent(Collider.class)
+                    .withComponent(ProjectileStats.class)
+                    .withComponent(RecentCollisionTag.class);
     }
 
     @Override

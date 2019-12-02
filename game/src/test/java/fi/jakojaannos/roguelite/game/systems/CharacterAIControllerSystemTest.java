@@ -1,6 +1,8 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
@@ -10,10 +12,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CharacterAIControllerSystemTest {
-    private SystemDispatcher dispatcher;
+    private CharacterAIControllerSystem system;
     private World world;
     private Entity player, follower;
     private Transform playerPos, followerPos;
@@ -21,9 +25,7 @@ public class CharacterAIControllerSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        this.dispatcher = new DispatcherBuilder()
-                .withSystem("test", new CharacterAIControllerSystem())
-                .build();
+        system = new CharacterAIControllerSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
 
@@ -67,7 +69,7 @@ public class CharacterAIControllerSystemTest {
         this.playerPos.setPosition(playerX, playerY);
         this.followerPos.setPosition(followerX, followerY);
 
-        this.dispatcher.dispatch(this.world, 1.0f);
+        this.system.tick(Stream.of(follower), this.world, 1.0f);
 
         if (followerInput.move.length() != 0)
             followerInput.move.normalize();

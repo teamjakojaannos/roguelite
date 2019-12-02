@@ -1,9 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.BasicWeaponStats;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
@@ -19,13 +16,13 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 public class CharacterAttackSystem implements ECSSystem {
-    private static final Collection<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(
-            Transform.class, CharacterInput.class, CharacterAbilities.class, BasicWeaponStats.class
-    );
-
     @Override
-    public Collection<Class<? extends Component>> getRequiredComponents() {
-        return REQUIRED_COMPONENTS;
+    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+        requirements.addToGroup(SystemGroups.CHARACTER_TICK)
+                    .withComponent(Transform.class)
+                    .withComponent(CharacterInput.class)
+                    .withComponent(CharacterAbilities.class)
+                    .withComponent(BasicWeaponStats.class);
     }
 
     private final Vector2d tmpSpreadOffset = new Vector2d();
@@ -53,8 +50,8 @@ public class CharacterAttackSystem implements ECSSystem {
                         .sub(projectileX, projectileY)
                         .normalize();
                 tmpSpreadOffset.set(direction)
-                        .perpendicular()
-                        .mul((random.nextDouble() * 2.0 - 1.0) * weapon.attackSpread);
+                               .perpendicular()
+                               .mul((random.nextDouble() * 2.0 - 1.0) * weapon.attackSpread);
 
                 BasicProjectileArchetype.create(world, projectileX, projectileY, direction, weapon.attackProjectileSpeed, tmpSpreadOffset);
 

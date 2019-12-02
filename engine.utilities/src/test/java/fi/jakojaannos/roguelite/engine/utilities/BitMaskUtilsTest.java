@@ -61,15 +61,28 @@ class BitMaskUtilsTest {
 
     @Test
     void compareMasksReturnsTrueForPartialMatch() {
-        // 111  = 7
-        // 11   = 3
-        // 11   = &
         assertTrue(BitMaskUtils.hasAllBitsOf(new byte[]{7, 3, 2, 1}, new byte[]{3, 2, 2, 0}));
     }
 
     @Test
     void compareMasksReturnsFalseForMasksOfDifferentLength() {
         assertFalse(BitMaskUtils.hasAllBitsOf(new byte[]{4, 3, 2, 0}, new byte[]{1, 2, 3}));
+    }
+
+    @Test
+    void hasNoneOfTheBitsOfReturnsFalseForMasksOfDifferentLength() {
+        assertFalse(BitMaskUtils.hasNoneOfTheBitsOf(new byte[]{4, 3, 2, 0}, new byte[]{1, 2, 3}));
+    }
+
+    @Test
+    void hasNoneOfTheBitsOfFailsWhenMaskContainSameBits() {
+        assertFalse(BitMaskUtils.hasNoneOfTheBitsOf(new byte[]{7, 3, 2, 1}, new byte[]{3, 2, 2, 0}));
+    }
+
+
+    @Test
+    void hasNoneOfTheBitsOfReturnsTrueWhenMasksAreCompletelyDifferent() {
+        assertTrue(BitMaskUtils.hasNoneOfTheBitsOf(new byte[]{4, 3, 2, 1}, new byte[]{1, 4, 1, 4}));
     }
 
     @ParameterizedTest

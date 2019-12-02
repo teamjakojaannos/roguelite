@@ -1,6 +1,8 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,21 +10,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StalkerAIControllerSystemTest {
-
-    private SystemDispatcher dispatcher;
+    private StalkerAIControllerSystem system;
     private World world;
     private Transform playerPos, stalkerPos;
+    private Entity stalker;
     private CharacterStats stalkerStats;
     private StalkerAI stalkerAI;
 
     @BeforeEach
     void beforeEach() {
-        this.dispatcher = new DispatcherBuilder()
-                .withSystem("test", new StalkerAIControllerSystem())
-                .build();
+        system = new StalkerAIControllerSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
 
@@ -34,7 +36,7 @@ public class StalkerAIControllerSystemTest {
         this.world.getResource(Players.class).player = player;
 
 
-        Entity stalker = entityManager.createEntity();
+        stalker = entityManager.createEntity();
         this.stalkerPos = new Transform();
         entityManager.addComponentTo(stalker, stalkerPos);
         entityManager.addComponentTo(stalker, new CharacterInput());
@@ -55,42 +57,45 @@ public class StalkerAIControllerSystemTest {
 
     @ParameterizedTest
     @CsvSource({
-            "0.0f,0.0f,50.0f,50.0f,1.7f",
-            "0.0f,0.0f,6.0f,6.0f,0.3f",
-            "0.0f,0.0f,1.0f,1.0f,0.3f"
-    })
+                       "0.0f,0.0f,50.0f,50.0f,1.7f",
+                       "0.0f,0.0f,6.0f,6.0f,0.3f",
+                       "0.0f,0.0f,1.0f,1.0f,0.3f"
+               })
     void stalkerEnemySpeedDependingOnDistanceToPlayerIsSetCorrectly(
             double playerX,
             double playerY,
             double stalkerX,
             double stalkerY,
-            double expectedSpeed) {
+            double expectedSpeed
+    ) {
         this.playerPos.setPosition(playerX, playerY);
         this.stalkerPos.setPosition(stalkerX, stalkerY);
         this.stalkerAI.jumpCoolDown = 100.0f;
 
-        this.dispatcher.dispatch(this.world, 1.0f);
+        this.system.tick(Stream.of(stalker), this.world, 1.0f);
 
         assertEquals(expectedSpeed, stalkerStats.speed, 0.001f);
     }
 
     @ParameterizedTest
     @CsvSource({
-            "0.0f,0.0f,200.0f,200.0f,false",
-            "0.0f,0.0f,8.0f,8.0f,false",
-            "0.0f,0.0f,3.0f,3.0f,true",
-            "0.0f,0.0f,1.0f,1.0f,true"
-    })
-    void stalkerLeapAbilityIsUsedWhenNearPlayer(double playerX,
-                                                double playerY,
-                                                double stalkerX,
-                                                double stalkerY,
-                                                boolean expectedToUseAbility) {
+                       "0.0f,0.0f,200.0f,200.0f,false",
+                       "0.0f,0.0f,8.0f,8.0f,false",
+                       "0.0f,0.0f,3.0f,3.0f,true",
+                       "0.0f,0.0f,1.0f,1.0f,true"
+               })
+    void stalkerLeapAbilityIsUsedWhenNearPlayer(
+            double playerX,
+            double playerY,
+            double stalkerX,
+            double stalkerY,
+            boolean expectedToUseAbility
+    ) {
         this.playerPos.setPosition(playerX, playerY);
         this.stalkerPos.setPosition(stalkerX, stalkerY);
         this.stalkerAI.jumpCoolDown = 0.0f;
 
-        this.dispatcher.dispatch(this.world, 0.2f);
+        this.system.tick(Stream.of(stalker), this.world, 0.2f);
 
         boolean didUseAbility = (stalkerAI.jumpCoolDown > 0);
         assertEquals(expectedToUseAbility, didUseAbility);
@@ -102,11 +107,11 @@ public class StalkerAIControllerSystemTest {
         this.stalkerAI.jumpCoolDown = 0.0f;
         this.stalkerAI.jumpAbilityGoesCoolDownThisLong = 2.0f;
 
-        this.dispatcher.dispatch(this.world, 0.1f);
+        this.system.tick(Stream.of(stalker), this.world, 0.1f);
         assertEquals(2.0f, this.stalkerAI.jumpCoolDown, 0.001f);
 
         for (int i = 0; i < 9; i++) {
-            this.dispatcher.dispatch(this.world, 0.1f);
+            this.system.tick(Stream.of(stalker), this.world, 0.1f);
         }
 
         assertEquals(1.1f, stalkerAI.jumpCoolDown, 0.001f);
@@ -115,7 +120,7 @@ public class StalkerAIControllerSystemTest {
         this.playerPos.setPosition(100.0f, 100.0f);
 
         for (int i = 0; i < 11; i++) {
-            this.dispatcher.dispatch(this.world, 0.1f);
+            this.system.tick(Stream.of(stalker), this.world, 0.1f);
         }
         assertEquals(0.0f, stalkerAI.jumpCoolDown, 0.001f);
     }

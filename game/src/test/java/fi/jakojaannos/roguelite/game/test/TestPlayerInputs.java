@@ -61,8 +61,8 @@ class TestPlayerInputs {
         EntityManager entityManager = state.getWorld().getEntityManager();
         Entity player = state.getWorld().getResource(Players.class).player;
 
-        // Simulate 1s worth of ticks at 0.02 per tick
-        for (int i = 0; i < 50; ++i) {
+        // Simulate 0.5s worth of ticks at 0.02 per tick
+        for (int i = 0; i < 25; ++i) {
             roguelite.tick(state, events, 0.02);
         }
 

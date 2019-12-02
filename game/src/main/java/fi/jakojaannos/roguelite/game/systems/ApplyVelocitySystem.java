@@ -34,11 +34,11 @@ import java.util.stream.Stream;
  */
 @Slf4j
 public class ApplyVelocitySystem implements ECSSystem {
-    private static final List<Class<? extends Component>> REQUIRED_COMPONENTS = List.of(Transform.class, Velocity.class);
-
     @Override
-    public Collection<Class<? extends Component>> getRequiredComponents() {
-        return REQUIRED_COMPONENTS;
+    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+        requirements.addToGroup(SystemGroups.PHYSICS_TICK)
+                    .withComponent(Transform.class)
+                    .withComponent(Velocity.class);
     }
 
     private final Vector2d tmpVelocity = new Vector2d();

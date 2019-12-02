@@ -1,7 +1,9 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
@@ -17,9 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class SpawnerSystemTest {
-
     private SpawnerSystem spawnerSystem;
-    private SystemDispatcher dispatcher;
     private World world;
     private EntityManager entityManager;
 
@@ -27,12 +27,8 @@ public class SpawnerSystemTest {
     @BeforeEach
     void beforeEach() {
         this.spawnerSystem = new SpawnerSystem();
-        this.dispatcher = new DispatcherBuilder()
-                .withSystem("test", spawnerSystem)
-                .build();
         this.entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
-
 
         entityManager.applyModifications();
     }
@@ -40,12 +36,12 @@ public class SpawnerSystemTest {
 
     @ParameterizedTest
     @CsvSource({
-            "1.0f,225,0.1f,20",
-            "20.0f,5,0.1f,0",
-            "3.3f,12,0.3f,1",
-            "0.2f,15,0.4f,15",
-            "0.0f,15,1.0f,15"
-    })
+                       "1.0f,225,0.1f,20",
+                       "20.0f,5,0.1f,0",
+                       "3.3f,12,0.3f,1",
+                       "0.2f,15,0.4f,15",
+                       "0.0f,15,1.0f,15"
+               })
     void spawnerCreatesCorrectAmountOfEnemies(
             double spawnFrequency,
             int nTicks,
@@ -56,17 +52,17 @@ public class SpawnerSystemTest {
         entityManager.addComponentTo(spawner, new Transform());
         entityManager.addComponentTo(spawner,
                                      new SpawnerComponent(spawnFrequency, (entities, spawnerPos, spawnerComponent) -> {
-                    Entity e = entities.createEntity();
-                    entities.addComponentTo(e, new FollowerEnemyAI(0, 0));
-                    return e;
-                }));
+                                         Entity e = entities.createEntity();
+                                         entities.addComponentTo(e, new FollowerEnemyAI(0, 0));
+                                         return e;
+                                     }));
 
         entityManager.applyModifications();
 
         long enemiesBefore = this.world.getEntityManager().getEntitiesWith(FollowerEnemyAI.class).count();
 
         for (int i = 0; i < nTicks; i++) {
-            this.dispatcher.dispatch(this.world, delta);
+            this.spawnerSystem.tick(Stream.of(spawner), this.world, delta);
         }
 
         entityManager.applyModifications();

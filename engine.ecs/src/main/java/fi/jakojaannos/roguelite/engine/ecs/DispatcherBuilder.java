@@ -1,33 +1,34 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojaannos.roguelite.engine.ecs.systems.SystemDispatcherImpl;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.val;
 
-import java.util.ArrayList;
-import java.util.Collection;
+public interface DispatcherBuilder {
+    DispatcherBuilder withGroup(@NonNull SystemGroup group);
 
-public class DispatcherBuilder {
-    private Collection<SystemEntry> systems = new ArrayList<>();
-
-    public DispatcherBuilder withSystem(
-            @NonNull String name,
-            @NonNull ECSSystem system,
-            @NonNull String... dependencies
-    ) {
-        this.systems.add(new SystemEntry(name, system, dependencies));
+    default DispatcherBuilder withGroups(SystemGroup... groups) {
+        for (val group : groups) {
+            withGroup(group);
+        }
         return this;
     }
 
-    public SystemDispatcher build() {
-        return new SystemDispatcherImpl(this.systems);
+    DispatcherBuilder addGroupDependency(
+            @NonNull SystemGroup group,
+            @NonNull SystemGroup dependency
+    );
+
+    default DispatcherBuilder addGroupDependencies(
+            @NonNull SystemGroup group,
+            @NonNull SystemGroup... dependencies
+    ) {
+        for (val dependency : dependencies) {
+            addGroupDependency(group, dependency);
+        }
+        return this;
     }
 
-    @RequiredArgsConstructor
-    public static class SystemEntry {
-        @Getter private final String name;
-        @Getter private final ECSSystem system;
-        @Getter private final String[] dependencies;
-    }
+    DispatcherBuilder withSystem(@NonNull ECSSystem system);
+
+    SystemDispatcher build();
 }

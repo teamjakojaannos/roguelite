@@ -1,27 +1,30 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CameraControlSystemTest {
-    private SystemDispatcher dispatcher;
-    private Camera camera;
+    private CameraControlSystem system;
     private World world;
+    private Entity cameraEntity;
+    private Camera camera;
 
     @BeforeEach
     void beforeEach() {
-        dispatcher = new DispatcherBuilder()
-                .withSystem("test", new CameraControlSystem())
-                .build();
+        system = new CameraControlSystem();
         world = World.createNew(EntityManager.createNew(256, 32));
-        Entity cameraEntity = world.getEntityManager().createEntity();
+        cameraEntity = world.getEntityManager().createEntity();
         camera = new Camera();
         world.getEntityManager().addComponentTo(cameraEntity, camera);
 
@@ -31,7 +34,7 @@ class CameraControlSystemTest {
     @Test
     void doesNothingIfFollowTargetIsNotSet() {
         camera.pos.set(42, 69);
-        dispatcher.dispatch(world, 0.02);
+        system.tick(Stream.of(cameraEntity), world, 0.02);
 
         assertEquals(new Vector2d(42, 69), camera.pos);
     }
@@ -44,8 +47,9 @@ class CameraControlSystemTest {
         camera.followTarget = target;
         world.getEntityManager().applyModifications();
 
-        for (int i = 0; i < 5 / 0.02; ++i)
-        dispatcher.dispatch(world, 0.02);
+        for (int i = 0; i < 5 / 0.02; ++i) {
+            system.tick(Stream.of(cameraEntity), world, 0.02);
+        }
 
         assertTrue(camera.pos.distance(10, 20) < 24.0);
     }
