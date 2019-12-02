@@ -5,18 +5,18 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import lombok.NonNull;
 import lombok.val;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class DispatchContext {
     private final Map<SystemGroup, InternalSystemGroup> groups = new HashMap<>();
     private final Map<Class<? extends ECSSystem>, Boolean> dispatchStatus = new HashMap<>();
 
     public DispatchContext(
-            @NonNull final Collection<SystemContext> systemContexts,
-            @NonNull final Collection<InternalSystemGroup> systemGroups
+            @NonNull final Stream<SystemContext> systemContexts,
+            @NonNull final Stream<InternalSystemGroup> systemGroups
     ) {
         systemContexts.forEach(ctx -> this.dispatchStatus.put(ctx.getInstance().getClass(), false));
         systemGroups.forEach(internalGroup -> this.groups.put(internalGroup.getGroup(), internalGroup));
