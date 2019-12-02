@@ -25,7 +25,8 @@ import static org.lwjgl.opengl.GL30.*;
 public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
     public void declareRequirements(@NonNull RequirementsBuilder requirements) {
-        requirements.withComponent(Transform.class);
+        requirements.tickAfter(SpriteRenderingSystem.class)
+                    .withComponent(Transform.class);
     }
 
     private final LWJGLCamera camera;

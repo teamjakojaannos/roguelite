@@ -36,12 +36,17 @@ class SystemStorage {
             queue.add(this.contextLookup.get(nextEntryPoint.get()));
             while (!queue.isEmpty()) {
                 val systemContext = queue.getFirst();
+
+                // Due to the fact our dependency walker is paranoid, same systems may end up on the
+                // queue multiple times. If that happens, just throw away systems already dispatched.
+                if (dispatchContext.isDispatched(systemContext.getInstance().getClass())) {
+                    queue.remove();
+                    continue;
+                }
+
                 if (dispatchContext.isReadyToDispatch(systemContext)) {
                     removeFromQueueAndDispatch(forEach, dispatchContext, queue, systemContext);
                 } else {
-                    // Does not remove from queue as the system we are queuing dependencies for was
-                    // not dispatched. As we always push to the top of the queue, we are guaranteed
-                    // to process all dependencies before the system is encountered again.
                     queueDependenciesWithoutRemovingFromQueue(dispatchContext, queue, systemContext);
                 }
             }

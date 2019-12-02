@@ -56,22 +56,6 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new CollisionEventCleanupSystem())
                 .withSystem(new PostUpdatePhysicsSystem())
                 .withSystem(new HealthCheckSystem())
-                /*
-                TODO: Move these to system.declareRequirements
-.withSystem("player_input", new PlayerInputSystem())
-.withSystem("character_move", new CharacterMovementSystem(), "player_input")
-.withSystem("character_attack", new CharacterAttackSystem(), "player_input")
-.withSystem("process_move", new ApplyVelocitySystem(), "character_move", "character_attack")
-.withSystem("crosshair_snap_to_cursor", new SnapToCursorSystem())
-.withSystem("ai_move", new CharacterAIControllerSystem(), "character_move")
-.withSystem("stalker_move", new StalkerAIControllerSystem())
-.withSystem("camera", new CameraControlSystem(), "character_move")
-.withSystem("spawner", new SpawnerSystem())
-.withSystem("simple_collision_handler", new ProjectileToCharacterCollisionHandlerSystem(), "process_move")
-.withSystem("projectile_remover", new DestroyProjectilesOnCollisionSystem(), "simple_collision_handler")
-.withSystem("collision_event_remover", new CollisionEventCleanupSystem(), "simple_collision_handler", "projectile_remover")
-.withSystem("post_tick_physics", new PostUpdatePhysicsSystem(), "collision_event_remover")
-.withSystem("health_check", new HealthCheckSystem(), "character_attack")*/
                 .build();
     }
 
