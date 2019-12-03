@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.engine.ecs;
 
 import fi.jakojaannos.roguelite.engine.ecs.entities.EntityManagerImpl;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
@@ -23,7 +22,7 @@ public interface EntityManager {
      *
      * @param group group to be registered.
      */
-    void registerComponentGroup(@NonNull ComponentGroup group);
+    void registerComponentGroup(ComponentGroup group);
 
     /**
      * Creates a new entity. The created entity is added to the game world during the next {@link
@@ -31,7 +30,6 @@ public interface EntityManager {
      *
      * @return the entity created
      */
-    @NonNull
     Entity createEntity();
 
     /**
@@ -40,7 +38,7 @@ public interface EntityManager {
      *
      * @param entity the entity to mark for removal
      */
-    void destroyEntity(@NonNull Entity entity);
+    void destroyEntity(Entity entity);
 
     /**
      * Applies all entity mutations. Executes all tasks queued with {@link #createEntity()} and
@@ -55,10 +53,7 @@ public interface EntityManager {
      * @param component    Component to add
      * @param <TComponent> Type of the component
      */
-    <TComponent extends Component> void addComponentTo(
-            @NonNull Entity entity,
-            @NonNull TComponent component
-    );
+    <TComponent extends Component> void addComponentTo(Entity entity, TComponent component);
 
 
     /**
@@ -68,8 +63,8 @@ public interface EntityManager {
      * @param component Component to remove
      */
     default <TComponent extends Component> void removeComponentFrom(
-            @NonNull Entity entity,
-            @NonNull TComponent component
+            final Entity entity,
+            final TComponent component
     ) {
         removeComponentFrom(entity, component.getClass());
     }
@@ -80,10 +75,7 @@ public interface EntityManager {
      * @param entity         Entity to remove the component from
      * @param componentClass Type of the component to remove
      */
-    void removeComponentFrom(
-            @NonNull Entity entity,
-            @NonNull Class<? extends Component> componentClass
-    );
+    void removeComponentFrom(Entity entity, Class<? extends Component> componentClass);
 
     /**
      * Gets the component of given type from the entity.
@@ -95,9 +87,9 @@ public interface EntityManager {
      * @return If component exists, component optional of the component. Otherwise, an empty
      * optional
      */
-    @NonNull <TComponent extends Component> Optional<TComponent> getComponentOf(
-            @NonNull Entity entity,
-            @NonNull Class<? extends TComponent> componentClass
+    <TComponent extends Component> Optional<TComponent> getComponentOf(
+            Entity entity,
+            Class<? extends TComponent> componentClass
     );
 
     /**
@@ -108,10 +100,7 @@ public interface EntityManager {
      *
      * @return <code>true</code> if the entity has the component, <code>false</code> otherwise
      */
-    boolean hasComponent(
-            @NonNull Entity entity,
-            @NonNull Class<? extends Component> componentClass
-    );
+    boolean hasComponent(Entity entity, Class<? extends Component> componentClass);
 
     /**
      * Checks whether or not the given entity has any component from the specified component group.
@@ -122,10 +111,7 @@ public interface EntityManager {
      * @return <code>true</code> if the entity has any of the components, <code>false</code>
      * otherwise
      */
-    boolean hasAnyComponentFromGroup(
-            @NonNull Entity entity,
-            @NonNull ComponentGroup group
-    );
+    boolean hasAnyComponentFromGroup(Entity entity, ComponentGroup group);
 
     /**
      * Removes all components except the component of given type
@@ -133,10 +119,7 @@ public interface EntityManager {
      * @param entity        the entity to remove components from
      * @param componentType type of the component not to remove
      */
-    void clearComponentsExcept(
-            @NonNull Entity entity,
-            @NonNull Class<? extends Component> componentType
-    );
+    void clearComponentsExcept(Entity entity, Class<? extends Component> componentType);
 
     /**
      * Removes all components except ones in the given list
@@ -145,8 +128,8 @@ public interface EntityManager {
      * @param componentTypes types of the components not to remove
      */
     void clearComponentsExcept(
-            @NonNull Entity entity,
-            @NonNull Collection<Class<? extends Component>> componentTypes
+            Entity entity,
+            Collection<Class<? extends Component>> componentTypes
     );
 
     /**
@@ -157,8 +140,8 @@ public interface EntityManager {
      *
      * @return <code>EntityComponentPair</code>s of all the entities and their respective components
      */
-    @NonNull <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
-            @NonNull Class<? extends TComponent> componentType
+    <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
+            Class<? extends TComponent> componentType
     );
 
     /**
@@ -168,9 +151,8 @@ public interface EntityManager {
      *
      * @return Stream of entities with all given component types
      */
-    @NonNull
     Stream<Entity> getEntitiesWith(
-            @NonNull Collection<Class<? extends Component>> componentTypes
+            Collection<Class<? extends Component>> componentTypes
     );
 
     /**
@@ -184,12 +166,11 @@ public interface EntityManager {
      *
      * @return Stream of entities matching the given criteria
      */
-    @NonNull
     Stream<Entity> getEntitiesWith(
-            @NonNull final Collection<Class<? extends Component>> required,
-            @NonNull final Collection<Class<? extends Component>> excluded,
-            @NonNull final Collection<ComponentGroup> requiredGroups,
-            @NonNull final Collection<ComponentGroup> excludedGroups
+            Collection<Class<? extends Component>> required,
+            Collection<Class<? extends Component>> excluded,
+            Collection<ComponentGroup> requiredGroups,
+            Collection<ComponentGroup> excludedGroups
     );
 
     /**
@@ -203,8 +184,8 @@ public interface EntityManager {
      * @return <code>true</code> if the component was added, <code>false</code> otherwise
      */
     default <TComponent extends Component> boolean addComponentIfAbsent(
-            @NonNull Entity entity,
-            @NonNull TComponent component
+            final Entity entity,
+            final TComponent component
     ) {
         if (hasComponent(entity, component.getClass())) {
             return false;
@@ -224,8 +205,8 @@ public interface EntityManager {
      * @return <code>true</code> if the component was removed, <code>false</code> otherwise
      */
     default boolean removeComponentIfPresent(
-            @NonNull Entity entity,
-            @NonNull Class<? extends Component> componentClass
+            final Entity entity,
+            final Class<? extends Component> componentClass
     ) {
         if (!hasComponent(entity, componentClass)) {
             return false;
@@ -237,7 +218,7 @@ public interface EntityManager {
 
     @RequiredArgsConstructor
     class EntityComponentPair<TComponent extends Component> {
-        @Getter @NonNull private final Entity entity;
-        @Getter @NonNull private final TComponent component;
+        @Getter private final Entity entity;
+        @Getter private final TComponent component;
     }
 }

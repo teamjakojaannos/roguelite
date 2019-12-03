@@ -16,18 +16,8 @@ class TileMapTest {
     }
 
     @Test
-    void constructorThrowsIfDefaultIsNull() {
-        assertThrows(AssertionError.class, () -> new TileMap<>(null));
-    }
-
-    @Test
     void getTileReturnsDefaultTileWhenTileIsNotSet() {
         assertEquals("default", level.getTile(1337, 9001));
-    }
-
-    @Test
-    void setTileThrowsWhenTileIsNull() {
-        assertThrows(AssertionError.class, () -> level.setTile(42, 69, null));
     }
 
     @Test

@@ -1,11 +1,31 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import lombok.NonNull;
 import lombok.val;
 
+/**
+ * Constructs a new {@link SystemDispatcher}. Use {@link SystemDispatcher#builder()} to get a new
+ * builder instance.
+ * <p>
+ * All {@link SystemGroup SystemGroups} must be registered before any of the systems can be
+ * registered.
+ */
 public interface DispatcherBuilder {
-    DispatcherBuilder withGroup(@NonNull SystemGroup group);
+    /**
+     * Registers the system group to this dispatcher.
+     *
+     * @param group group to register
+     *
+     * @return the builder for chaining
+     */
+    DispatcherBuilder withGroup(SystemGroup group);
 
+    /**
+     * Convenience method for registering multiple systems at once
+     *
+     * @param groups groups to register
+     *
+     * @return the builder for chaining
+     */
     default DispatcherBuilder withGroups(SystemGroup... groups) {
         for (val group : groups) {
             withGroup(group);
@@ -13,14 +33,30 @@ public interface DispatcherBuilder {
         return this;
     }
 
+    /**
+     * Adds a new dependency between two {@link SystemGroup SystemGroups}
+     *
+     * @param group      group to add the dependency to
+     * @param dependency the another group the first group depends on
+     *
+     * @return the builder for chaining
+     */
     DispatcherBuilder addGroupDependency(
-            @NonNull SystemGroup group,
-            @NonNull SystemGroup dependency
+            SystemGroup group,
+            SystemGroup dependency
     );
 
+    /**
+     * Convenience method for making a group depend on multiple other groups.
+     *
+     * @param group        group to add the dependencies to
+     * @param dependencies the other groups the first group depends on
+     *
+     * @return the builder for chaining
+     */
     default DispatcherBuilder addGroupDependencies(
-            @NonNull SystemGroup group,
-            @NonNull SystemGroup... dependencies
+            SystemGroup group,
+            SystemGroup... dependencies
     ) {
         for (val dependency : dependencies) {
             addGroupDependency(group, dependency);
@@ -28,7 +64,20 @@ public interface DispatcherBuilder {
         return this;
     }
 
-    DispatcherBuilder withSystem(@NonNull ECSSystem system);
+    /**
+     * Registers the system instance to this dispatcher.
+     *
+     * @param system system instance to add
+     *
+     * @return the builder for chaining
+     */
+    DispatcherBuilder withSystem(ECSSystem system);
 
+    /**
+     * Finalizes the construction process and outputs a fully operational {@link SystemDispatcher}
+     * instance.
+     *
+     * @return the newly constructed <code>SystemDispatcher</code>
+     */
     SystemDispatcher build();
 }

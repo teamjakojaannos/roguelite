@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
-import lombok.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -21,12 +20,12 @@ import static org.mockito.Mockito.*;
 class SystemDispatcherTest {
     class SystemBase implements ECSSystem {
         @Override
-        public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+        public void declareRequirements(RequirementsBuilder requirements) {
         }
 
         @Override
         public void tick(
-                @NonNull Stream<Entity> entities, @NonNull World world, double delta
+                Stream<Entity> entities, World world, double delta
         ) {
             synchronized (callOrderLock) {
                 callOrder.add(this);
@@ -123,7 +122,7 @@ class SystemDispatcherTest {
         assertThrows(IllegalStateException.class, () -> {
             ECSSystem invalid = new SystemA() {
                 @Override
-                public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+                public void declareRequirements(RequirementsBuilder requirements) {
                     requirements.tickAfter(getClass());
                 }
             };
@@ -141,7 +140,7 @@ class SystemDispatcherTest {
 
             ECSSystem invalid = new SystemA() {
                 @Override
-                public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+                public void declareRequirements(RequirementsBuilder requirements) {
                     requirements.addToGroup(systemGroup)
                                 .tickAfter(systemGroup);
                 }
@@ -161,7 +160,7 @@ class SystemDispatcherTest {
 
             ECSSystem invalid = new SystemA() {
                 @Override
-                public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+                public void declareRequirements(RequirementsBuilder requirements) {
                     requirements.addToGroup(systemGroup)
                                 .tickBefore(systemGroup);
                 }
@@ -197,7 +196,7 @@ class SystemDispatcherTest {
     void systemMarkedAsTickAfterAnotherSystemTicksAfter() {
         ECSSystem systemA = new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.tickAfter(SystemB.class);
             }
         };
@@ -217,7 +216,7 @@ class SystemDispatcherTest {
     void systemMarkedAsTickBeforeAnotherSystemTicksBefore() {
         ECSSystem systemA = new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.tickBefore(SystemB.class);
             }
         };
@@ -239,14 +238,14 @@ class SystemDispatcherTest {
 
         ECSSystem systemA = new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.tickAfter(group);
             }
         };
 
         ECSSystem systemB = new SystemB() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.addToGroup(group);
             }
         };
@@ -267,14 +266,14 @@ class SystemDispatcherTest {
 
         ECSSystem systemA = new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.tickBefore(group);
             }
         };
 
         ECSSystem systemB = new SystemB() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.addToGroup(group);
             }
         };
@@ -296,14 +295,14 @@ class SystemDispatcherTest {
 
         ECSSystem systemA = new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.addToGroup(groupA);
             }
         };
 
         ECSSystem systemB = new SystemB() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.addToGroup(groupB);
             }
         };
@@ -338,7 +337,7 @@ class SystemDispatcherTest {
     void systemWithRequiredComponentsReceivesEntities() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withComponent(ComponentC.class);
             }
         });
@@ -358,7 +357,7 @@ class SystemDispatcherTest {
     void systemReceivesEntitiesWithAllRequiredComponents() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withComponent(ComponentA.class)
                             .withComponent(ComponentB.class);
             }
@@ -381,7 +380,7 @@ class SystemDispatcherTest {
     void systemWithRequiredGroupsReceivesEntities() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withComponentFrom(componentGroup);
             }
         });
@@ -401,7 +400,7 @@ class SystemDispatcherTest {
     void systemReceivesEntitiesWithComponentsFromRequiredGroup() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withComponentFrom(componentGroup);
             }
         });
@@ -423,7 +422,7 @@ class SystemDispatcherTest {
     void systemWithRequiredGroupsAndComponentsReceivesEntities() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withComponentFrom(componentGroup)
                             .withComponent(ComponentB.class);
             }
@@ -444,7 +443,7 @@ class SystemDispatcherTest {
     void systemReceivesEntitiesWithAllRequiredGroupsAndComponents() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withComponentFrom(componentGroup)
                             .withComponent(ComponentB.class);
             }
@@ -468,7 +467,7 @@ class SystemDispatcherTest {
     void systemReceivesEntitiesWithAllRequiredComponentsAndSomeOtherComponents() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withComponentFrom(componentGroup);
                 //.withComponent(ComponentB.class);
             }
@@ -493,7 +492,7 @@ class SystemDispatcherTest {
     void systemDoesNotReceiveEntitiesWithExcludedComponents() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withoutComponent(ComponentD.class);
             }
         });
@@ -513,7 +512,7 @@ class SystemDispatcherTest {
     void systemDoesNotReceiveEntitiesWithComponentsFromExcludedGroups() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withoutComponent(ComponentD.class);
             }
         });
@@ -534,7 +533,7 @@ class SystemDispatcherTest {
     void systemReceivesEntitiesWithAllRequiredComponentsAndNoExcludedComponents() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withoutComponent(ComponentD.class)
                             .withComponent(ComponentB.class);
             }
@@ -557,7 +556,7 @@ class SystemDispatcherTest {
     void systemReceivesEntitiesWithAllRequiredComponentsAndNoExcludedGroups() {
         ECSSystem systemA = spy(new SystemA() {
             @Override
-            public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+            public void declareRequirements(RequirementsBuilder requirements) {
                 requirements.withComponent(ComponentB.class)
                             .withoutComponentsFrom(componentGroup);
             }

@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.view.Camera;
-import lombok.NonNull;
 import org.joml.Matrix4f;
 
 public interface SpriteBatch<TSpriteID, TCamera extends Camera> extends AutoCloseable {
@@ -11,7 +10,7 @@ public interface SpriteBatch<TSpriteID, TCamera extends Camera> extends AutoClos
      *
      * @param camera camera to use as the rendering context
      */
-    default void begin(@NonNull TCamera camera) {
+    default void begin( TCamera camera) {
         begin(camera, null);
     }
 
@@ -22,7 +21,7 @@ public interface SpriteBatch<TSpriteID, TCamera extends Camera> extends AutoClos
      * @param camera         camera to use as the rendering context
      * @param transformation additional global transformation to apply. May be <code>null</code>
      */
-    void begin(@NonNull TCamera camera, Matrix4f transformation);
+    void begin( TCamera camera, Matrix4f transformation);
 
     /**
      * Renders the whole sprite texture at given coordinates.

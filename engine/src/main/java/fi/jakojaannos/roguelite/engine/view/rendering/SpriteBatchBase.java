@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine.view.rendering;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -32,8 +31,8 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
      * @param transformation global transformations to apply
      */
     protected abstract void flush(
-            @NonNull TTexture texture,
-            @NonNull TCamera camera,
+             TTexture texture,
+             TCamera camera,
             Matrix4f transformation
     );
 
@@ -45,8 +44,8 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
      *
      * @return texture which can be used to render the sprite
      */
-    @NonNull
-    public abstract TextureRegion<TTexture> resolveTexture(@NonNull TSpriteID sprite, int frame);
+
+    public abstract TextureRegion<TTexture> resolveTexture( TSpriteID sprite, int frame);
 
     /**
      * Queues a new sprite animation frame for rendering. Passing in -1 as the frame renders the
@@ -59,7 +58,7 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
      * @param height  vertical size of the sprite in world units
      */
     protected abstract void queueFrame(
-            @NonNull TextureRegion<TTexture> texture,
+             TextureRegion<TTexture> texture,
             double x,
             double y,
             double width,

@@ -6,7 +6,6 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -17,8 +16,7 @@ import java.util.Queue;
 import java.util.stream.Stream;
 
 /**
- * A cluster of entities. Contains storage for components in all of the entities in this cluster.
- * Provides accessors for entity components.
+ * Default {@link EntityManager} implementation.
  */
 @Slf4j
 public class EntityManagerImpl implements EntityManager {
@@ -36,8 +34,8 @@ public class EntityManagerImpl implements EntityManager {
     public EntityManagerImpl(
             final int entityCapacity,
             final int maxComponentTypes,
-            @NonNull final EntityStorage entityStorage,
-            @NonNull final ComponentStorage componentStorage
+            final EntityStorage entityStorage,
+            final ComponentStorage componentStorage
     ) {
         this.entityStorage = entityStorage;
         this.entityCapacity = entityCapacity;
@@ -46,11 +44,10 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
-    public void registerComponentGroup(@NonNull final ComponentGroup group) {
+    public void registerComponentGroup(final ComponentGroup group) {
         this.componentStorage.registerGroup(group);
     }
 
-    @NonNull
     @Override
     public Entity createEntity() {
         val entity = this.entityStorage.create(this.maxComponentTypes);
@@ -64,7 +61,7 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
-    public void destroyEntity(@NonNull final Entity entityRaw) {
+    public void destroyEntity(final Entity entityRaw) {
         val entity = (EntityImpl) entityRaw;
         entity.markForRemoval();
         this.taskQueue.offer(() -> {
@@ -82,47 +79,47 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <TComponent extends Component> void addComponentTo(
-            @NonNull final Entity entity,
-            @NonNull final TComponent component
+            final Entity entity,
+            final TComponent component
     ) {
         this.componentStorage.add((EntityImpl) entity, component);
     }
 
     @Override
     public void removeComponentFrom(
-            @NonNull final Entity entity,
-            @NonNull final Class<? extends Component> componentClass
+            final Entity entity,
+            final Class<? extends Component> componentClass
     ) {
         this.componentStorage.remove((EntityImpl) entity, componentClass);
     }
 
     @Override
     public <TComponent extends Component> Optional<TComponent> getComponentOf(
-            @NonNull final Entity entity,
-            @NonNull final Class<? extends TComponent> componentClass
+            final Entity entity,
+            final Class<? extends TComponent> componentClass
     ) {
         return this.componentStorage.get((EntityImpl) entity, componentClass);
     }
 
     @Override
     public boolean hasComponent(
-            @NonNull Entity entity,
-            @NonNull Class<? extends Component> componentClass
+            final Entity entity,
+            final Class<? extends Component> componentClass
     ) {
         return this.componentStorage.exists((EntityImpl) entity, componentClass);
     }
 
     @Override
     public boolean hasAnyComponentFromGroup(
-            @NonNull final Entity entity,
-            @NonNull final ComponentGroup group
+            final Entity entity,
+            final ComponentGroup group
     ) {
         return this.componentStorage.anyExists((EntityImpl) entity, group);
     }
 
     @Override
     public <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
-            @NonNull final Class<? extends TComponent> componentClass
+            final Class<? extends TComponent> componentClass
     ) {
         return this.entityStorage.stream()
                                  .filter(e -> this.componentStorage.exists(e, componentClass))
@@ -131,7 +128,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public Stream<Entity> getEntitiesWith(
-            @NonNull Collection<Class<? extends Component>> componentTypes
+            final Collection<Class<? extends Component>> componentTypes
     ) {
         val requiredMask = this.componentStorage.createComponentBitmask(componentTypes);
         return this.entityStorage.stream()
@@ -140,11 +137,11 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
-    public @NonNull Stream<Entity> getEntitiesWith(
-            @NonNull final Collection<Class<? extends Component>> required,
-            @NonNull final Collection<Class<? extends Component>> excluded,
-            @NonNull final Collection<ComponentGroup> requiredGroups,
-            @NonNull final Collection<ComponentGroup> excludedGroups
+    public Stream<Entity> getEntitiesWith(
+            final Collection<Class<? extends Component>> required,
+            final Collection<Class<? extends Component>> excluded,
+            final Collection<ComponentGroup> requiredGroups,
+            final Collection<ComponentGroup> excludedGroups
     ) {
         val requiredMask = this.componentStorage.createComponentBitmask(required, requiredGroups);
         val excludedMask = this.componentStorage.createComponentBitmask(excluded, excludedGroups);
@@ -156,21 +153,21 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void clearComponentsExcept(
-            @NonNull final Entity entity,
-            @NonNull final Class<? extends Component> componentType
+            final Entity entity,
+            final Class<? extends Component> componentType
     ) {
         this.componentStorage.clear((EntityImpl) entity, componentType);
     }
 
     @Override
     public void clearComponentsExcept(
-            @NonNull final Entity entity,
-            @NonNull final Collection<Class<? extends Component>> allowedComponentTypes
+            final Entity entity,
+            final Collection<Class<? extends Component>> allowedComponentTypes
     ) {
         this.componentStorage.clear((EntityImpl) entity, allowedComponentTypes);
     }
 
-    private void resize(int entityCapacity) {
+    private void resize(final int entityCapacity) {
         LOG.debug("Resizing EntityManager... Size: {} -> {}", this.entityCapacity, entityCapacity);
         this.entityCapacity = entityCapacity;
         this.entityStorage.resize(entityCapacity);

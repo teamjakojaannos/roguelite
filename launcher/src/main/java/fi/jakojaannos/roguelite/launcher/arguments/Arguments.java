@@ -1,6 +1,4 @@
 package fi.jakojaannos.roguelite.launcher.arguments;
-
-import lombok.NonNull;
 import lombok.val;
 
 import java.util.ArrayList;
@@ -10,24 +8,24 @@ public class Arguments {
     private boolean ignoreUnknown = false;
     private List<Argument> arguments = new ArrayList<>();
 
-    @NonNull
+
     public static Arguments builder() {
         return new Arguments();
     }
 
-    @NonNull
+
     public Arguments ignoreUnknown() {
         this.ignoreUnknown = true;
         return this;
     }
 
-    @NonNull
-    public Arguments with(@NonNull Argument argument) {
+
+    public Arguments with( Argument argument) {
         this.arguments.add(argument);
         return this;
     }
 
-    public void consume(@NonNull String... args) throws ArgumentParsingException {
+    public void consume( String... args) throws ArgumentParsingException {
         for (int i = 0; i < args.length; ++i) {
             val argStr = args[i];
             if (argStr.isEmpty()) {

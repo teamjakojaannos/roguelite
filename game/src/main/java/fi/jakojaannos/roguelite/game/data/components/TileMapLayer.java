@@ -4,7 +4,6 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import lombok.Getter;
-import lombok.NonNull;
 
 public class TileMapLayer implements Component {
     @Getter public TileMap<TileType> tileMap;

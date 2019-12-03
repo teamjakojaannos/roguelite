@@ -8,7 +8,6 @@ import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
@@ -18,7 +17,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class CharacterAIControllerSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
                     .requireResource(Players.class)
                     .withComponent(FollowerEnemyAI.class)
@@ -30,8 +29,8 @@ public class CharacterAIControllerSystem implements ECSSystem {
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double delta
     ) {
         val player = world.getResource(Players.class).player;

@@ -6,7 +6,6 @@ import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import lombok.Getter;
-import lombok.NonNull;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
@@ -50,7 +49,7 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
     }
 
     @Override
-    protected boolean shouldContinueLoop(@NonNull TGame game) {
+    protected boolean shouldContinueLoop(TGame game) {
         return super.shouldContinueLoop(game) && !glfwWindowShouldClose(this.window.getId());
     }
 

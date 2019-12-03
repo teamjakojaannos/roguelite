@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
 import fi.jakojaannos.roguelite.engine.ecs.systems.DispatcherBuilderImpl;
-import lombok.NonNull;
 
 import java.util.stream.Stream;
 
@@ -15,5 +14,11 @@ public interface SystemDispatcher extends AutoCloseable {
         return new DispatcherBuilderImpl();
     }
 
-    void dispatch(@NonNull World world, double delta);
+    /**
+     * Call this to tick all registered systems.
+     *
+     * @param world ECS {@link World} to use as a data source for the systems.
+     * @param delta time elapsed since the last tick
+     */
+    void dispatch(World world, double delta);
 }

@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import lombok.NonNull;
-
 import java.util.stream.Stream;
 
 /**
@@ -19,7 +17,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder tickAfter(@NonNull Class<? extends ECSSystem> other);
+    RequirementsBuilder tickAfter(Class<? extends ECSSystem> other);
 
     /**
      * Adds a dependency for this system to be ticked before given <code>other</code> system.
@@ -28,7 +26,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder tickBefore(@NonNull Class<? extends ECSSystem> other);
+    RequirementsBuilder tickBefore(Class<? extends ECSSystem> other);
 
     /**
      * Adds a dependency for this system to be ticked after given system group.
@@ -37,7 +35,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder tickAfter(@NonNull SystemGroup group);
+    RequirementsBuilder tickAfter(SystemGroup group);
 
     /**
      * Adds a dependency for this system to be ticked before given system group.
@@ -46,7 +44,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder tickBefore(@NonNull SystemGroup group);
+    RequirementsBuilder tickBefore(SystemGroup group);
 
     /**
      * Adds this system to a system group. System groups are used for easier dependency definition.
@@ -55,7 +53,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder addToGroup(@NonNull SystemGroup group);
+    RequirementsBuilder addToGroup(SystemGroup group);
 
     /**
      * Marks requirement for all entities this system handles to have a component of given type.
@@ -64,7 +62,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder withComponent(@NonNull Class<? extends Component> componentClass);
+    RequirementsBuilder withComponent(Class<? extends Component> componentClass);
 
     /**
      * Marks requirement for all entities this system handles to not have a component of given type.
@@ -75,7 +73,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder withoutComponent(@NonNull Class<? extends Component> componentClass);
+    RequirementsBuilder withoutComponent(Class<? extends Component> componentClass);
 
     /**
      * Marks requirement for all entities this system handles to have at least one component from
@@ -85,7 +83,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder withComponentFrom(@NonNull ComponentGroup componentGroup);
+    RequirementsBuilder withComponentFrom(ComponentGroup componentGroup);
 
     /**
      * Marks requirement for all entities this system handles to not have any components from the
@@ -96,7 +94,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder withoutComponentsFrom(@NonNull ComponentGroup componentGroup);
+    RequirementsBuilder withoutComponentsFrom(ComponentGroup componentGroup);
 
     /**
      * Marks requirement for a resource to be available for this system to be able to tick.
@@ -105,5 +103,5 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
-    RequirementsBuilder requireResource(@NonNull Class<? extends Resource> resource);
+    RequirementsBuilder requireResource(Class<? extends Resource> resource);
 }

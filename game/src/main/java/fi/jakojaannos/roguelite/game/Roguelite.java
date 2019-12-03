@@ -19,7 +19,6 @@ import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.*;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -97,8 +96,8 @@ public class Roguelite extends GameBase<GameState> {
 
     @Override
     public void tick(
-            @NonNull GameState state,
-            @NonNull Queue<InputEvent> inputEvents,
+             GameState state,
+             Queue<InputEvent> inputEvents,
             double delta
     ) {
         super.tick(state, inputEvents, delta);

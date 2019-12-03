@@ -6,7 +6,6 @@ import fi.jakojaannos.roguelite.game.data.components.BasicWeaponStats;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import lombok.NonNull;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -17,7 +16,7 @@ import java.util.stream.Stream;
 
 public class CharacterAttackSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
                     .withComponent(Transform.class)
                     .withComponent(CharacterInput.class)
@@ -30,8 +29,8 @@ public class CharacterAttackSystem implements ECSSystem {
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double delta
     ) {
         val cluster = world.getEntityManager();

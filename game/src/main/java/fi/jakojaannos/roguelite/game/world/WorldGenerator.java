@@ -6,7 +6,6 @@ import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import lombok.NonNull;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -26,9 +25,9 @@ public class WorldGenerator<TTile> {
 
     public void prepareInitialRoom(
             final long seed,
-            @NonNull final World world,
-            @NonNull final TTile floor,
-            @NonNull final TTile wall,
+             final World world,
+             final TTile floor,
+             final TTile wall,
             final int mainRoomSizeMin,
             final int mainRoomSizeMax,
             final int hallwayLength,
@@ -124,8 +123,8 @@ public class WorldGenerator<TTile> {
             final int x,
             final int y,
             final double spawnFrequency,
-            @NonNull final EntityManager entityManager,
-            @NonNull final SpawnerComponent.EntityFactory factoryFollower
+             final EntityManager entityManager,
+             final SpawnerComponent.EntityFactory factoryFollower
     ) {
         val spawner = entityManager.createEntity();
         entityManager.addComponentTo(spawner, new Transform(x, y));

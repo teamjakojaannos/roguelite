@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
 import fi.jakojaannos.roguelite.engine.view.Window;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.system.Callback;
@@ -16,7 +15,6 @@ import java.util.Optional;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
@@ -81,7 +79,7 @@ public class LWJGLWindow implements Window, AutoCloseable {
 
 
     @Override
-    public void addResizeCallback(@NonNull ResizeCallback callback) {
+    public void addResizeCallback(ResizeCallback callback) {
         this.resizeCallbacks.add(callback);
     }
 

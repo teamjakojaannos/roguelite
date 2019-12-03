@@ -9,7 +9,6 @@ import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -18,7 +17,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.COLLISION_HANDLER)
                     .withComponent(Collider.class)
                     .withComponent(RecentCollisionTag.class)
@@ -27,8 +26,8 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
 
     @Override
     public void tick(
-            @NonNull final Stream<Entity> entities,
-            @NonNull final World world,
+             final Stream<Entity> entities,
+             final World world,
             final double delta
     ) {
         val entityManager = world.getEntityManager();

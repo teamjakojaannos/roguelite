@@ -4,7 +4,6 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.ComponentGroup;
 import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -23,20 +22,20 @@ public class ComponentStorage {
     private int registeredTypeIndices = 0;
     private int entityCapacity;
 
-    public ComponentStorage(int entityCapacity, int maxComponentTypes) {
+    public ComponentStorage(final int entityCapacity, final int maxComponentTypes) {
         this.entityCapacity = entityCapacity;
         this.maxComponentTypes = maxComponentTypes;
     }
 
-    public void clear(@NonNull final EntityImpl entity) {
+    public void clear(final EntityImpl entity) {
         for (val storage : this.componentTypes.values()) {
             storage.removeComponent(entity);
         }
     }
 
     public void clear(
-            @NonNull final EntityImpl entity,
-            @NonNull final Class<? extends Component> except
+            final EntityImpl entity,
+            final Class<? extends Component> except
     ) {
         val componentTypeIndex = getComponentTypeIndexFor(except);
         IntStream.range(0, this.componentTypes.size())
@@ -47,8 +46,8 @@ public class ComponentStorage {
     }
 
     public void clear(
-            @NonNull final EntityImpl entity,
-            @NonNull final Collection<Class<? extends Component>> except
+            final EntityImpl entity,
+            final Collection<Class<? extends Component>> except
     ) {
         List<Integer> allowedIndices = except.stream()
                                              .map(this::getComponentTypeIndexFor)
@@ -69,13 +68,13 @@ public class ComponentStorage {
         }
     }
 
-    public void registerGroup(@NonNull final ComponentGroup group) {
+    public void registerGroup(final ComponentGroup group) {
         getComponentTypeIndexFor(group);
     }
 
     public <TComponent extends Component> void add(
-            @NonNull final EntityImpl entity,
-            @NonNull final TComponent component
+            final EntityImpl entity,
+            final TComponent component
     ) {
         val componentTypeIndex = getComponentTypeIndexFor(component.getClass());
         if (BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), componentTypeIndex)) {
@@ -90,7 +89,7 @@ public class ComponentStorage {
         checkGroupsAfterAdd(entity, component.getClass());
     }
 
-    public void remove(EntityImpl entity, Class<? extends Component> componentClass) {
+    public void remove(final EntityImpl entity, final Class<? extends Component> componentClass) {
         val componentTypeIndex = getComponentTypeIndexFor(componentClass);
         if (!BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), componentTypeIndex)) {
             throw new IllegalStateException("Component removed while type bit is already unset!");
@@ -101,8 +100,8 @@ public class ComponentStorage {
     }
 
     public <TComponent extends Component> Optional<TComponent> get(
-            @NonNull final EntityImpl entity,
-            @NonNull final Class<? extends TComponent> componentClass
+            final EntityImpl entity,
+            final Class<? extends TComponent> componentClass
     ) {
         val componentTypeIndex = getComponentTypeIndexFor(componentClass);
         if (!BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), componentTypeIndex)) {
@@ -115,23 +114,23 @@ public class ComponentStorage {
     }
 
     public boolean exists(
-            @NonNull final EntityImpl entity,
-            @NonNull final Class<? extends Component> componentClass
+            final EntityImpl entity,
+            final Class<? extends Component> componentClass
     ) {
         return BitMaskUtils.isNthBitSet(entity.getComponentBitmask(),
                                         getComponentTypeIndexFor(componentClass));
     }
 
     public boolean anyExists(
-            @NonNull final EntityImpl entity,
-            @NonNull final ComponentGroup group
+            final EntityImpl entity,
+            final ComponentGroup group
     ) {
         return BitMaskUtils.isNthBitSet(entity.getComponentBitmask(),
                                         getComponentTypeIndexFor(group));
     }
 
     public byte[] createComponentBitmask(
-            @NonNull final Collection<Class<? extends Component>> componentTypes
+            final Collection<Class<? extends Component>> componentTypes
     ) {
         return componentTypes.stream()
                              .map(this::getComponentTypeIndexFor)
@@ -141,8 +140,8 @@ public class ComponentStorage {
     }
 
     public byte[] createComponentBitmask(
-            @NonNull final Collection<Class<? extends Component>> componentTypes,
-            @NonNull final Collection<ComponentGroup> componentGroups
+            final Collection<Class<? extends Component>> componentTypes,
+            final Collection<ComponentGroup> componentGroups
     ) {
         return Stream.concat(componentTypes.stream()
                                            .map(this::getComponentTypeIndexFor),
@@ -154,20 +153,20 @@ public class ComponentStorage {
     }
 
     private int getComponentTypeIndexFor(
-            @NonNull final Class<? extends Component> componentClass
+            final Class<? extends Component> componentClass
     ) {
         return this.componentTypeIndices.computeIfAbsent(componentClass,
                                                          this::createNewComponentStorage);
     }
 
     private int getComponentTypeIndexFor(
-            @NonNull final ComponentGroup group
+            final ComponentGroup group
     ) {
         return this.componentGroupIndices.computeIfAbsent(group,
                                                           this::createNewComponentGroup);
     }
 
-    private int createNewComponentGroup(@NonNull final ComponentGroup group) {
+    private int createNewComponentGroup(final ComponentGroup group) {
         LOG.trace("Created new component group {}", group.getName());
         return getNextComponentTypeIndex();
     }
@@ -182,7 +181,7 @@ public class ComponentStorage {
         return index;
     }
 
-    private int createNewComponentStorage(@NonNull Class<? extends Component> componentClass) {
+    private int createNewComponentStorage(final Class<? extends Component> componentClass) {
         int index = getNextComponentTypeIndex();
         this.componentTypes.put(index, new ComponentMap<>(
                 this.entityCapacity,
@@ -196,7 +195,7 @@ public class ComponentStorage {
     }
 
     private void removeComponentByIndex(
-            @NonNull final EntityImpl entity,
+            final EntityImpl entity,
             final int componentTypeIndex
     ) {
         this.componentTypes.get(componentTypeIndex)
@@ -206,8 +205,8 @@ public class ComponentStorage {
     }
 
     private void checkGroupsAfterAdd(
-            @NonNull final EntityImpl entity,
-            @NonNull final Class<? extends Component> added
+            final EntityImpl entity,
+            final Class<? extends Component> added
     ) {
         this.componentGroupIndices.entrySet()
                                   .stream()
@@ -217,8 +216,8 @@ public class ComponentStorage {
     }
 
     private void checkGroupsAfterRemove(
-            @NonNull final EntityImpl entity,
-            @NonNull final Class<? extends Component> removed
+            final EntityImpl entity,
+            final Class<? extends Component> removed
     ) {
         this.componentGroupIndices.entrySet()
                                   .stream()

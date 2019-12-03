@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
-import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
-import fi.jakojaannos.roguelite.engine.ecs.entities.EntityStorage;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -53,15 +51,5 @@ class EntityStorageTest {
 
         assertEquals(0, storage.stream().filter(e -> removed.getId() == e.getId()).count());
         assertEquals(1, storage.stream().filter(e -> spawned.getId() == e.getId()).count());
-    }
-
-    @Test
-    void spawnThrowsIfEntityIsNull() {
-        assertThrows(AssertionError.class, () -> new EntityStorage(100).spawn(null));
-    }
-
-    @Test
-    void removeThrowsIfEntityIsNull() {
-        assertThrows(AssertionError.class, () -> new EntityStorage(100).remove(null));
     }
 }

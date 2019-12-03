@@ -1,6 +1,4 @@
 package fi.jakojaannos.roguelite.engine.view.rendering;
-
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -9,7 +7,7 @@ import java.util.List;
 public class Sprite<TTexture> {
     private final List<TextureRegion<TTexture>> frames;
 
-    public Sprite(@NonNull List<TextureRegion<TTexture>> frames) {
+    public Sprite( List<TextureRegion<TTexture>> frames) {
         this.frames = frames;
     }
 

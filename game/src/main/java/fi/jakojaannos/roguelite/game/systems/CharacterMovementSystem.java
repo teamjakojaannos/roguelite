@@ -5,7 +5,6 @@ import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
@@ -17,7 +16,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class CharacterMovementSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
                     .withComponent(Transform.class)
                     .withComponent(Velocity.class)
@@ -31,8 +30,8 @@ public class CharacterMovementSystem implements ECSSystem {
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double delta
     ) {
         entities.forEach(entity -> {

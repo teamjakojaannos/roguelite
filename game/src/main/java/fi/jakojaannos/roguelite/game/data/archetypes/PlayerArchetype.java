@@ -3,14 +3,13 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import lombok.NonNull;
 import lombok.val;
 
 public class PlayerArchetype {
-    @NonNull
+
     public static Entity create(
-            @NonNull final EntityManager entityManager,
-            @NonNull final Transform transform
+             final EntityManager entityManager,
+             final Transform transform
     ) {
         val player = entityManager.createEntity();
         entityManager.addComponentTo(player, transform);

@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * Internal {@link ECSSystem} storage for {@link SystemDispatcherImpl}. Provides convenient access
+ * to the per-system context with either the system class or a raw instance.
+ */
 class SystemStorage {
     private final List<SystemContext> systems;
     private final List<InternalSystemGroup> systemGroups;
@@ -15,8 +19,8 @@ class SystemStorage {
     private final Map<SystemGroup, InternalSystemGroup> groupLookup;
 
     SystemStorage(
-            List<SystemContext> systems,
-            List<InternalSystemGroup> systemGroups
+            final List<SystemContext> systems,
+            final List<InternalSystemGroup> systemGroups
     ) {
         this.systems = systems;
         this.systemGroups = systemGroups;
@@ -31,7 +35,7 @@ class SystemStorage {
         return this.systems.stream().map(SystemContext::getInstance);
     }
 
-    SystemContext findContextByType(Class<? extends ECSSystem> systemType) {
+    SystemContext findContextByType(final Class<? extends ECSSystem> systemType) {
         return this.contextLookup.get(systemType);
     }
 
@@ -43,7 +47,7 @@ class SystemStorage {
         return this.systemGroups.stream();
     }
 
-    public InternalSystemGroup findGroupByType(SystemGroup group) {
+    InternalSystemGroup findGroupByType(final SystemGroup group) {
         return this.groupLookup.get(group);
     }
 }

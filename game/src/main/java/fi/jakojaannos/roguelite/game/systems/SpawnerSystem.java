@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.game.systems;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -14,7 +13,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class SpawnerSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.EARLY_TICK)
                     .withComponent(SpawnerComponent.class)
                     .withComponent(Transform.class);

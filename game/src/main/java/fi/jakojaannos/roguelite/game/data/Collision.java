@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.game.data;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import lombok.Getter;
-import lombok.NonNull;
 import org.joml.Rectangled;
 
 public class Collision {
@@ -16,9 +15,9 @@ public class Collision {
         COLLISION
     }
 
-    @Getter @NonNull private final Type type;
-    @Getter @NonNull private final Mode mode;
-    @Getter @NonNull private final Rectangled bounds;
+    @Getter  private final Type type;
+    @Getter  private final Mode mode;
+    @Getter  private final Rectangled bounds;
 
     public final boolean isEntity() {
         return this.type == Type.ENTITY;
@@ -43,9 +42,9 @@ public class Collision {
     }
 
     public Collision(
-            @NonNull final Type type,
-            @NonNull final Mode mode,
-            @NonNull final Rectangled bounds
+             final Type type,
+             final Mode mode,
+             final Rectangled bounds
     ) {
         this.type = type;
         this.mode = mode;
@@ -61,7 +60,7 @@ public class Collision {
     }
 
     public static class EntityCollision extends Collision {
-        @NonNull @Getter private final Entity other;
+         @Getter private final Entity other;
 
         private EntityCollision(Mode mode, Entity other, Rectangled bounds) {
             super(Type.ENTITY, mode, bounds);

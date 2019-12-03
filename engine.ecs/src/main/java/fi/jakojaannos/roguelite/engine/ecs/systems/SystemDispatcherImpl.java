@@ -3,21 +3,23 @@ package fi.jakojaannos.roguelite.engine.ecs.systems;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.*;
 
+/**
+ * Default {@link SystemDispatcher} implementation.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class SystemDispatcherImpl implements SystemDispatcher {
-    @NonNull private final SystemStorage systems;
+    private final SystemStorage systems;
 
     @Override
     public void dispatch(
-            @NonNull final World world,
+            final World world,
             final double delta
     ) {
         val dispatchContext = new DispatchContext(this.systems.getSystems(), this.systems.getSystemGroups());
@@ -47,10 +49,10 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
 
     private void removeFromQueueAndDispatch(
-            @NonNull final World world,
-            @NonNull final DispatchContext dispatchContext,
-            @NonNull final Deque<SystemContext> queue,
-            @NonNull final SystemContext systemContext,
+            final World world,
+            final DispatchContext dispatchContext,
+            final Deque<SystemContext> queue,
+            final SystemContext systemContext,
             final double delta
     ) {
         queue.removeFirst();
@@ -64,9 +66,9 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     }
 
     private void queueDependenciesWithoutRemovingFromQueue(
-            @NonNull final DispatchContext dispatchContext,
-            @NonNull final Deque<SystemContext> queue,
-            @NonNull final SystemContext systemContext
+            final DispatchContext dispatchContext,
+            final Deque<SystemContext> queue,
+            final SystemContext systemContext
     ) {
         // TODO: This extensive dependency tree walking here should NOT be necessary. Simplify
         //  things for easier handling of transitive dependencies caused by groups

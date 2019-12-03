@@ -1,6 +1,4 @@
 package fi.jakojaannos.roguelite.game.data;
-
-import lombok.NonNull;
 import org.joml.Rectangled;
 import org.joml.Vector2i;
 
@@ -12,7 +10,7 @@ public class TileCollisionEvent {
     }
 
 
-    public Rectangled getBounds(final double tileSize, @NonNull final Rectangled result) {
+    public Rectangled getBounds(final double tileSize,  final Rectangled result) {
         result.minX = pos.x * tileSize;
         result.minY = pos.y * tileSize;
         result.maxX = (pos.x + 1) * tileSize;

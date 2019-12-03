@@ -5,14 +5,13 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import lombok.NonNull;
 import lombok.val;
 
 public class DummyArchetype {
 
-    @NonNull
+
     public static Entity create(
-            @NonNull final EntityManager entityManager,
+             final EntityManager entityManager,
             double x,
             double y
     ) {
@@ -22,10 +21,10 @@ public class DummyArchetype {
         );
     }
 
-    @NonNull
+
     public static Entity create(
-            @NonNull final EntityManager entityManager,
-            @NonNull final Transform transform
+             final EntityManager entityManager,
+             final Transform transform
     ) {
         val dummy = entityManager.createEntity();
         entityManager.addComponentTo(dummy, transform);

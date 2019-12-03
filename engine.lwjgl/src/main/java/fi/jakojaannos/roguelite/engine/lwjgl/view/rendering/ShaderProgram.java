@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import fi.jakojaannos.roguelite.engine.utilities.io.TextFileHelper;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -10,10 +8,11 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL20.glCreateProgram;
 import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
 
 @Slf4j
@@ -23,10 +22,10 @@ public class ShaderProgram implements AutoCloseable {
     private final int fragmentShader;
 
     public ShaderProgram(
-            @NonNull String vertexShaderPath,
-            @NonNull String fragmentShaderPath,
-            @NonNull Map<Integer, String> attributeLocations,
-            @NonNull Map<Integer, String> fragDataLocations
+            String vertexShaderPath,
+            String fragmentShaderPath,
+            Map<Integer, String> attributeLocations,
+            Map<Integer, String> fragDataLocations
     ) {
         this.vertexShader = glCreateShader(GL_VERTEX_SHADER);
         this.fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -35,7 +34,7 @@ public class ShaderProgram implements AutoCloseable {
         // Compile the vertex shader
         try {
             GL20.glShaderSource(this.vertexShader,
-                                TextFileHelper.readFileToString(vertexShaderPath));
+                                Files.readString(Paths.get(vertexShaderPath)));
         } catch (IOException e) {
             LOG.error("Loading vertex shader \"{}\" failed!", vertexShaderPath);
             return;
@@ -45,7 +44,7 @@ public class ShaderProgram implements AutoCloseable {
         // Compile the fragment shader
         try {
             glShaderSource(this.fragmentShader,
-                           TextFileHelper.readFileToString(fragmentShaderPath));
+                           Files.readString(Paths.get(fragmentShaderPath)));
         } catch (IOException e) {
             LOG.error("Loading fragment shader \"{}\" failed!", fragmentShaderPath);
             return;

@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -33,7 +32,7 @@ public abstract class GameRunner<
      * @return <code>true</code> if runner should continue with the game loop. <code>false</code> to
      * break from the loop.
      */
-    protected boolean shouldContinueLoop(@NonNull TGame game) {
+    protected boolean shouldContinueLoop( TGame game) {
         return !game.isFinished();
     }
 
@@ -47,9 +46,9 @@ public abstract class GameRunner<
      *                      provided renderer is <code>null</code>.
      */
     public void run(
-            @NonNull Supplier<TState> defaultStateSupplier,
-            @NonNull TGame game,
-            @NonNull TInput inputProvider,
+             Supplier<TState> defaultStateSupplier,
+             TGame game,
+             TInput inputProvider,
             GameRenderer<TState> renderer
     ) {
         if (game.isDisposed()) {

@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.lwjgl.system.MemoryStack;
@@ -27,8 +26,8 @@ public class LWJGLTexture implements AutoCloseable {
     @Getter private final int height;
 
     public LWJGLTexture(
-            @NonNull Path assetRoot,
-            @NonNull String path
+            Path assetRoot,
+            String path
     ) {
         this.texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, this.texture);
@@ -69,8 +68,8 @@ public class LWJGLTexture implements AutoCloseable {
     }
 
     private ByteBuffer loadImageData(
-            @NonNull MemoryStack stack,
-            @NonNull BufferedImage image,
+            MemoryStack stack,
+            BufferedImage image,
             int width,
             int height
     ) {

@@ -11,7 +11,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -25,7 +24,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.tickAfter(LevelRenderingSystem.class)
                     .withComponent(Transform.class)
                     .withComponent(SpriteInfo.class);
@@ -35,7 +34,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     private final SpriteBatch<String, LWJGLCamera> batch;
     private final BiFunction<String, Integer, LWJGLTexture> textureResolver;
 
-    public SpriteRenderingSystem(@NonNull String assetRoot, @NonNull LWJGLCamera camera) {
+    public SpriteRenderingSystem( String assetRoot,  LWJGLCamera camera) {
         this.camera = camera;
         val batch = new LWJGLSpriteBatch(assetRoot, "sprite");
         this.batch = batch;
@@ -44,8 +43,8 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double partialTickAlpha
     ) {
         // Render using two-pass approach. By using correct data-structures with sensible estimates

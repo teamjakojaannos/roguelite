@@ -9,7 +9,6 @@ import fi.jakojaannos.roguelite.game.data.components.CrosshairTag;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
-import lombok.NonNull;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -18,7 +17,7 @@ import java.util.stream.Stream;
 
 public class SnapToCursorSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.PHYSICS_TICK)
                     .requireResource(Mouse.class)
                     .requireResource(CameraProperties.class)
@@ -30,8 +29,8 @@ public class SnapToCursorSystem implements ECSSystem {
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double delta
     ) {
         val mouse = world.getResource(Mouse.class);

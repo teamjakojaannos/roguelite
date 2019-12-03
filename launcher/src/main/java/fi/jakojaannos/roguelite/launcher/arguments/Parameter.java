@@ -1,6 +1,4 @@
 package fi.jakojaannos.roguelite.launcher.arguments;
-
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
@@ -10,40 +8,40 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public abstract class Parameter<T> {
-    @NonNull
+
     protected final String name;
 
-    @NonNull
+
     public abstract T parse(String string) throws ArgumentParsingException;
 
-    @NonNull
+
     public static <T> Parameter<Optional<T>> optional(Parameter<T> parameter) {
         return null;
     }
 
-    @NonNull
-    public static IntegerParameter integer(@NonNull String name) {
+
+    public static IntegerParameter integer( String name) {
         return new IntegerParameter(name);
     }
 
-    @NonNull
+
     public static <T extends Enum<T>> EnumParameter<T> enumeration(
-            @NonNull String name,
-            @NonNull Class<T> enumClass
+             String name,
+             Class<T> enumClass
     ) {
         return new EnumParameter<>(name, enumClass);
     }
 
-    public static BoolParameter bool(@NonNull String name) {
+    public static BoolParameter bool( String name) {
         return new BoolParameter(name);
     }
 
-    public static PathParameter filePath(@NonNull String name) {
+    public static PathParameter filePath( String name) {
         return new PathParameter(name);
     }
 
     public static class BoolParameter extends Parameter<Boolean> {
-        private BoolParameter(@NonNull String name) {
+        private BoolParameter( String name) {
             super(name);
         }
 
@@ -57,18 +55,18 @@ public abstract class Parameter<T> {
         private int minimum;
         private boolean hasMinimum = false;
 
-        private IntegerParameter(@NonNull String name) {
+        private IntegerParameter( String name) {
             super(name);
         }
 
-        @NonNull
+
         public IntegerParameter withMin(int minimum) {
             this.minimum = minimum;
             this.hasMinimum = true;
             return this;
         }
 
-        @NonNull
+
         @Override
         public Integer parse(String string) throws ArgumentParsingException {
             try {
@@ -95,14 +93,14 @@ public abstract class Parameter<T> {
     public static class EnumParameter<T extends Enum<T>> extends Parameter<T> {
         private final Class<T> type;
 
-        private EnumParameter(@NonNull String name, @NonNull Class<T> type) {
+        private EnumParameter( String name,  Class<T> type) {
             super(name);
             this.type = type;
         }
 
-        @NonNull
+
         @Override
-        public T parse(@NonNull String string) throws ArgumentParsingException {
+        public T parse( String string) throws ArgumentParsingException {
             try {
                 return T.valueOf(this.type, string);
             } catch (IllegalArgumentException e) {
@@ -115,7 +113,7 @@ public abstract class Parameter<T> {
         private boolean mustBeDirectory;
         private boolean mustExist;
 
-        private PathParameter(@NonNull String name) {
+        private PathParameter( String name) {
             super(name);
         }
 

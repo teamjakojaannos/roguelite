@@ -3,20 +3,19 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import lombok.NonNull;
 import lombok.val;
 import org.joml.Vector2d;
 
 public class BasicProjectileArchetype {
 
-    @NonNull
+
     public static Entity create(
-            @NonNull final World world,
+             final World world,
             double projectileX,
             double projectileY,
-            @NonNull final Vector2d direction,
+             final Vector2d direction,
             final double projectileSpeed,
-            @NonNull Vector2d spreadOffset
+             Vector2d spreadOffset
     ) {
         return create(
                 world,
@@ -26,12 +25,12 @@ public class BasicProjectileArchetype {
                 ));
     }
 
-    @NonNull
+
     public static Entity create(
-            @NonNull final World world,
+             final World world,
             double projectileX,
             double projectileY,
-            @NonNull final Vector2d direction,
+             final Vector2d direction,
             final double projectileSpeed
     ) {
 
@@ -42,11 +41,11 @@ public class BasicProjectileArchetype {
                 ));
     }
 
-    @NonNull
+
     public static Entity create(
-            @NonNull final World world,
-            @NonNull final Transform transform,
-            @NonNull final Velocity velocity
+             final World world,
+             final Transform transform,
+             final Velocity velocity
     ) {
         val entities = world.getEntityManager();
 

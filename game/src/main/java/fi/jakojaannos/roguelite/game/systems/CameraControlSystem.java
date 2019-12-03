@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.game.systems;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import lombok.NonNull;
 import lombok.val;
 
 import java.util.Collection;
@@ -12,15 +11,15 @@ import java.util.stream.Stream;
 
 public class CameraControlSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.LATE_TICK)
                     .withComponent(Camera.class);
     }
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double delta
     ) {
         entities.forEach(entity -> {

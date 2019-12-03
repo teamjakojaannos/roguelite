@@ -11,7 +11,6 @@ import fi.jakojaannos.roguelite.launcher.arguments.Argument;
 import fi.jakojaannos.roguelite.launcher.arguments.ArgumentParsingException;
 import fi.jakojaannos.roguelite.launcher.arguments.Arguments;
 import fi.jakojaannos.roguelite.launcher.arguments.Parameter;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -34,7 +33,7 @@ public class RogueliteLauncher {
     @Setter private Window.Mode windowMode = Window.Mode.Windowed;
     @Setter private boolean floatWindow = false;
 
-    public void parseCommandLineArguments(@NonNull String... args) {
+    public void parseCommandLineArguments( String... args) {
         try {
             Arguments.builder()
                      .with(Argument.withName("window")

@@ -17,14 +17,6 @@ class ComponentMapTest {
         storage = new ComponentMap<>(100, MockComponent.class);
     }
 
-    @ParameterizedTest
-    @CsvSource({"valid,", ",valid"})
-    void addComponentThrowsIfAnyOfTheArgsAreNull(String entity, String component) {
-        assertThrows(AssertionError.class,
-                     () -> storage.addComponent(entity == null ? null : new EntityImpl(0, 100),
-                                                component == null ? null : new MockComponent()));
-    }
-
     @Test
     void addComponentAddsTheComponent() {
         EntityImpl entity = new EntityImpl(0, 100);

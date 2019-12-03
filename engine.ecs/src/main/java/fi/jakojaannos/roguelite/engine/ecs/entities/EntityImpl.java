@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
-import lombok.AccessLevel;
 import lombok.Getter;
 
 public class EntityImpl implements fi.jakojaannos.roguelite.engine.ecs.Entity {

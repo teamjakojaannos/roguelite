@@ -1,21 +1,27 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
+import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Backend for handling constructing system dependency graph during {@link DispatcherBuilder}.
+ * Handles dependency validation and assigning proper concrete dependencies on dependency
+ * declarations.
+ */
 class SystemDependencyResolver {
     private final Map<Class<? extends ECSSystem>, Entry> systems = new HashMap<>();
     private final Map<SystemGroup, InternalSystemGroup.Builder> groups = new HashMap<>();
 
     private boolean firstInstanceAdded = false;
 
-    void addGroup(@NonNull final SystemGroup group) {
+    void addGroup(final SystemGroup group) {
         if (this.firstInstanceAdded) {
             throw new IllegalStateException("System groups must be registered before any systems are registered!");
         }
@@ -24,14 +30,14 @@ class SystemDependencyResolver {
                                                   .group(group));
     }
 
-    void addInstance(@NonNull final ECSSystem instance) {
+    void addInstance(final ECSSystem instance) {
         this.firstInstanceAdded = true;
         entryFor(instance);
     }
 
     void tickAfter(
-            @NonNull final ECSSystem instance,
-            @NonNull final Class<? extends ECSSystem> other
+            final ECSSystem instance,
+            final Class<? extends ECSSystem> other
     ) {
         if (other.equals(instance.getClass())) {
             throw new IllegalStateException("System cannot depend on itself!");
@@ -42,8 +48,8 @@ class SystemDependencyResolver {
     }
 
     void tickBefore(
-            @NonNull final ECSSystem instance,
-            @NonNull final Class<? extends ECSSystem> other
+            final ECSSystem instance,
+            final Class<? extends ECSSystem> other
     ) {
         if (other.equals(instance.getClass())) {
             throw new IllegalStateException("System cannot depend on itself!");
@@ -54,15 +60,15 @@ class SystemDependencyResolver {
     }
 
     void tickAfter(
-            @NonNull final ECSSystem instance,
-            @NonNull final SystemGroup group
+            final ECSSystem instance,
+            final SystemGroup group
     ) {
         entryFor(instance).tickAfterGroup.add(group);
     }
 
     void tickBefore(
-            @NonNull final ECSSystem instance,
-            @NonNull final SystemGroup group
+            final ECSSystem instance,
+            final SystemGroup group
     ) {
         entryFor(instance).tickBeforeGroup.add(group);
         this.groups.get(group).dependency(instance.getClass());
@@ -84,8 +90,8 @@ class SystemDependencyResolver {
     }
 
     void addToGroup(
-            @NonNull final SystemGroup group,
-            @NonNull final ECSSystem instance
+            final SystemGroup group,
+            final ECSSystem instance
     ) {
         if (!this.groups.containsKey(group)) {
             throw new IllegalArgumentException(String.format("Unknown group \"%s\"!", group.getName()));
@@ -154,7 +160,8 @@ class SystemDependencyResolver {
         private final List<Class<? extends ECSSystem>> tickBefore = new ArrayList<>();
         private final List<SystemGroup> tickAfterGroup = new ArrayList<>();
         private final List<SystemGroup> tickBeforeGroup = new ArrayList<>();
-        private ECSSystem systemInstance;
+
+        @Nullable private ECSSystem systemInstance;
 
         public boolean hasInstance() {
             return this.systemInstance != null;

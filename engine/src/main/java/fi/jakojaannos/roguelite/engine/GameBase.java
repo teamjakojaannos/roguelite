@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Queue;
@@ -15,7 +14,6 @@ public abstract class GameBase<TState> implements Game<TState> {
     private boolean disposed = false;
     private boolean finished = false;
 
-    @NonNull
     @Override
     public TimeManager getTime() {
         return this.timeManager;
@@ -27,7 +25,7 @@ public abstract class GameBase<TState> implements Game<TState> {
     }
 
     @Override
-    public void setFinished(boolean state) {
+    public void setFinished(final boolean state) {
         this.finished = state;
     }
 
@@ -37,7 +35,7 @@ public abstract class GameBase<TState> implements Game<TState> {
     }
 
     @Override
-    public void tick(@NonNull TState state, @NonNull Queue<InputEvent> inputEvents, double delta) {
+    public void tick(final TState state, final Queue<InputEvent> inputEvents, final double delta) {
         this.timeManager.refresh();
     }
 

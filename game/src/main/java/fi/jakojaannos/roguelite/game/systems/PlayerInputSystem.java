@@ -11,7 +11,6 @@ import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
-import lombok.NonNull;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -19,7 +18,7 @@ import java.util.stream.Stream;
 
 public class PlayerInputSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
                     .withComponent(CharacterInput.class)
                     .withComponent(CharacterAbilities.class)
@@ -33,8 +32,8 @@ public class PlayerInputSystem implements ECSSystem {
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double delta
     ) {
         val inputs = world.getResource(Inputs.class);

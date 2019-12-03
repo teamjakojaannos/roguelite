@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.tilemap.storage;
 
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.val;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ public final class Chunk<TTile> {
     private transient final List<TTile> tileTypes = new ArrayList<>();
     private transient final Map<TTile, Integer> tileTypeToIndex = new HashMap<>();
 
-    public Chunk(final int chunkX, final int chunkY, @NonNull final TTile defaultTileType) {
+    public Chunk(final int chunkX, final int chunkY,  final TTile defaultTileType) {
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.tileTypes.add(defaultTileType);
@@ -40,7 +39,7 @@ public final class Chunk<TTile> {
     public void setByTileCoordinates(
             final int x,
             final int y,
-            @NonNull final TTile tileType
+             final TTile tileType
     ) {
         setByLocal(local(x), local(y), tileType);
     }
@@ -53,11 +52,11 @@ public final class Chunk<TTile> {
         return this.tileTypes.get(this.tileData[index(localX, localY)]);
     }
 
-    private void setByLocal(final int localX, final int localY, @NonNull final TTile tileType) {
+    private void setByLocal(final int localX, final int localY,  final TTile tileType) {
         this.tileData[index(localX, localY)] = resolveTileTypeIndex(tileType);
     }
 
-    private int resolveTileTypeIndex(@NonNull final TTile tileType) {
+    private int resolveTileTypeIndex( final TTile tileType) {
         return this.tileTypeToIndex.computeIfAbsent(tileType,
                                                     type -> {
                                                         val index = this.tileTypes.size();

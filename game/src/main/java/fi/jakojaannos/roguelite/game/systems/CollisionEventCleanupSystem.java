@@ -7,7 +7,6 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
-import lombok.NonNull;
 
 import java.util.stream.Stream;
 
@@ -19,15 +18,15 @@ import java.util.stream.Stream;
  */
 public class CollisionEventCleanupSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CLEANUP)
                     .withComponent(Collider.class);
     }
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double delta
     ) {
         entities.forEach(entity -> {

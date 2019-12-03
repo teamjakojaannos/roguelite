@@ -8,7 +8,6 @@ import fi.jakojaannos.roguelite.game.data.Collision;
 import fi.jakojaannos.roguelite.game.data.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -35,7 +34,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class ApplyVelocitySystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.PHYSICS_TICK)
                     .withComponent(Transform.class)
                     .withComponent(Velocity.class);
@@ -45,8 +44,8 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     @Override
     public void tick(
-            @NonNull final Stream<Entity> entities,
-            @NonNull final World world,
+             final Stream<Entity> entities,
+             final World world,
             final double delta
     ) {
         val entitiesWithCollider = world.getEntityManager()
@@ -76,7 +75,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         });
     }
 
-    private List<TileMap<TileType>> getTileMapLayersWithCollision(@NonNull World world) {
+    private List<TileMap<TileType>> getTileMapLayersWithCollision( World world) {
         return world.getEntityManager()
                     .getEntitiesWith(TileMapLayer.class)
                     .map(EntityManager.EntityComponentPair::getComponent)
@@ -87,13 +86,13 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     private Rectangled updateTargetBoundsWithCollisionDetection(
             final double delta,
-            @NonNull final World world,
-            @NonNull final Entity entity,
-            @NonNull final Transform transform,
-            @NonNull final Collider collider,
-            @NonNull final List<TileMap<TileType>> tileMapLayers,
-            @NonNull final List<Entity> entitiesWithCollider,
-            @NonNull final Vector2d velocityRaw
+             final World world,
+             final Entity entity,
+             final Transform transform,
+             final Collider collider,
+             final List<TileMap<TileType>> tileMapLayers,
+             final List<Entity> entitiesWithCollider,
+             final Vector2d velocityRaw
     ) {
         val direction = velocityRaw.normalize(new Vector2d());
         val maxDistance = velocityRaw.length() * delta;
@@ -136,17 +135,17 @@ public class ApplyVelocitySystem implements ECSSystem {
     }
 
     private double tryMove(
-            @NonNull final World world,
-            @NonNull final Entity entity,
-            @NonNull final Collider collider,
-            @NonNull final List<TileMap<TileType>> tileMapLayers,
-            @NonNull final List<Entity> entitiesWithCollider,
-            @NonNull final Vector2d direction,
+             final World world,
+             final Entity entity,
+             final Collider collider,
+             final List<TileMap<TileType>> tileMapLayers,
+             final List<Entity> entitiesWithCollider,
+             final Vector2d direction,
             final double distance,
-            @NonNull final Rectangled initialBounds,
-            @NonNull final Rectangled outTargetBounds,
-            @NonNull final List<CollisionCandidate> outCollisions,
-            @NonNull final Set<CollisionCandidate> outOverlaps
+             final Rectangled initialBounds,
+             final Rectangled outTargetBounds,
+             final List<CollisionCandidate> outCollisions,
+             final Set<CollisionCandidate> outOverlaps
     ) {
         val collisionsXY = new ArrayList<CollisionCandidate>();
         val overlapsXY = new TreeSet<CollisionCandidate>(Comparator.comparingInt(candidate -> candidate.getOther().getId()));
@@ -210,16 +209,16 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     private double checkForCollisionsInDirection(
             final double distance,
-            @NonNull final World world,
-            @NonNull final Entity entity,
-            @NonNull final Collider collider,
-            @NonNull final Vector2d direction,
-            @NonNull final List<TileMap<TileType>> tileMapLayers,
-            @NonNull final List<Entity> entitiesWithCollider,
-            @NonNull final Rectangled initialBounds,
-            @NonNull final Rectangled outTargetBounds,
-            @NonNull final List<CollisionCandidate> outCollisions,
-            @NonNull final Set<CollisionCandidate> outOverlaps
+             final World world,
+             final Entity entity,
+             final Collider collider,
+             final Vector2d direction,
+             final List<TileMap<TileType>> tileMapLayers,
+             final List<Entity> entitiesWithCollider,
+             final Rectangled initialBounds,
+             final Rectangled outTargetBounds,
+             final List<CollisionCandidate> outCollisions,
+             final Set<CollisionCandidate> outOverlaps
     ) {
         val targetBounds = initialBounds.translate(direction.mul(distance, new Vector2d()), new Rectangled());
         getCollidingTilesAndEntities(world, entity, collider, tileMapLayers, entitiesWithCollider, initialBounds, targetBounds, outCollisions, outOverlaps);
@@ -241,25 +240,25 @@ public class ApplyVelocitySystem implements ECSSystem {
     }
 
     private void getCollidingTilesAndEntities(
-            @NonNull final World world,
-            @NonNull final Entity entity,
-            @NonNull final Collider collider,
-            @NonNull final List<TileMap<TileType>> tileMapLayers,
-            @NonNull final List<Entity> entitiesWithCollider,
-            @NonNull final Rectangled currentBounds,
-            @NonNull final Rectangled targetBounds,
-            @NonNull final List<CollisionCandidate> outCollisions,
-            @NonNull final Set<CollisionCandidate> outOverlaps
+             final World world,
+             final Entity entity,
+             final Collider collider,
+             final List<TileMap<TileType>> tileMapLayers,
+             final List<Entity> entitiesWithCollider,
+             final Rectangled currentBounds,
+             final Rectangled targetBounds,
+             final List<CollisionCandidate> outCollisions,
+             final Set<CollisionCandidate> outOverlaps
     ) {
         getCollidingTiles(tileMapLayers, currentBounds, targetBounds, outCollisions);
         gatherPossiblyCollidingEntities(world, entitiesWithCollider, entity, targetBounds, collider, outCollisions, outOverlaps);
     }
 
     private void getCollidingTiles(
-            @NonNull final List<TileMap<TileType>> tileMapLayers,
-            @NonNull final Rectangled currentBounds,
-            @NonNull final Rectangled targetBounds,
-            @NonNull final List<CollisionCandidate> outCollisions
+             final List<TileMap<TileType>> tileMapLayers,
+             final Rectangled currentBounds,
+             final Rectangled targetBounds,
+             final List<CollisionCandidate> outCollisions
     ) {
         val startX = Math.min((int) Math.floor(currentBounds.minX), (int) Math.floor(targetBounds.minX));
         val startY = Math.min((int) Math.floor(currentBounds.minY), (int) Math.floor(targetBounds.minY));
@@ -280,13 +279,13 @@ public class ApplyVelocitySystem implements ECSSystem {
     }
 
     private void gatherPossiblyCollidingEntities(
-            @NonNull final World world,
-            @NonNull final List<Entity> entitiesWithCollider,
-            @NonNull final Entity entity,
-            @NonNull final Rectangled targetBounds,
-            @NonNull final Collider collider,
-            @NonNull final List<CollisionCandidate> outCollisions,
-            @NonNull final Set<CollisionCandidate> outOverlaps
+             final World world,
+             final List<Entity> entitiesWithCollider,
+             final Entity entity,
+             final Rectangled targetBounds,
+             final Collider collider,
+             final List<CollisionCandidate> outCollisions,
+             final Set<CollisionCandidate> outOverlaps
     ) {
         for (val other : entitiesWithCollider) {
             if (other.getId() == entity.getId()) {
@@ -309,10 +308,10 @@ public class ApplyVelocitySystem implements ECSSystem {
     }
 
     private void fireCollisionEvent(
-            @NonNull final World world,
-            @NonNull final Entity entity,
-            @NonNull final Collider collider,
-            @NonNull final Collision collision
+             final World world,
+             final Entity entity,
+             final Collider collider,
+             final Collision collision
     ) {
         collider.collisions.add(new CollisionEvent(collision));
         world.getEntityManager().addComponentIfAbsent(entity, new RecentCollisionTag());

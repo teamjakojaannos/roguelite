@@ -10,7 +10,6 @@ import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -24,7 +23,7 @@ import static org.lwjgl.opengl.GL30.*;
 @Slf4j
 public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements( RequirementsBuilder requirements) {
         requirements.tickAfter(SpriteRenderingSystem.class)
                     .withComponent(Transform.class);
     }
@@ -41,7 +40,7 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
 
     private final Matrix4f modelMatrix = new Matrix4f();
 
-    public EntityBoundsRenderingSystem(@NonNull String assetRoot, @NonNull LWJGLCamera camera) {
+    public EntityBoundsRenderingSystem( String assetRoot,  LWJGLCamera camera) {
         this.camera = camera;
         this.shader = new ShaderProgram(
                 assetRoot + "shaders/bounds.vert",
@@ -88,8 +87,8 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
+             Stream<Entity> entities,
+             World world,
             double partialTickAlpha
     ) {
         this.shader.use();

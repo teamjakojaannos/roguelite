@@ -10,7 +10,6 @@ import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.view.systems.EntityBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.LevelRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -19,7 +18,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final SystemDispatcher rendererDispatcher;
     private final RogueliteCamera camera;
 
-    public RogueliteGameRenderer(@NonNull String assetRoot, @NonNull LWJGLWindow window) {
+    public RogueliteGameRenderer( String assetRoot,  LWJGLWindow window) {
         LOG.debug("Constructing GameRenderer...");
         LOG.debug("asset root: {}", assetRoot);
 

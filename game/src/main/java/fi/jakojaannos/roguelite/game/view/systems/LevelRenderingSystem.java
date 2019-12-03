@@ -1,41 +1,38 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
-import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
-import lombok.NonNull;
 import lombok.val;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 public class LevelRenderingSystem implements ECSSystem {
     @Override
-    public void declareRequirements(@NonNull RequirementsBuilder requirements) {
+    public void declareRequirements(RequirementsBuilder requirements) {
         requirements.withComponent(TileMapLayer.class);
     }
 
-    private final String assetRoot;
     private final LWJGLCamera camera;
     private final SpriteBatch<String, LWJGLCamera> batch;
 
-    public LevelRenderingSystem(String assetRoot, LWJGLCamera camera) {
-        this.assetRoot = assetRoot;
+    public LevelRenderingSystem(final String assetRoot, final LWJGLCamera camera) {
         this.camera = camera;
         this.batch = new LWJGLSpriteBatch(assetRoot, "sprite");
     }
 
     @Override
     public void tick(
-            @NonNull Stream<Entity> entities,
-            @NonNull World world,
-            double partialTickAlpha
+            final Stream<Entity> entities,
+            final World world,
+            final double partialTickAlpha
     ) {
         val camera = world.getEntityManager()
                           .getComponentOf(world.getResource(CameraProperties.class).cameraEntity,

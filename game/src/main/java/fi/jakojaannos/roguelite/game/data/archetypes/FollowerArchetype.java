@@ -3,14 +3,13 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import lombok.NonNull;
 import lombok.val;
 
 public class FollowerArchetype {
 
-    @NonNull
+
     public static Entity create(
-            @NonNull final EntityManager entityManager,
+             final EntityManager entityManager,
             double x,
             double y
     ) {
@@ -20,10 +19,10 @@ public class FollowerArchetype {
         );
     }
 
-    @NonNull
+
     public static Entity create(
-            @NonNull final EntityManager entityManager,
-            @NonNull final Transform transform
+             final EntityManager entityManager,
+             final Transform transform
     ) {
         val follower = entityManager.createEntity();
         entityManager.addComponentTo(follower, transform);

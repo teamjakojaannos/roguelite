@@ -5,7 +5,6 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.view.rendering.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -55,8 +54,8 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     private Path assetRoot;
 
     public LWJGLSpriteBatch(
-            @NonNull String assetRoot,
-            @NonNull String shader
+            String assetRoot,
+            String shader
     ) {
         super(MAX_SPRITES_PER_BATCH);
         this.assetRoot = Paths.get(assetRoot);
@@ -83,13 +82,13 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     }
 
     @Override
-    public TextureRegion<LWJGLTexture> resolveTexture(@NonNull String spriteName, int frame) {
+    public TextureRegion<LWJGLTexture> resolveTexture(String spriteName, int frame) {
         return this.sprites.computeIfAbsent(spriteName,
                                             key -> loadSprite(spriteName))
                            .getFrameOrWhole(frame);
     }
 
-    private Sprite<LWJGLTexture> loadSprite(@NonNull String spriteName) {
+    private Sprite<LWJGLTexture> loadSprite(String spriteName) {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Sprite.class, (JsonDeserializer<Sprite<LWJGLTexture>>) this::deserializeSprite)
                 .create();
@@ -133,7 +132,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
 
     @Override
     protected void queueFrame(
-            @NonNull TextureRegion<LWJGLTexture> region,
+            TextureRegion<LWJGLTexture> region,
             double x,
             double y,
             double width,
@@ -156,22 +155,6 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
                      x, y + height,
                      (float) region.getU0(), (float) region.getV1(),
                      1.0f, 1.0f, 1.0f);
-        /*updateVertex(offset,
-                     x, y,
-                     0.0f, 0.0f,
-                     1.0f, 1.0f, 1.0f);
-        updateVertex(offset + SIZE_IN_BYTES,
-                     x + width, y,
-                     1.0f, 0.0f,
-                     1.0f, 1.0f, 1.0f);
-        updateVertex(offset + (2 * SIZE_IN_BYTES),
-                     x + width, y + height,
-                     1.0f, 1.0f,
-                     1.0f, 1.0f, 1.0f);
-        updateVertex(offset + (3 * SIZE_IN_BYTES),
-                     x, y + height,
-                     0.0f, 1.0f,
-                     1.0f, 1.0f, 1.0f);*/
     }
 
     private void updateVertex(
@@ -195,8 +178,8 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
 
     @Override
     protected void flush(
-            @NonNull LWJGLTexture texture,
-            @NonNull LWJGLCamera camera,
+            LWJGLTexture texture,
+            LWJGLCamera camera,
             Matrix4f transformation
     ) {
         this.shader.use();
