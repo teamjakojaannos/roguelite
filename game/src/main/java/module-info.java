@@ -3,6 +3,7 @@ module roguelite.game {
     requires org.slf4j;
     requires org.lwjgl.opengl;
     requires org.joml;
+    requires jsr305;
 
     requires roguelite.engine;
     requires roguelite.engine.utilities;

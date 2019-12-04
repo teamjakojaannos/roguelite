@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.Collision;
+import fi.jakojaannos.roguelite.game.data.collision.Collision;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;

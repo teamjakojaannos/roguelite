@@ -1,25 +1,30 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.data.components.Collider;
+import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.val;
 
 public class ObstacleArchetype {
     public static Entity create(
-             final EntityManager entityManager,
-             final Transform transform
+            final EntityManager entityManager,
+            final Transform transform,
+            final double size
     ) {
         val obstacle = entityManager.createEntity();
         entityManager.addComponentTo(obstacle, transform);
-        entityManager.addComponentTo(obstacle, createCollider());
+        entityManager.addComponentTo(obstacle, createCollider(size));
         entityManager.addComponentTo(obstacle, createSpriteInfo());
         return obstacle;
     }
 
-    private static Collider createCollider() {
+    private static Collider createCollider(final double size) {
         val collider = new Collider();
         collider.solid = true;
+        collider.width = size;
+        collider.height = size;
         return collider;
     }
 

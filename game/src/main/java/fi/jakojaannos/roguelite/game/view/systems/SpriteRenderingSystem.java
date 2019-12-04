@@ -8,12 +8,14 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
+import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.joml.Rectangled;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +26,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
-    public void declareRequirements( RequirementsBuilder requirements) {
+    public void declareRequirements(RequirementsBuilder requirements) {
         requirements.tickAfter(LevelRenderingSystem.class)
                     .withComponent(Transform.class)
                     .withComponent(SpriteInfo.class);
@@ -34,7 +36,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     private final SpriteBatch<String, LWJGLCamera> batch;
     private final BiFunction<String, Integer, LWJGLTexture> textureResolver;
 
-    public SpriteRenderingSystem( String assetRoot,  LWJGLCamera camera) {
+    public SpriteRenderingSystem(String assetRoot, LWJGLCamera camera) {
         this.camera = camera;
         val batch = new LWJGLSpriteBatch(assetRoot, "sprite");
         this.batch = batch;
@@ -43,8 +45,8 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
 
     @Override
     public void tick(
-             Stream<Entity> entities,
-             World world,
+            Stream<Entity> entities,
+            World world,
             double partialTickAlpha
     ) {
         // Render using two-pass approach. By using correct data-structures with sensible estimates
@@ -69,13 +71,26 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                     val texture = this.textureResolver.apply(info.spriteName, info.getCurrentFrame());
                     val spritesForTexture = texturesForZLayer.computeIfAbsent(texture,
                                                                               tex -> new ArrayList<>());
+
+                    val bounds = world.getEntityManager().getComponentOf(entity, Collider.class)
+                                      .map(collider -> new Rectangled(transform.position.x - 0 * collider.origin.x,
+                                                                      transform.position.y - 0 * collider.origin.y,
+                                                                      transform.position.x - 0 * collider.origin.x + collider.width,
+                                                                      transform.position.y - 0 * collider.origin.y + collider.height))
+                                      .orElseGet(() -> new Rectangled(transform.position.x,
+                                                                      transform.position.y,
+                                                                      transform.position.x + 1.0,
+                                                                      transform.position.y + 1.0));
+
+                    val width = bounds.maxX - bounds.minX;
+                    val height = bounds.maxY - bounds.minY;
                     spritesForTexture.add(new SpriteRenderEntry(info.spriteName,
                                                                 info.getCurrentFrame(),
                                                                 info.zLayer,
-                                                                transform.bounds.minX,
-                                                                transform.bounds.minY,
-                                                                transform.getWidth(),
-                                                                transform.getHeight()));
+                                                                bounds.minX,
+                                                                bounds.minY,
+                                                                width,
+                                                                height));
                 }
         );
 

@@ -7,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
 import fi.jakojaannos.roguelite.game.DebugConfig;
+import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
@@ -21,11 +22,12 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
 @Slf4j
-public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
+public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
-    public void declareRequirements( RequirementsBuilder requirements) {
+    public void declareRequirements(RequirementsBuilder requirements) {
         requirements.tickAfter(SpriteRenderingSystem.class)
-                    .withComponent(Transform.class);
+                    .withComponent(Transform.class)
+                    .withComponent(Collider.class);
     }
 
     private final LWJGLCamera camera;
@@ -40,7 +42,7 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
 
     private final Matrix4f modelMatrix = new Matrix4f();
 
-    public EntityBoundsRenderingSystem( String assetRoot,  LWJGLCamera camera) {
+    public EntityCollisionBoundsRenderingSystem(String assetRoot, LWJGLCamera camera) {
         this.camera = camera;
         this.shader = new ShaderProgram(
                 assetRoot + "shaders/bounds.vert",
@@ -87,8 +89,8 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
 
     @Override
     public void tick(
-             Stream<Entity> entities,
-             World world,
+            Stream<Entity> entities,
+            World world,
             double partialTickAlpha
     ) {
         this.shader.use();
@@ -103,11 +105,12 @@ public class EntityBoundsRenderingSystem implements ECSSystem, AutoCloseable {
                     }
 
                     Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
+                    Collider collider = world.getEntityManager().getComponentOf(entity, Collider.class).get();
                     this.shader.setUniformMat4x4(this.uniformModelMatrix,
                                                  modelMatrix.identity()
-                                                            .translate((float) transform.bounds.minX,
-                                                                       (float) transform.bounds.minY, 0.0f)
-                                                            .scaleXY((float) transform.getWidth(), (float) transform.getHeight())
+                                                            .translate((float) (transform.position.x - collider.origin.x),
+                                                                       (float) (transform.position.y - collider.origin.y), 0.0f)
+                                                            .scaleXY((float) collider.width, (float) collider.height)
                     );
                     glDrawElements(GL_LINES, 10, GL_UNSIGNED_INT, 0);
                 }

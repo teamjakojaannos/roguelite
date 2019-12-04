@@ -4,5 +4,6 @@ module roguelite.engine.utilities {
     requires jsr305;
 
     exports fi.jakojaannos.roguelite.engine.utilities;
+    exports fi.jakojaannos.roguelite.engine.utilities.math;
     exports fi.jakojaannos.roguelite.engine.utilities.annotation;
 }

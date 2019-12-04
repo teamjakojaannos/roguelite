@@ -108,8 +108,8 @@ public class LWJGLCamera extends Camera {
                     : ratio * realTargetSize);
             this.projectionMatrix.setOrtho2D(
                     0.0f,
-                    (float) viewportWidthInUnits,
-                    (float) viewportHeightInUnits,
+                    viewportWidthInUnits,
+                    viewportHeightInUnits,
                     0.0f);
 
             this.projectionMatrixDirty = false;

@@ -53,7 +53,6 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new ProjectileToCharacterCollisionHandlerSystem())
                 .withSystem(new DestroyProjectilesOnCollisionSystem())
                 .withSystem(new CollisionEventCleanupSystem())
-                .withSystem(new PostUpdatePhysicsSystem())
                 .withSystem(new HealthUpdateSystem())
                 .build();
     }
@@ -67,7 +66,7 @@ public class Roguelite extends GameBase<GameState> {
         val state = new GameState(World.createNew(entities));
 
         val player = PlayerArchetype.create(entities,
-                                            new Transform(0, 0, 1.0, 1.0, 0.5, 0.5));
+                                            new Transform(0, 0));
         state.getWorld().getResource(Players.class).player = player;
 
         val camera = entities.createEntity();
@@ -78,8 +77,14 @@ public class Roguelite extends GameBase<GameState> {
         state.getWorld().getResource(CameraProperties.class).cameraEntity = camera;
 
         val crosshair = entities.createEntity();
-        entities.addComponentTo(crosshair, new Transform(-999.0, -999.0, 0.5, 0.5, 0.25, 0.25));
+        entities.addComponentTo(crosshair, new Transform(-999.0, -999.0));
         entities.addComponentTo(crosshair, new CrosshairTag());
+        val crosshairCollider = new Collider();
+        crosshairCollider.solid = false;
+        crosshairCollider.width = 0.30;
+        crosshairCollider.height = 0.30;
+        crosshairCollider.origin.set(0.15);
+        entities.addComponentTo(crosshair, crosshairCollider);
 
         val emptiness = new TileType(0, false);
         val floor = new TileType(1, false);
@@ -96,8 +101,8 @@ public class Roguelite extends GameBase<GameState> {
 
     @Override
     public void tick(
-             GameState state,
-             Queue<InputEvent> inputEvents,
+            GameState state,
+            Queue<InputEvent> inputEvents,
             double delta
     ) {
         super.tick(state, inputEvents, delta);

@@ -1,10 +1,10 @@
-package fi.jakojaannos.roguelite.game.data;
+package fi.jakojaannos.roguelite.game.data.collision;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import lombok.Getter;
 import org.joml.Rectangled;
 
-public class Collision {
+public abstract class Collision {
     public enum Type {
         ENTITY,
         TILE
@@ -15,9 +15,8 @@ public class Collision {
         COLLISION
     }
 
-    @Getter  private final Type type;
-    @Getter  private final Mode mode;
-    @Getter  private final Rectangled bounds;
+    @Getter private final Type type;
+    @Getter private final Mode mode;
 
     public final boolean isEntity() {
         return this.type == Type.ENTITY;
@@ -34,43 +33,41 @@ public class Collision {
         return (EntityCollision) this;
     }
 
-    public Tile getAsTileCollision() {
+    public TileCollision getAsTileCollision() {
         if (this.type != Type.TILE) {
             throw new IllegalStateException(String.format("Cannot convert collision of type \"%s\" to TILE", this.type));
         }
-        return (Tile) this;
+        return (TileCollision) this;
     }
 
-    public Collision(
-             final Type type,
-             final Mode mode,
-             final Rectangled bounds
+    private Collision(
+            final Type type,
+            final Mode mode
     ) {
         this.type = type;
         this.mode = mode;
-        this.bounds = new Rectangled(bounds);
     }
 
-    public static Collision tile(Mode mode, Rectangled bounds) {
-        return new Tile(mode, bounds);
+    public static Collision tile(Mode mode) {
+        return new TileCollision(mode);
     }
 
-    public static Collision entity(Mode mode, Entity other, Rectangled bounds) {
-        return new EntityCollision(mode, other, bounds);
+    public static Collision entity(Mode mode, Entity other) {
+        return new EntityCollision(mode, other);
     }
 
     public static class EntityCollision extends Collision {
          @Getter private final Entity other;
 
-        private EntityCollision(Mode mode, Entity other, Rectangled bounds) {
-            super(Type.ENTITY, mode, bounds);
+        private EntityCollision(Mode mode, Entity other) {
+            super(Type.ENTITY, mode);
             this.other = other;
         }
     }
 
-    public static class Tile extends Collision {
-        private Tile(Mode mode, Rectangled bounds) {
-            super(Type.TILE, mode, bounds);
+    public static class TileCollision extends Collision {
+        private TileCollision(Mode mode) {
+            super(Type.TILE, mode);
         }
     }
 }

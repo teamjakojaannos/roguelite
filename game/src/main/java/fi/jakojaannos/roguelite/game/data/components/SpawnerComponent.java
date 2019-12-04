@@ -1,9 +1,8 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.DummyArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.StalkerArchetype;
@@ -25,7 +24,12 @@ public class SpawnerComponent implements Component {
         this(spawnFrequency, entityFactory, 3.0f, System.currentTimeMillis());
     }
 
-    public SpawnerComponent(double spawnFrequency, EntityFactory entityFactory, double maxSpawnDistance, long seed) {
+    public SpawnerComponent(
+            double spawnFrequency,
+            EntityFactory entityFactory,
+            double maxSpawnDistance,
+            long seed
+    ) {
         this.spawnFrequency = spawnFrequency;
         this.maxSpawnDistance = maxSpawnDistance;
         this.entityFactory = entityFactory;
@@ -76,21 +80,26 @@ public class SpawnerComponent implements Component {
         Vector2d vec = getRandomSpotAround(spawnerPos, spawnerComponent.maxSpawnDistance, spawnerComponent.random, spawnerComponent.temp);
 
         Entity e = entities.createEntity();
-        entities.addComponentTo(e, new Transform(vec.x, vec.y, 0.5f));
+        entities.addComponentTo(e, new Transform(vec.x, vec.y));
         entities.addComponentTo(e,
-                new SpawnerComponent(
-                        5.0f,
-                        SpawnerComponent.FACTORY_SPAWNER,
-                        spawnerComponent.maxSpawnDistance,
-                        spawnerComponent.random.nextLong()
-                ));
+                                new SpawnerComponent(
+                                        5.0f,
+                                        SpawnerComponent.FACTORY_SPAWNER,
+                                        spawnerComponent.maxSpawnDistance,
+                                        spawnerComponent.random.nextLong()
+                                ));
 
 
         return e;
     };
 
 
-    private static Vector2d getRandomSpotAround(Transform origin, double maxDist, Random random, Vector2d result) {
+    private static Vector2d getRandomSpotAround(
+            Transform origin,
+            double maxDist,
+            Random random,
+            Vector2d result
+    ) {
         double xDir = random.nextDouble() * 2.0f - 1.0f;
         double yDir = random.nextDouble() * 2.0f - 1.0f;
         result.set(xDir, yDir);
@@ -104,7 +113,11 @@ public class SpawnerComponent implements Component {
 
 
     public interface EntityFactory {
-        Entity get(EntityManager entityManager, Transform spawnerPos, SpawnerComponent spawnerComponent);
+        Entity get(
+                EntityManager entityManager,
+                Transform spawnerPos,
+                SpawnerComponent spawnerComponent
+        );
     }
 
 }

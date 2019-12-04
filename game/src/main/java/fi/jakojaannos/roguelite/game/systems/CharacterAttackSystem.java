@@ -42,9 +42,8 @@ public class CharacterAttackSystem implements ECSSystem {
             if (input.attack && abilities.attackTimer >= 1.0 / weapon.attackRate) {
                 val character = cluster.getComponentOf(entity, Transform.class).get();
 
-                val projectileX = character.getCenterX();
-                val projectileY = character.getCenterY();
-
+                val projectileX = character.position.x + 0.5;
+                val projectileY = character.position.y + 0.5;
                 val direction = new Vector2d(abilities.attackTarget)
                         .sub(projectileX, projectileY)
                         .normalize();

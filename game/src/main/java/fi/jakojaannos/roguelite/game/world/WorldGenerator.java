@@ -115,7 +115,7 @@ public class WorldGenerator<TTile> {
                 x = startX + this.random.nextDouble() * (mainRoomWidth - size);
                 y = startY + this.random.nextDouble() * (mainRoomHeight - size);
             } while (Vector2d.distance(0, 0, x, y) < 4.0);
-            ObstacleArchetype.create(entities, new Transform(x, y, size));
+            ObstacleArchetype.create(entities, new Transform(x, y), size);
         }
     }
 
@@ -126,6 +126,9 @@ public class WorldGenerator<TTile> {
              final EntityManager entityManager,
              final SpawnerComponent.EntityFactory factoryFollower
     ) {
+        if (true) {
+            return;
+        }
         val spawner = entityManager.createEntity();
         entityManager.addComponentTo(spawner, new Transform(x, y));
         val spawnerComponent = new SpawnerComponent(spawnFrequency, factoryFollower);

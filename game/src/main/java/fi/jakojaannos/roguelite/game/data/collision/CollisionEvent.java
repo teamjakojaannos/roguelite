@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.data;
+package fi.jakojaannos.roguelite.game.data.collision;
 
 import lombok.Getter;
 

@@ -6,46 +6,31 @@ import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
 import org.joml.Vector2d;
 
+import javax.annotation.Nonnull;
+
 public class BasicProjectileArchetype {
 
 
     public static Entity create(
-             final World world,
-            double projectileX,
-            double projectileY,
-             final Vector2d direction,
+            final World world,
+            final double projectileX,
+            final double projectileY,
+            final Vector2d direction,
             final double projectileSpeed,
-             Vector2d spreadOffset
+            final Vector2d spreadOffset
     ) {
-        return create(
-                world,
-                createTransform(projectileX, projectileY),
-                new Velocity(direction.normalize(projectileSpeed)
-                                      .add(spreadOffset)
-                ));
+        return create(world,
+                      new Transform(projectileX, projectileY),
+                      new Velocity(direction.normalize(projectileSpeed, new Vector2d())
+                                            .add(spreadOffset)
+                      ));
     }
 
 
     public static Entity create(
-             final World world,
-            double projectileX,
-            double projectileY,
-             final Vector2d direction,
-            final double projectileSpeed
-    ) {
-
-        return create(
-                world,
-                createTransform(projectileX, projectileY),
-                new Velocity(direction.normalize(projectileSpeed)
-                ));
-    }
-
-
-    public static Entity create(
-             final World world,
-             final Transform transform,
-             final Velocity velocity
+            final World world,
+            final Transform transform,
+            final Velocity velocity
     ) {
         val entities = world.getEntityManager();
 
@@ -53,8 +38,7 @@ public class BasicProjectileArchetype {
         val projectileStats = createProjectileStats();
 
         entities.addComponentTo(projectile, projectileStats);
-        entities.addComponentTo(projectile, new Physics(transform));
-        entities.addComponentTo(projectile, new Collider());
+        entities.addComponentTo(projectile, createCollider());
         entities.addComponentTo(projectile, transform);
         entities.addComponentTo(projectile, velocity);
         entities.addComponentTo(projectile, createSpriteInfo());
@@ -62,18 +46,17 @@ public class BasicProjectileArchetype {
         return projectile;
     }
 
-    private static ProjectileStats createProjectileStats() {
-        return new ProjectileStats(1.0);
+    @Nonnull
+    private static Collider createCollider() {
+        val collider = new Collider();
+        collider.width = 0.30;
+        collider.height = 0.30;
+        collider.origin.set(0.15);
+        return collider;
     }
 
-    private static Transform createTransform(double x, double y) {
-        return new Transform(
-                x,
-                y,
-                0.3,
-                0.3,
-                0.15,
-                0.15);
+    private static ProjectileStats createProjectileStats() {
+        return new ProjectileStats(1.0);
     }
 
 

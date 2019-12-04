@@ -1,28 +1,37 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
+
+import javax.annotation.Nonnull;
 
 public class PlayerArchetype {
 
     public static Entity create(
-             final EntityManager entityManager,
-             final Transform transform
+            final EntityManager entityManager,
+            final Transform transform
     ) {
         val player = entityManager.createEntity();
         entityManager.addComponentTo(player, transform);
-        entityManager.addComponentTo(player, new Physics(transform));
         entityManager.addComponentTo(player, new Velocity());
         entityManager.addComponentTo(player, new CharacterInput());
         entityManager.addComponentTo(player, new CharacterAbilities());
-        entityManager.addComponentTo(player, new Collider());
+        entityManager.addComponentTo(player, createCollider());
         entityManager.addComponentTo(player, new PlayerTag());
         entityManager.addComponentTo(player, createCharacterStats());
         entityManager.addComponentTo(player, createWeaponStats());
         entityManager.addComponentTo(player, createSpriteInfo());
         return player;
+    }
+
+    @Nonnull
+    private static Collider createCollider() {
+        val collider = new Collider();
+        collider.width = 1.0;
+        collider.height = 1.0;
+        return collider;
     }
 
     private static CharacterStats createCharacterStats() {
