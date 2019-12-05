@@ -116,7 +116,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
             for (val candidate : collisions) {
                 if (candidate.isTile()) {
-                    fireCollisionEvent(world, entity, collider, Collision.tile(Collision.Mode.COLLISION));
+                    //fireCollisionEvent(world, entity, collider, Collision.tile(Collision.Mode.COLLISION));
                 } else {
                     fireCollisionEvent(world, entity, collider, Collision.entity(Collision.Mode.COLLISION, candidate.other));
                     fireCollisionEvent(world, candidate.other, candidate.otherCollider, Collision.entity(Collision.Mode.COLLISION, entity));
@@ -234,7 +234,8 @@ public class ApplyVelocitySystem implements ECSSystem {
         val entityTargetPosition = moveUntilEntityCollision(stepSize, distance, direction, world, entitiesWithCollider, entity, collider, initialPosition, outCollisions, outOverlaps);
         val distanceUntilEntityCollision = initialPosition.distanceSquared(entityTargetPosition);
 
-        if (distanceUntilTileCollision <= 0.0 || distanceUntilEntityCollision < 0.0) {
+        val epsilon = 0.00001;
+        if (distanceUntilTileCollision <= epsilon || distanceUntilEntityCollision <= epsilon) {
             return new Vector2d(initialPosition);
         } else if (distanceUntilTileCollision < distanceUntilEntityCollision) {
             return new Vector2d(tileTargetPosition);
@@ -258,8 +259,10 @@ public class ApplyVelocitySystem implements ECSSystem {
                                                                new Vector2d()),
                                                  new Vector2d());
 
-        val currentBounds = new RotatedRectangle(initialPosition, collider.origin, collider.width, collider.height, transform.rotation);
-        val targetBounds = new RotatedRectangle(targetPosition, collider.origin, collider.width, collider.height, transform.rotation);
+        val currentBounds = new RotatedRectangle(initialPosition, collider.origin, collider.width + stepSize / 2.0, collider.height + stepSize / 2.0, transform.rotation);
+        val targetBounds = new RotatedRectangle(targetPosition, collider.origin, collider.width + stepSize / 2.0, collider.height + stepSize / 2.0, transform.rotation);
+        currentBounds.position.sub(stepSize / 2.0, stepSize / 2.0);
+        targetBounds.position.sub(stepSize / 2.0, stepSize / 2.0);
 
         val currentMin = new Vector2d();
         val currentMax = new Vector2d();
@@ -272,10 +275,10 @@ public class ApplyVelocitySystem implements ECSSystem {
         val min = currentMin.min(targetMin).floor();
         val max = currentMax.max(targetMax).ceil();
 
-        val startX = org.joml.Math.round(min.x);
-        val startY = org.joml.Math.round(min.y);
-        val endX = org.joml.Math.round(max.x);
-        val endY = org.joml.Math.round(max.y);
+        val startX = org.joml.Math.round(min.x) - 1;
+        val startY = org.joml.Math.round(min.y) - 1;
+        val endX = org.joml.Math.round(max.x) + 1;
+        val endY = org.joml.Math.round(max.y) + 1;
 
         val width = endX - startX;
         val height = endY - startY;
@@ -365,53 +368,44 @@ public class ApplyVelocitySystem implements ECSSystem {
             final List<CollisionCandidate> outCollisions,
             final Set<CollisionCandidate> outOverlaps
     ) {
-        val targetPosition = initialPosition.add(direction.mul(distance,
-                                                               new Vector2d()),
-                                                 new Vector2d());
-
-
-        var shortestDistance = distance;
-        Optional<CollisionCandidate> collision = Optional.empty();
-
         val actualStepSize = Math.min(stepSize, distance);
-        for (val other : entitiesWithCollider) {
-            if (other.getId() == entity.getId()) {
-                continue;
-            }
+        val step = direction.normalize(actualStepSize, new Vector2d());
 
-            val otherCollider = world.getEntityManager().getComponentOf(other, Collider.class).get();
-            val otherTransform = world.getEntityManager().getComponentOf(other, Transform.class).get();
+        var distanceMoved = 0.0;
+        val newPosition = new Vector2d(initialPosition);
+        val nextTransform = new Transform(initialPosition.x, initialPosition.y);
+        nextTransform.rotation = 0.0;
 
-            if (otherCollider.isSolidTo(entity, collider)) {
-                val step = direction.normalize(actualStepSize, new Vector2d());
-
-                var distanceMoved = 0.0;
-                val nextTransform = new Transform(initialPosition.x, initialPosition.y);
-                nextTransform.rotation = 0.0;
-
-                nextTransform.position.add(step);
-                while (distanceMoved <= shortestDistance && !GJK2D.intersects(nextTransform, collider, otherTransform, otherCollider, new Vector2d(otherTransform.position).sub(nextTransform.position))) {
-                    nextTransform.position.add(step);
-                    distanceMoved += actualStepSize;
+        nextTransform.position.add(step);
+        Optional<CollisionCandidate> collision = Optional.empty();
+        while (distanceMoved <= distance) {
+            for (val other : entitiesWithCollider) {
+                if (other.getId() == entity.getId()) {
+                    continue;
                 }
 
-                if (distanceMoved < shortestDistance) {
-                    shortestDistance = distanceMoved;
-                    val candidate = new CollisionCandidate(otherTransform.position.x, otherTransform.position.y, other, otherCollider);
-                    collision = Optional.of(candidate);
-                }
-            } else {
-                val targetTransform = new Transform(initialPosition.x, initialPosition.y);
-                targetTransform.rotation = 0.0;
+                val otherCollider = world.getEntityManager().getComponentOf(other, Collider.class).get();
+                val otherTransform = world.getEntityManager().getComponentOf(other, Transform.class).get();
 
-                if (GJK2D.intersects(targetTransform, collider, otherTransform, otherCollider, new Vector2d(otherTransform.position).sub(targetTransform.position))) {
-                    outOverlaps.add(new CollisionCandidate(otherTransform.position.x, otherTransform.position.y, other, otherCollider));
+                if (GJK2D.intersects(nextTransform, collider, otherTransform, otherCollider, new Vector2d(otherTransform.position).sub(nextTransform.position))) {
+                    if (otherCollider.isSolidTo(entity, collider)) {
+                        collision = Optional.of(new CollisionCandidate(otherTransform.position.x, otherTransform.position.y, other, otherCollider));
+                    } else {
+                        outOverlaps.add(new CollisionCandidate(otherTransform.position.x, otherTransform.position.y, other, otherCollider));
+                    }
                 }
             }
+
+            if (collision.isEmpty()) {
+                newPosition.add(step);
+            }
+
+            nextTransform.position.add(step);
+            distanceMoved += actualStepSize;
         }
 
         collision.ifPresent(outCollisions::add);
-        return targetPosition;
+        return newPosition;
     }
 
     private void fireCollisionEvent(
