@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.game.systems;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.DamageInstance;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -11,7 +12,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HealthCheckSystemTest {
+public class HealthUpdateSystemTest {
 
 
     @ParameterizedTest
@@ -33,7 +34,7 @@ public class HealthCheckSystemTest {
         Entity entity = entityManager.createEntity();
         Health hp = new Health(maxHp, currentHp);
         entityManager.addComponentTo(entity, hp);
-        hp.currentHealth -= damage;
+        hp.addDamageInstance(new DamageInstance(damage));
 
         system.tick(Stream.of(entity), world, 0.2f);
 
