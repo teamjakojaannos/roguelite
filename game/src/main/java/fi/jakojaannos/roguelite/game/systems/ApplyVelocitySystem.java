@@ -14,6 +14,7 @@ import lombok.val;
 import org.joml.Math;
 import org.joml.Vector2d;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -108,6 +109,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
         var distanceRemaining = maxDistance;
         val currentPosition = new Vector2d(initialPosition);
+
         while (distanceRemaining > 0.0) {
             val collisions = new ArrayList<CollisionCandidate>();
             val overlaps = new HashSet<CollisionCandidate>();
@@ -134,6 +136,10 @@ public class ApplyVelocitySystem implements ECSSystem {
                 break;
             }
             currentPosition.set(newTargetPosition);
+
+            // TODO: This is incorrect moved distance. Project last movement onto the initial
+            //  translation vector and calculate the length of that projection to get the correct
+            //  value.
             distanceRemaining -= distanceMoved;
         }
 
@@ -168,6 +174,8 @@ public class ApplyVelocitySystem implements ECSSystem {
         val directionX = new Vector2d(direction.x, 0.0);
         val collisionsX = new ArrayList<CollisionCandidate>();
         val overlapsX = new HashSet<CollisionCandidate>();
+        // FIXME: Do not multiply by delta here, it is already taken in account. Fix the incorrect
+        //  relative distance calculation and remove multiplication then.
         val targetPositionX = moveUntilCollisionsInDirection(stepSize, Math.abs(distance * direction.x) * delta, world, entity, transform, collider, directionX, tileMapLayers, entitiesWithCollider, initialPosition, collisionsX, overlapsX);
         val distanceMovedX = initialPosition.distance(targetPositionX);
 
@@ -178,8 +186,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         val distanceMovedY = initialPosition.distance(targetPositionY);
 
         // Both directions succeeded, move on the axis we can travel furthest
-        val epsilon = stepSize / 10.0;
-        if (distanceMovedX > epsilon && distanceMovedY > epsilon) {
+        if (distanceMovedX > 0 && distanceMovedY > 0) {
             if (distanceMovedX > distanceMovedY) {
                 outCollisions.addAll(collisionsY);
                 outOverlaps.addAll(overlapsY);
@@ -191,13 +198,13 @@ public class ApplyVelocitySystem implements ECSSystem {
             }
         }
         // Only X succeeded
-        else if (distanceMovedX > epsilon) {
+        else if (distanceMovedX > 0) {
             outCollisions.addAll(collisionsY);
             outOverlaps.addAll(overlapsY);
             return targetPositionX;
         }
         // Only Y succeeded
-        else if (distanceMovedY > epsilon) {
+        else if (distanceMovedY > 0) {
             outCollisions.addAll(collisionsX);
             outOverlaps.addAll(overlapsX);
             return targetPositionY;
@@ -228,31 +235,30 @@ public class ApplyVelocitySystem implements ECSSystem {
             return new Vector2d(initialPosition);
         }
 
-        val tileTargetPosition = moveUntilTileCollision(stepSize, distance, direction, transform, collider, tileMapLayers, initialPosition, outCollisions);
-        val distanceUntilTileCollision = initialPosition.distanceSquared(tileTargetPosition);
-
-        val entityTargetPosition = moveUntilEntityCollision(stepSize, distance, direction, world, entitiesWithCollider, entity, collider, initialPosition, outCollisions, outOverlaps);
-        val distanceUntilEntityCollision = initialPosition.distanceSquared(entityTargetPosition);
+        val targetPosition = moveUntilCollision(stepSize, distance, direction, world, entity, transform, collider, entitiesWithCollider, tileMapLayers, initialPosition, outCollisions, outOverlaps);
+        val distanceUntilCollision = initialPosition.distanceSquared(targetPosition);
 
         val epsilon = 0.00001;
-        if (distanceUntilTileCollision <= epsilon || distanceUntilEntityCollision <= epsilon) {
+        if (distanceUntilCollision <= epsilon) {
             return new Vector2d(initialPosition);
-        } else if (distanceUntilTileCollision < distanceUntilEntityCollision) {
-            return new Vector2d(tileTargetPosition);
         } else {
-            return new Vector2d(entityTargetPosition);
+            return new Vector2d(targetPosition);
         }
     }
 
-    private Vector2d moveUntilTileCollision(
+    private Vector2d moveUntilCollision(
             final double stepSize,
             final double distance,
             final Vector2d direction,
+            final World world,
+            final Entity entity,
             final Transform transform,
             final Collider collider,
+            final List<Entity> entitiesWithCollider,
             final List<TileMap<TileType>> tileMapLayers,
             final Vector2d initialPosition,
-            final List<CollisionCandidate> outCollisions
+            final List<CollisionCandidate> outCollisions,
+            final Set<CollisionCandidate> outOverlaps
     ) {
         // TODO: Create "stretched" collider
         val targetPosition = initialPosition.add(direction.mul(distance,
@@ -295,36 +301,13 @@ public class ApplyVelocitySystem implements ECSSystem {
         val newPosition = new Vector2d(initialPosition);
         nextTransform.position.add(step); // nextTransform is always a step ahead
         while (distanceMoved <= distance) {
-            for (var ix = 0; ix < width; ++ix) {
-                for (var iy = 0; iy < height; ++iy) {
-                    val x = (int) startX + ix;
-                    val y = (int) startY + iy;
+            collision = getTileCollision(collider, tileMapLayers, (int) startX, (int) startY, width, height, nextTransform);
 
-                    val notSolid = tileMapLayers.stream()
-                                                .map(tm -> tm.getTile(x, y))
-                                                .noneMatch(TileType::isSolid);
-                    if (notSolid) {
-                        continue;
-                    }
-
-                    Shape tileShape = (ignored, result) -> {
-                        result.add(new Vector2d(x + 0, y + 0));
-                        result.add(new Vector2d(x + 1, y + 0));
-                        result.add(new Vector2d(x + 0, y + 1));
-                        result.add(new Vector2d(x + 1, y + 1));
-                        return result;
-                    };
-
-                    if (GJK2D.intersects(nextTransform, collider, tileShape, new Vector2d(x + 0.5, y + 0.5).sub(nextTransform.position))) {
-                        collision = Optional.of(new CollisionCandidate(x, y, null, null));
-                        break;
-                    }
-                }
-
-                if (collision.isPresent()) {
-                    break;
-                }
+            if (collision.isPresent()) {
+                break;
             }
+
+            collision = getEntityCollisionAndOverlaps(world, entitiesWithCollider, entity, collider, outOverlaps, nextTransform);
 
             if (collision.isPresent()) {
                 break;
@@ -338,6 +321,45 @@ public class ApplyVelocitySystem implements ECSSystem {
 
         collision.ifPresent(outCollisions::add);
         return newPosition;
+    }
+
+    @Nonnull
+    private Optional<CollisionCandidate> getTileCollision(
+            Collider collider,
+            List<TileMap<TileType>> tileMapLayers,
+            int startX,
+            int startY,
+            long width,
+            long height,
+            Transform nextTransform
+    ) {
+        for (var ix = 0; ix < width; ++ix) {
+            for (var iy = 0; iy < height; ++iy) {
+                val x = startX + ix;
+                val y = startY + iy;
+
+                val notSolid = tileMapLayers.stream()
+                                            .map(tm -> tm.getTile(x, y))
+                                            .noneMatch(TileType::isSolid);
+                if (notSolid) {
+                    continue;
+                }
+
+                Shape tileShape = (ignored, result) -> {
+                    result.add(new Vector2d(x + 0, y + 0));
+                    result.add(new Vector2d(x + 1, y + 0));
+                    result.add(new Vector2d(x + 0, y + 1));
+                    result.add(new Vector2d(x + 1, y + 1));
+                    return result;
+                };
+
+                if (GJK2D.intersects(nextTransform, collider, tileShape, new Vector2d(x + 0.5, y + 0.5).sub(nextTransform.position).negate())) {
+                    return Optional.of(new CollisionCandidate(x, y, null, null));
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     private void findMinMax(
@@ -356,56 +378,33 @@ public class ApplyVelocitySystem implements ECSSystem {
               .max(bounds.getTopRight(temp), outMax);
     }
 
-    private Vector2d moveUntilEntityCollision(
-            final double stepSize,
-            final double distance,
-            final Vector2d direction,
-            final World world,
-            final List<Entity> entitiesWithCollider,
-            final Entity entity,
-            final Collider collider,
-            final Vector2d initialPosition,
-            final List<CollisionCandidate> outCollisions,
-            final Set<CollisionCandidate> outOverlaps
+    private Optional<CollisionCandidate> getEntityCollisionAndOverlaps(
+            World world,
+            List<Entity> entitiesWithCollider,
+            Entity entity,
+            Collider collider,
+            Set<CollisionCandidate> outOverlaps,
+            Transform nextTransform
     ) {
-        val actualStepSize = Math.min(stepSize, distance);
-        val step = direction.normalize(actualStepSize, new Vector2d());
-
-        var distanceMoved = 0.0;
-        val newPosition = new Vector2d(initialPosition);
-        val nextTransform = new Transform(initialPosition.x, initialPosition.y);
-        nextTransform.rotation = 0.0;
-
-        nextTransform.position.add(step);
         Optional<CollisionCandidate> collision = Optional.empty();
-        while (distanceMoved <= distance) {
-            for (val other : entitiesWithCollider) {
-                if (other.getId() == entity.getId()) {
-                    continue;
-                }
 
-                val otherCollider = world.getEntityManager().getComponentOf(other, Collider.class).get();
-                val otherTransform = world.getEntityManager().getComponentOf(other, Transform.class).get();
-
-                if (GJK2D.intersects(nextTransform, collider, otherTransform, otherCollider, new Vector2d(otherTransform.position).sub(nextTransform.position))) {
-                    if (otherCollider.isSolidTo(entity, collider)) {
-                        collision = Optional.of(new CollisionCandidate(otherTransform.position.x, otherTransform.position.y, other, otherCollider));
-                    } else {
-                        outOverlaps.add(new CollisionCandidate(otherTransform.position.x, otherTransform.position.y, other, otherCollider));
-                    }
-                }
+        for (val other : entitiesWithCollider) {
+            if (other.getId() == entity.getId()) {
+                continue;
             }
 
-            if (collision.isEmpty()) {
-                newPosition.add(step);
-            }
+            val otherCollider = world.getEntityManager().getComponentOf(other, Collider.class).get();
+            val otherTransform = world.getEntityManager().getComponentOf(other, Transform.class).get();
 
-            nextTransform.position.add(step);
-            distanceMoved += actualStepSize;
+            if (GJK2D.intersects(nextTransform, collider, otherTransform, otherCollider, new Vector2d(otherTransform.position).sub(nextTransform.position))) {
+                if (collision.isEmpty() && otherCollider.isSolidTo(entity, collider)) {
+                    collision = Optional.of(new CollisionCandidate(otherTransform.position.x, otherTransform.position.y, other, otherCollider));
+                } else {
+                    outOverlaps.add(new CollisionCandidate(otherTransform.position.x, otherTransform.position.y, other, otherCollider));
+                }
+            }
         }
-
-        collision.ifPresent(outCollisions::add);
-        return newPosition;
+        return collision;
     }
 
     private void fireCollisionEvent(
