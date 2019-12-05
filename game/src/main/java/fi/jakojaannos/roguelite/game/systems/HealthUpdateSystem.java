@@ -11,7 +11,8 @@ import lombok.val;
 import java.util.stream.Stream;
 
 @Slf4j
-public class HealthCheckSystem implements ECSSystem {
+
+public class HealthUpdateSystem implements ECSSystem {
     @Override
     public void declareRequirements( RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.LATE_TICK)
@@ -24,14 +25,22 @@ public class HealthCheckSystem implements ECSSystem {
              World world,
             double delta
     ) {
-        val cluster = world.getEntityManager();
+        val entityManager = world.getEntityManager();
 
         entities.forEach(entity -> {
+            val hp = entityManager.getComponentOf(entity, Health.class).get();
 
-            val hp = cluster.getComponentOf(entity, Health.class).get();
+            val dmgList = hp.damageInstances;
+            for (val dmg : dmgList) {
+                LOG.debug("Oof");
+                hp.currentHealth -= dmg.damage;
+            }
+
+            dmgList.clear();
+
             if (hp.currentHealth <= 0.0f) {
                 LOG.debug("Dead");
-                cluster.destroyEntity(entity);
+                entityManager.destroyEntity(entity);
             }
 
         });

@@ -54,7 +54,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new DestroyProjectilesOnCollisionSystem())
                 .withSystem(new CollisionEventCleanupSystem())
                 .withSystem(new PostUpdatePhysicsSystem())
-                .withSystem(new HealthCheckSystem())
+                .withSystem(new HealthUpdateSystem())
                 .build();
     }
 

@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.Collision;
+import fi.jakojaannos.roguelite.game.data.DamageInstance;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
@@ -42,8 +43,8 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
             for (val collision : (Iterable<Collision.EntityCollision>) entityCollisions::iterator) {
                 if (entityManager.hasComponent(collision.getOther(), Health.class)) {
                     val health = entityManager.getComponentOf(collision.getOther(), Health.class).get();
-                    LOG.debug("Hit!");
-                    health.currentHealth -= stats.damage;
+                    //LOG.debug("Hit!");
+                    health.addDamageInstance(new DamageInstance(stats.damage));
                     entityManager.destroyEntity(entity);
                     // FIXME: Proper damage cool-down / invulnerability frame thingy
                     break;

@@ -28,7 +28,7 @@ public class HealthCheckSystemTest {
     void entitiesWithZeroHpAreRemoved(double maxHp, double currentHp, double damage, boolean shouldBeRemoved) {
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
-        HealthCheckSystem system = new HealthCheckSystem();
+        HealthUpdateSystem system = new HealthUpdateSystem();
 
         Entity entity = entityManager.createEntity();
         Health hp = new Health(maxHp, currentHp);
