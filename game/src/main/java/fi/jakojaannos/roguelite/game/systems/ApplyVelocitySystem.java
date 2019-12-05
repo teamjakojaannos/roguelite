@@ -280,55 +280,61 @@ public class ApplyVelocitySystem implements ECSSystem {
         val width = endX - startX;
         val height = endY - startY;
 
+        val actualStepSize = Math.min(stepSize, distance);
+        val step = direction.normalize(actualStepSize, new Vector2d());
 
-        var shortestDistance = distance;
+        var distanceMoved = 0.0;
+        val nextTransform = new Transform(initialPosition.x, initialPosition.y);
+        nextTransform.rotation = 0.0;
+
         Optional<CollisionCandidate> collision = Optional.empty();
 
-        val actualStepSize = Math.min(stepSize, distance);
-        for (var ix = 0; ix < width; ++ix) {
-            for (var iy = 0; iy < height; ++iy) {
-                val x = (int) startX + ix;
-                val y = (int) startY + iy;
+        val newPosition = new Vector2d(initialPosition);
+        nextTransform.position.add(step); // nextTransform is always a step ahead
+        while (distanceMoved <= distance) {
+            for (var ix = 0; ix < width; ++ix) {
+                for (var iy = 0; iy < height; ++iy) {
+                    val x = (int) startX + ix;
+                    val y = (int) startY + iy;
 
-                val notSolid = tileMapLayers.stream()
-                                            .map(tm -> tm.getTile(x, y))
-                                            .noneMatch(TileType::isSolid);
-                if (notSolid) {
-                    continue;
+                    val notSolid = tileMapLayers.stream()
+                                                .map(tm -> tm.getTile(x, y))
+                                                .noneMatch(TileType::isSolid);
+                    if (notSolid) {
+                        continue;
+                    }
+
+                    Shape tileShape = (ignored, result) -> {
+                        result.add(new Vector2d(x + 0, y + 0));
+                        result.add(new Vector2d(x + 1, y + 0));
+                        result.add(new Vector2d(x + 0, y + 1));
+                        result.add(new Vector2d(x + 1, y + 1));
+                        return result;
+                    };
+
+                    if (GJK2D.intersects(nextTransform, collider, tileShape, new Vector2d(x + 0.5, y + 0.5).sub(nextTransform.position))) {
+                        collision = Optional.of(new CollisionCandidate(x, y, null, null));
+                        break;
+                    }
                 }
 
-                Shape tileShape = (ignored, result) -> {
-                    result.add(new Vector2d(x + 0, y + 0));
-                    result.add(new Vector2d(x + 1, y + 0));
-                    result.add(new Vector2d(x + 0, y + 1));
-                    result.add(new Vector2d(x + 1, y + 1));
-                    return result;
-                };
-
-                val step = direction.normalize(actualStepSize, new Vector2d());
-
-                var distanceMoved = 0.0;
-                val nextTransform = new Transform(initialPosition.x, initialPosition.y);
-                nextTransform.rotation = 0.0;
-
-                nextTransform.position.add(step);
-                while (distanceMoved <= shortestDistance && !GJK2D.intersects(nextTransform, collider, tileShape, new Vector2d(x + 0.5, y + 0.5).sub(nextTransform.position))) {
-                    nextTransform.position.add(step);
-                    distanceMoved += actualStepSize;
-                }
-
-                if (distanceMoved < shortestDistance) {
-                    shortestDistance = distanceMoved;
-                    collision = Optional.of(new CollisionCandidate(x, y, null, null));
+                if (collision.isPresent()) {
+                    break;
                 }
             }
+
+            if (collision.isPresent()) {
+                break;
+            }
+
+            newPosition.add(step);
+            nextTransform.position.add(step);
+            distanceMoved += actualStepSize;
         }
 
 
         collision.ifPresent(outCollisions::add);
-        return initialPosition.add(direction.mul(shortestDistance,
-                                                 new Vector2d()),
-                                   new Vector2d());
+        return newPosition;
     }
 
     private void findMinMax(
