@@ -4,6 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
+import fi.jakojaannos.roguelite.game.data.components.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -26,7 +27,7 @@ public class HealthUpdateSystemTest {
             "100.0f,25.0f,25.0f,true",
             "100.0f,25.0f,5.0f,false"
     })
-    void entitiesWithZeroHpAreRemoved(double maxHp, double currentHp, double damage, boolean shouldBeRemoved) {
+    void entitiesWithZeroHpAreAddedDeadTag(double maxHp, double currentHp, double damage, boolean shouldBeRemoved) {
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
         HealthUpdateSystem system = new HealthUpdateSystem();
@@ -38,7 +39,8 @@ public class HealthUpdateSystemTest {
 
         system.tick(Stream.of(entity), world, 0.2f);
 
-        assertEquals(shouldBeRemoved, entity.isMarkedForRemoval());
+        boolean hasDeadTag = entityManager.getComponentOf(entity, DeadTag.class).isPresent();
+        assertEquals(shouldBeRemoved, hasDeadTag);
     }
 
 
