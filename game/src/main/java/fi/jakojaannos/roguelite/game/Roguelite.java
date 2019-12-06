@@ -58,6 +58,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new HealthUpdateSystem())
                 .withSystem(new EnemyAttackCoolDownSystem())
                 .withSystem(new EnemyToPlayerCollisionHandlerSystem())
+                .withSystem(new ReaperSystem())
                 .build();
     }
 
