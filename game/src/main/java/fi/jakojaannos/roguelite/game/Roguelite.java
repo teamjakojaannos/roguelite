@@ -12,6 +12,7 @@ import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
@@ -50,6 +51,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new SnapToCursorSystem())
                 .withSystem(new CharacterAIControllerSystem())
                 .withSystem(new StalkerAIControllerSystem())
+                .withSystem(new SlimeAIControllerSystem())
                 .withSystem(new CameraControlSystem())
                 .withSystem(new SpawnerSystem())
                 .withSystem(new ProjectileToCharacterCollisionHandlerSystem())
@@ -95,6 +97,9 @@ public class Roguelite extends GameBase<GameState> {
         val wall = new TileType(2, true);
         val generator = new WorldGenerator<TileType>(emptiness);
         generator.prepareInitialRoom(seed, state.getWorld(), floor, wall, 25, 45, 5, 5, 2);
+
+        SlimeArchetype.create(entities, 1.0, 1.0);
+
 
         val levelEntity = entities.createEntity();
         val layer = new TileMapLayer(generator.getTileMap());
