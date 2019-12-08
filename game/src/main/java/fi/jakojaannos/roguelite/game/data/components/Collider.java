@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 public class Collider implements Component, Shape {
     public boolean solid;
+    public boolean overlaps = true;
     public double width = 1.0;
     public double height = 1.0;
     public Vector2d origin = new Vector2d();
@@ -35,6 +36,14 @@ public class Collider implements Component, Shape {
 
     public boolean isSolidTo(Entity entity, Collider collider) {
         return this.solid;
+    }
+
+    public boolean canOverlapsWith(Entity entity, Collider collider) {
+        return this.overlaps;
+    }
+
+    public boolean canCollideWith(Entity entity, Collider collider) {
+        return isSolidTo(entity, collider) || canOverlapsWith(entity, collider);
     }
 
     public Stream<Collision> getCollisions() {

@@ -39,7 +39,7 @@ class CharacterMovementSystemTest {
         this.characterInput = new CharacterInput();
         this.characterStats = new CharacterStats();
         this.velocity = new Velocity();
-        this.transform = new Transform(0.0, 0.0, 0.0);
+        this.transform = new Transform(0.0, 0.0);
         entityManager.addComponentTo(entity, this.transform);
         entityManager.addComponentTo(entity, this.velocity);
         entityManager.addComponentTo(entity, this.characterInput);
@@ -113,7 +113,7 @@ class CharacterMovementSystemTest {
             this.applyVelocity.tick(Stream.of(entity), this.world, 0.02);
         }
 
-        assertEquals(expectedPositionAfter10s, this.transform.bounds.minX, POSITION_EPSILON);
+        assertEquals(expectedPositionAfter10s, this.transform.position.x, POSITION_EPSILON);
     }
 
     @ParameterizedTest
@@ -134,8 +134,8 @@ class CharacterMovementSystemTest {
             this.applyVelocity.tick(Stream.of(entity), this.world, 0.02);
         }
 
-        assertEquals(expectedX, this.transform.bounds.minX, POSITION_EPSILON);
-        assertEquals(expectedY, this.transform.bounds.minY, POSITION_EPSILON);
+        assertEquals(expectedX, this.transform.position.x, POSITION_EPSILON);
+        assertEquals(expectedY, this.transform.position.y, POSITION_EPSILON);
     }
 
     @ParameterizedTest
@@ -156,7 +156,7 @@ class CharacterMovementSystemTest {
             this.applyVelocity.tick(Stream.of(entity), this.world, 0.02);
         }
 
-        assertEquals(expectedX, this.transform.bounds.minX, POSITION_EPSILON);
-        assertEquals(expectedY, this.transform.bounds.minY, POSITION_EPSILON);
+        assertEquals(expectedX, this.transform.position.x, POSITION_EPSILON);
+        assertEquals(expectedY, this.transform.position.y, POSITION_EPSILON);
     }
 }

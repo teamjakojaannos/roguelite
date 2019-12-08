@@ -93,7 +93,9 @@ public class Roguelite extends GameBase<GameState> {
         generator.prepareInitialRoom(seed, state.getWorld(), floor, wall, 25, 45, 5, 5, 2);
 
         val levelEntity = entities.createEntity();
-        entities.addComponentTo(levelEntity, new TileMapLayer(generator.getTileMap()));
+        val layer = new TileMapLayer(generator.getTileMap());
+        layer.collisionEnabled = true;
+        entities.addComponentTo(levelEntity, layer);
 
         entities.applyModifications();
         return state;

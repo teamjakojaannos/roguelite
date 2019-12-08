@@ -33,7 +33,7 @@ class CharacterAttackSystemTest {
         this.characterStats = new CharacterStats();
         this.characterAbilities = new CharacterAbilities();
         this.weaponStats = new BasicWeaponStats();
-        entityManager.addComponentTo(entity, new Transform(0.0, 0.0, 0.0));
+        entityManager.addComponentTo(entity, new Transform(0.0, 0.0));
         entityManager.addComponentTo(entity, new Velocity());
         entityManager.addComponentTo(entity, this.characterInput);
         entityManager.addComponentTo(entity, this.characterAbilities);

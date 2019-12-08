@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.game.systems;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public enum SystemGroups implements SystemGroup {
     INPUT,
     EARLY_TICK,

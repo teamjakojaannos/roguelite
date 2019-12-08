@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.game.data.collision;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import lombok.Getter;
-import org.joml.Rectangled;
 
 public abstract class Collision {
     public enum Type {
@@ -48,26 +47,34 @@ public abstract class Collision {
         this.mode = mode;
     }
 
-    public static Collision tile(Mode mode) {
-        return new TileCollision(mode);
+    public static Collision tile(
+            final Mode mode,
+            final double tileX,
+            final double tileY
+    ) {
+        return new TileCollision(mode, tileX, tileY);
     }
 
-    public static Collision entity(Mode mode, Entity other) {
+    public static Collision entity(final Mode mode, final Entity other) {
         return new EntityCollision(mode, other);
     }
 
     public static class EntityCollision extends Collision {
-         @Getter private final Entity other;
+        @Getter private final Entity other;
 
-        private EntityCollision(Mode mode, Entity other) {
+        private EntityCollision(final Mode mode, final Entity other) {
             super(Type.ENTITY, mode);
             this.other = other;
         }
     }
 
     public static class TileCollision extends Collision {
-        private TileCollision(Mode mode) {
+        @Getter private final double tileX, tileY;
+
+        private TileCollision(final Mode mode, final double tileX, final double tileY) {
             super(Type.TILE, mode);
+            this.tileX = tileX;
+            this.tileY = tileY;
         }
     }
 }
