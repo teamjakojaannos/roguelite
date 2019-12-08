@@ -52,6 +52,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new CharacterAIControllerSystem())
                 .withSystem(new StalkerAIControllerSystem())
                 .withSystem(new SlimeAIControllerSystem())
+                .withSystem(new SlimeDeathHandlerSystem())
                 .withSystem(new CameraControlSystem())
                 .withSystem(new SpawnerSystem())
                 .withSystem(new ProjectileToCharacterCollisionHandlerSystem())
@@ -98,7 +99,7 @@ public class Roguelite extends GameBase<GameState> {
         val generator = new WorldGenerator<TileType>(emptiness);
         generator.prepareInitialRoom(seed, state.getWorld(), floor, wall, 25, 45, 5, 5, 2);
 
-        SlimeArchetype.create(entities, 1.0, 1.0);
+        SlimeArchetype.createLargeSlime(entities, 5.0, 5.0);
 
 
         val levelEntity = entities.createEntity();

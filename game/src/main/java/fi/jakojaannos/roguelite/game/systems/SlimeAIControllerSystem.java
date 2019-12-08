@@ -41,6 +41,9 @@ public class SlimeAIControllerSystem implements ECSSystem {
 
         val entityManager = world.getEntityManager();
         val player = world.getResource(Players.class).player;
+        if (player == null){
+            return;
+        }
 
         val opt = entityManager.getComponentOf(player, Transform.class);
         if (opt.isEmpty()) {
@@ -80,9 +83,9 @@ public class SlimeAIControllerSystem implements ECSSystem {
                 tempDir.set(playerPos)
                         .sub(tempPos);
 
-                ai.jumpDir = tempDir;
-                ai.airTime = 0.6;
-                ai.jumpCoolDown = 1.0;
+                ai.jumpDir.set(tempDir);
+                ai.airTime = ai.setAirTimeCoolDown;
+                ai.jumpCoolDown = ai.setJumpCoolDown;
 
                 input.move.set(tempDir);
             } else {

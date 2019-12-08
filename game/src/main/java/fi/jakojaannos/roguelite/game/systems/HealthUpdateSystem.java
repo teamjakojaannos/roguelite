@@ -41,14 +41,14 @@ public class HealthUpdateSystem implements ECSSystem {
             if (hp.currentHealth <= 0.0f) {
                 LOG.debug("Dead");
                 entityManager.addComponentIfAbsent(entity, new DeadTag());
-            }
-            // FIXME: Move this somewhere else once Reaper is merged to master
-            if (world.getResource(Players.class).player != null && entity.getId() == world.getResource(Players.class).player.getId()) {
-                world.getResource(Players.class).player = null;
-                entityManager.getEntitiesWith(Camera.class)
-                        .map(EntityManager.EntityComponentPair::getComponent)
-                        .filter(camera -> camera.followTarget == entity)
-                        .forEach(camera -> camera.followTarget = null);
+                // FIXME: Move this somewhere else once Reaper is merged to master
+                if (world.getResource(Players.class).player != null && entity.getId() == world.getResource(Players.class).player.getId()) {
+                    world.getResource(Players.class).player = null;
+                    entityManager.getEntitiesWith(Camera.class)
+                            .map(EntityManager.EntityComponentPair::getComponent)
+                            .filter(camera -> camera.followTarget == entity)
+                            .forEach(camera -> camera.followTarget = null);
+                }
             }
         });
     }

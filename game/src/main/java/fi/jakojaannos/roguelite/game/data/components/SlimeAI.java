@@ -8,9 +8,29 @@ public class SlimeAI implements Component {
     public double chaseRadiusSquared = 10.0 * 10.0,
             targetRadiusSquared = 1.0;
 
-    public double airTime = 0.0,
-            jumpCoolDown = 0.0;
+    public double airTime = 0.0, setAirTimeCoolDown = 0.6,
+            jumpCoolDown = 0.0, setJumpCoolDown = 1.0;
 
-    public Vector2d jumpDir = new Vector2d();
+    public int slimeSize = 3;
+
+    public final Vector2d jumpDir = new Vector2d();
+
+    public SlimeAI(){
+    }
+
+    public SlimeAI(double chaseRadiusSquared, double targetRadiusSquared, double airTimeCoolDown, double jumpCoolDown, int slimeSize) {
+        this.chaseRadiusSquared = chaseRadiusSquared;
+        this.targetRadiusSquared = targetRadiusSquared;
+        this.setAirTimeCoolDown = airTimeCoolDown;
+        this.setJumpCoolDown = jumpCoolDown;
+        this.slimeSize = slimeSize;
+    }
+
+    public SlimeAI(double airTimeCoolDown, double jumpCoolDown, int slimeSize) {
+        this.setAirTimeCoolDown = airTimeCoolDown;
+        this.setJumpCoolDown = jumpCoolDown;
+        this.slimeSize = slimeSize;
+    }
+
 
 }

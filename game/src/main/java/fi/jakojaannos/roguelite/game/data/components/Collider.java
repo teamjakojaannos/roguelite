@@ -2,15 +2,9 @@ package fi.jakojaannos.roguelite.game.data.components;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
-import fi.jakojaannos.roguelite.game.systems.collision.Collision;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.extern.slf4j.Slf4j;
 import org.joml.Vector2d;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Defines entity collision boundaries and which other entities it should interact with. Each
@@ -27,12 +21,18 @@ import java.util.stream.Stream;
  */
 @Slf4j
 public class Collider implements Component, Shape {
-    public double width = 1.0;
-    public double height = 1.0;
+    public double width;
+    public double height;
     public CollisionLayer layer;
 
     public Collider(CollisionLayer layer) {
+        this(layer, 1.0);
+    }
+
+    public Collider(CollisionLayer layer, double size) {
         this.layer = layer;
+        this.width = size;
+        this.height = size;
     }
 
     public final Vector2d origin = new Vector2d();
