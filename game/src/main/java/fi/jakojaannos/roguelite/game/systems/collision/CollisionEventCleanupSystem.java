@@ -1,10 +1,12 @@
-package fi.jakojaannos.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems.collision;
 
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.collision.CollisionEvent;
+import fi.jakojaannos.roguelite.game.systems.ApplyVelocitySystem;
+import fi.jakojaannos.roguelite.game.systems.SystemGroups;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 

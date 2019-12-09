@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
 
@@ -29,7 +30,7 @@ public class FollowerArchetype {
         entityManager.addComponentTo(follower, new Velocity());
         entityManager.addComponentTo(follower, new CharacterInput());
         entityManager.addComponentTo(follower, new Health(5));
-        entityManager.addComponentTo(follower, new Collider());
+        entityManager.addComponentTo(follower, new Collider(CollisionLayer.ENEMY));
         entityManager.addComponentTo(follower, createCharacterStats());
         entityManager.addComponentTo(follower, createEnemyAI());
         entityManager.addComponentTo(follower, createSpriteInfo());

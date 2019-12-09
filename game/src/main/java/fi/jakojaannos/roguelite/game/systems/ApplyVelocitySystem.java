@@ -4,9 +4,9 @@ import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.GJK2D;
-import fi.jakojaannos.roguelite.game.data.collision.Collision;
-import fi.jakojaannos.roguelite.game.data.collision.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.systems.collision.Collision;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -175,12 +175,12 @@ public class ApplyVelocitySystem implements ECSSystem {
                             .filter(other -> world.getEntityManager()
                                                   .getComponentOf(other, Collider.class)
                                                   .orElseThrow()
-                                                  .canCollideWith(entity, collider))
+                                                  .canCollideWith(collider))
                             .map(target -> new CollisionCandidate(target,
                                                                   world.getEntityManager().getComponentOf(target, Transform.class).orElseThrow(),
                                                                   world.getEntityManager().getComponentOf(target, Collider.class).orElseThrow()))
                             .forEach(candidate -> {
-                                if (((Collider) candidate.shape).isSolidTo(entity, collider)) {
+                                if (candidate.isSolidTo(collider)) {
                                     colliderConsumer.accept(candidate);
                                 } else /* (((Collider) candidate.shape).canOverlapWith(entity, collider)) */ {
                                     overlapConsumer.accept(candidate);
@@ -246,17 +246,7 @@ public class ApplyVelocitySystem implements ECSSystem {
                                                         overlapTargets,
                                                         (candidate, mode) -> collisionsY.add(new CollisionEventCandidate(mode, candidate)));
 
-                if (distanceMovedX > MOVE_EPSILON && distanceMovedY > MOVE_EPSILON) {
-                    if (distanceMovedX < distanceMovedY) {
-                        distanceMoved = distanceMovedX;
-                        tmpTransform.set(tmpTransformX);
-                        actualCollisions = collisionsY;
-                    } else {
-                        distanceMoved = distanceMovedY;
-                        tmpTransform.set(tmpTransformY);
-                        actualCollisions = collisionsX;
-                    }
-                } else if (distanceMovedX > MOVE_EPSILON) {
+                if (distanceMovedX > MOVE_EPSILON) {
                     distanceMoved = distanceMovedX;
                     tmpTransform.set(tmpTransformX);
                     actualCollisions = collisionsY;
@@ -483,9 +473,9 @@ public class ApplyVelocitySystem implements ECSSystem {
             this.tileType = null;
         }
 
-        public boolean isSolidTo(Entity entity, Collider collider) {
+        public boolean isSolidTo(Collider collider) {
             return (this.tileType != null && this.tileType.isSolid())
-                    || (this.entity != null && ((Collider) this.shape).isSolidTo(entity, collider));
+                    || (this.entity != null && ((Collider) this.shape).isSolidTo(collider));
         }
     }
 

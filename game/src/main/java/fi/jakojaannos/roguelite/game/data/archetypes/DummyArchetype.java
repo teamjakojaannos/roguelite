@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
@@ -29,7 +30,7 @@ public class DummyArchetype {
         val dummy = entityManager.createEntity();
         entityManager.addComponentTo(dummy, transform);
         entityManager.addComponentTo(dummy, new Health(10));
-        entityManager.addComponentTo(dummy, new Collider());
+        entityManager.addComponentTo(dummy, new Collider(CollisionLayer.OVERLAP_ALL));
 
         return dummy;
     }

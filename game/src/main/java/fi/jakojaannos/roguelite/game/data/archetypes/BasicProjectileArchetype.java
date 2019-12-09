@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
 import org.joml.Vector2d;
@@ -48,7 +49,7 @@ public class BasicProjectileArchetype {
 
     @Nonnull
     private static Collider createCollider() {
-        val collider = new Collider();
+        val collider = new Collider(CollisionLayer.PLAYER_PROJECTILE);
         collider.width = 0.30;
         collider.height = 0.30;
         collider.origin.set(0.15);

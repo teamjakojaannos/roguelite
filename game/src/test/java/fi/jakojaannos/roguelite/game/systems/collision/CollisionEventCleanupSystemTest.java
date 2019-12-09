@@ -1,10 +1,8 @@
-package fi.jakojaannos.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems.collision;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.collision.Collision;
-import fi.jakojaannos.roguelite.game.data.collision.CollisionEvent;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +26,7 @@ class CollisionEventCleanupSystemTest {
         system = new CollisionEventCleanupSystem();
         world = mock(World.class);
         entity = mock(Entity.class);
-        collider = new Collider();
+        collider = new Collider(CollisionLayer.COLLIDE_ALL);
         EntityManager entityManager = mock(EntityManager.class);
         when(world.getEntityManager()).thenReturn(entityManager);
         when(entityManager.getComponentOf(eq(entity), eq(Collider.class))).thenReturn(Optional.of(collider));

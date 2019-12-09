@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
@@ -13,11 +14,12 @@ import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+// TODO: Tests to verify collision layers work as expected
 
 class ApplyVelocitySystemTest {
     private ApplyVelocitySystem system;
@@ -35,7 +37,7 @@ class ApplyVelocitySystemTest {
         entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());
         entityManager.addComponentTo(entity, transform = new Transform(0.0, 0.0));
-        entityManager.addComponentTo(entity, collider = new Collider());
+        entityManager.addComponentTo(entity, collider = new Collider(CollisionLayer.COLLIDE_ALL));
         collider.height = collider.width = 1;
 
         system = new ApplyVelocitySystem();
@@ -99,7 +101,7 @@ class ApplyVelocitySystemTest {
     void entityWithNonSolidColliderDoesNotBlockMovement() {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(1.0, 0.0);
-        Collider otherCollider = new Collider();
+        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
         otherCollider.solid = false;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
@@ -119,7 +121,7 @@ class ApplyVelocitySystemTest {
     void entityWithSolidColliderBlocksMovement() {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(1.0, 0.0);
-        Collider otherCollider = new Collider();
+        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
         otherCollider.solid = true;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
@@ -138,7 +140,7 @@ class ApplyVelocitySystemTest {
     void entitySlidesHorizontallyWhenCollidingAgainstSolidEntityFromBelow() {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(0.0, 1.0);
-        Collider otherCollider = new Collider();
+        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
         otherCollider.solid = true;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
@@ -158,7 +160,7 @@ class ApplyVelocitySystemTest {
     void entitySlidesVerticallyWhenCollidingAgainstSolidEntityFromSide() {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(1.0, 0.0);
-        Collider otherCollider = new Collider();
+        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
         otherCollider.solid = true;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
@@ -236,5 +238,27 @@ class ApplyVelocitySystemTest {
 
         assertEquals(1.0, transform.position.x, 0.01);
         assertEquals(0.1, transform.position.y, 0.01);
+    }
+
+    @Test
+    void collidingWithDiagonalSurfaceDoesNotBlowUp() {
+        Entity other = entityManager.createEntity();
+        Transform otherTransform = new Transform(1.0, 0.5);
+        otherTransform.rotation = 45.0;
+        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
+        otherCollider.solid = true;
+        entityManager.addComponentTo(other, otherCollider);
+        entityManager.addComponentTo(other, otherTransform);
+
+        velocity.velocity = new Vector2d(1.0, 0);
+        transform.position.x = -1.5;
+        transform.position.y = -1;
+
+        world.getEntityManager().applyModifications();
+        assertTimeout(Duration.ofMillis(500), () -> {
+            for (int i = 0; i < 150; ++i) {
+                system.tick(Stream.of(entity), world, 0.02);
+            }
+        });
     }
 }

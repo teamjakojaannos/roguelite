@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
 
@@ -28,7 +29,7 @@ public class PlayerArchetype {
 
     @Nonnull
     private static Collider createCollider() {
-        val collider = new Collider();
+        val collider = new Collider(CollisionLayer.PLAYER);
         collider.width = 1.0;
         collider.height = 1.0;
         return collider;

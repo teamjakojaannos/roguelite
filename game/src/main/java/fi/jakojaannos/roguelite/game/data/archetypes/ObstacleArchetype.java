@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
@@ -21,7 +22,7 @@ public class ObstacleArchetype {
     }
 
     private static Collider createCollider(final double size) {
-        val collider = new Collider();
+        val collider = new Collider(CollisionLayer.OBSTACLE);
         collider.solid = true;
         collider.width = size;
         collider.height = size;
