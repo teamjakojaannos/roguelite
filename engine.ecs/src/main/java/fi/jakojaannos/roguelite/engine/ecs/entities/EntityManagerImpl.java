@@ -44,6 +44,11 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
+    public int entityCount() {
+        return this.entityStorage.count();
+    }
+
+    @Override
     public void registerComponentGroup(final ComponentGroup group) {
         this.componentStorage.registerGroup(group);
     }

@@ -55,4 +55,8 @@ public class EntityStorage {
     public boolean isFull() {
         return this.entityCount >= this.capacity;
     }
+
+    public int count() {
+        return this.entityCount;
+    }
 }

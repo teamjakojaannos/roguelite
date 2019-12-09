@@ -216,6 +216,8 @@ public interface EntityManager {
         return true;
     }
 
+    int entityCount();
+
     @RequiredArgsConstructor
     class EntityComponentPair<TComponent extends Component> {
         @Getter private final Entity entity;

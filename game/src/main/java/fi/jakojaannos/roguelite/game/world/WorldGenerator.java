@@ -25,9 +25,9 @@ public class WorldGenerator<TTile> {
 
     public void prepareInitialRoom(
             final long seed,
-             final World world,
-             final TTile floor,
-             final TTile wall,
+            final World world,
+            final TTile floor,
+            final TTile wall,
             final int mainRoomSizeMin,
             final int mainRoomSizeMax,
             final int hallwayLength,
@@ -123,12 +123,12 @@ public class WorldGenerator<TTile> {
             final int x,
             final int y,
             final double spawnFrequency,
-             final EntityManager entityManager,
-             final SpawnerComponent.EntityFactory factoryFollower
+            final EntityManager entityManager,
+            final SpawnerComponent.EntityFactory factory
     ) {
         val spawner = entityManager.createEntity();
         entityManager.addComponentTo(spawner, new Transform(x, y));
-        val spawnerComponent = new SpawnerComponent(spawnFrequency, factoryFollower);
+        val spawnerComponent = new SpawnerComponent(spawnFrequency, factory);
         spawnerComponent.maxSpawnDistance = 0.25;
         entityManager.addComponentTo(spawner, spawnerComponent);
     }

@@ -186,11 +186,11 @@ class ApplyVelocitySystemTest {
         layer.collisionEnabled = false;
         entityManager.addComponentTo(other, layer);
 
-        velocity.velocity = new Vector2d(1.0, 0.0);
+        velocity.velocity = new Vector2d(1.0, 0.1);
         transform.position.x = 0;
 
         world.getEntityManager().applyModifications();
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 50; ++i) {
             system.tick(Stream.of(entity), world, 0.02);
         }
 

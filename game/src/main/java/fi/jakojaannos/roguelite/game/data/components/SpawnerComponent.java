@@ -11,8 +11,7 @@ import org.joml.Vector2d;
 import java.util.Random;
 
 public class SpawnerComponent implements Component {
-
-    public final double spawnFrequency;
+    public double spawnFrequency;
     public double spawnCoolDown, maxSpawnDistance;
 
     public final Random random;
