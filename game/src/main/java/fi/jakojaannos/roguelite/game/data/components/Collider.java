@@ -6,7 +6,6 @@ import fi.jakojaannos.roguelite.game.systems.collision.Collision;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
@@ -40,22 +39,30 @@ public class Collider implements Component, Shape {
 
     public final Vector2d origin = new Vector2d();
 
+    private transient double lastRotation = Double.NaN;
+    private transient Vector2d[] vertices = new Vector2d[]{
+            new Vector2d(), new Vector2d(), new Vector2d(), new Vector2d()
+    };
+
     // TODO: Get rid of this, move to resources or sth. no reason to store these in individual
     //  components. Also, breaks everything if we move components to native memory later on.
     public final List<CollisionEvent> collisions = new ArrayList<>();
 
-    @Override
-    public List<Vector2d> getVertices(
-            final Transform transform,
-            final List<Vector2d> result
-    ) {
-        val bounds = new RotatedRectangle(transform.position, this.origin, this.width, this.height, transform.rotation);
-        result.add(bounds.getTopLeft(new Vector2d()));
-        result.add(bounds.getTopRight(new Vector2d()));
-        result.add(bounds.getBottomLeft(new Vector2d()));
-        result.add(bounds.getBottomRight(new Vector2d()));
+    private static final RotatedRectangle tmpBounds = new RotatedRectangle();
 
-        return result;
+    @Override
+    public Vector2d[] getVerticesInLocalSpace(final Transform transform) {
+        if (this.lastRotation != transform.rotation) {
+            this.lastRotation = transform.rotation;
+
+            tmpBounds.set(new Vector2d(0.0), this.origin, this.width, this.height, transform.rotation);
+            tmpBounds.getTopLeft(this.vertices[0]);
+            tmpBounds.getTopRight(this.vertices[1]);
+            tmpBounds.getBottomLeft(this.vertices[2]);
+            tmpBounds.getBottomRight(this.vertices[3]);
+        }
+
+        return this.vertices;
     }
 
     public boolean isSolidTo(final Collider collider) {
@@ -73,5 +80,13 @@ public class Collider implements Component, Shape {
     public Stream<Collision> getCollisions() {
         return this.collisions.stream()
                               .map(CollisionEvent::getCollision);
+    }
+
+    public Stream<CollisionLayer> getCollidingLayers() {
+        return this.layer.getCollidingLayers();
+    }
+
+    public Stream<CollisionLayer> getOverlappingLayers() {
+        return this.layer.getOverlappingLayers();
     }
 }

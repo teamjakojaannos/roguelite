@@ -12,16 +12,13 @@ import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionEventCleanupSystem;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.*;
-import fi.jakojaannos.roguelite.game.systems.collision.DestroyProjectilesOnCollisionSystem;
-import fi.jakojaannos.roguelite.game.systems.collision.ProjectileToCharacterCollisionHandlerSystem;
+import fi.jakojaannos.roguelite.game.systems.collision.*;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -45,6 +42,7 @@ public class Roguelite extends GameBase<GameState> {
                 .addGroupDependencies(SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK, SystemGroups.EARLY_TICK)
                 .addGroupDependencies(SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK)
                 .addGroupDependencies(SystemGroups.LATE_TICK, SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK)
+                .withSystem(new ColliderDataCollectorSystem())
                 .withSystem(new PlayerInputSystem())
                 .withSystem(new CharacterMovementSystem())
                 .withSystem(new CharacterAttackSystem())
@@ -143,5 +141,9 @@ public class Roguelite extends GameBase<GameState> {
 
         this.dispatcher.dispatch(state.getWorld(), delta);
         state.getWorld().getEntityManager().applyModifications();
+
+        if (getTime().getCurrentGameTime() % 100 == 0) {
+            LOG.info("Entities: {}", state.getWorld().getEntityManager().entityCount());
+        }
     }
 }

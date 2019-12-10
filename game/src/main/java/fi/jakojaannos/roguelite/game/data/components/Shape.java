@@ -4,13 +4,9 @@ import lombok.val;
 import org.joml.Rectangled;
 import org.joml.Vector2d;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public interface Shape {
-    List<Vector2d> getVertices(
-            Transform transform,
-            List<Vector2d> result
+    Vector2d[] getVerticesInLocalSpace(
+            Transform transform
     );
 
     default Rectangled getBounds(final Transform transform) {
@@ -19,12 +15,12 @@ public interface Shape {
         double maxX = Double.NEGATIVE_INFINITY;
         double maxY = Double.NEGATIVE_INFINITY;
 
-        val vertices = getVertices(transform, new ArrayList<>());
+        val vertices = getVerticesInLocalSpace(transform);
         for (val vertex : vertices) {
-            minX = Math.min(minX, vertex.x);
-            maxX = Math.max(maxX, vertex.x);
-            minY = Math.min(minY, vertex.y);
-            maxY = Math.max(maxY, vertex.y);
+            minX = Math.min(minX, transform.position.x + vertex.x);
+            maxX = Math.max(maxX, transform.position.x + vertex.x);
+            minY = Math.min(minY, transform.position.y + vertex.y);
+            maxY = Math.max(maxY, transform.position.y + vertex.y);
         }
 
         return new Rectangled(minX, minY, maxX, maxY);
@@ -36,18 +32,18 @@ public interface Shape {
             final Vector2d result
     ) {
         val normDirection = direction.normalize(new Vector2d());
-        val vertices = getVertices(transform, new ArrayList<>(4));
+        val vertices = getVerticesInLocalSpace(transform);
 
-        var maxProduct = normDirection.dot(vertices.get(0));
+        var maxProduct = normDirection.dot(vertices[0]);
         var index = 0;
-        for (var i = 1; i < vertices.size(); ++i) {
-            val product = normDirection.dot(vertices.get(i));
+        for (var i = 1; i < vertices.length; ++i) {
+            val product = normDirection.dot(vertices[i]);
             if (product > maxProduct) {
                 maxProduct = product;
                 index = i;
             }
         }
 
-        return result.set(vertices.get(index));
+        return result.set(vertices[index]).add(transform.position);
     }
 }

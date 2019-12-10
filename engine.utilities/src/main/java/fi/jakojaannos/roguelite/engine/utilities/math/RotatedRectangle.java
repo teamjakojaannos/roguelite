@@ -1,15 +1,27 @@
 package fi.jakojaannos.roguelite.engine.utilities.math;
 
+import lombok.NoArgsConstructor;
 import org.joml.Vector2d;
 
+@NoArgsConstructor
 public final class RotatedRectangle {
-    public double width;
-    public double height;
+    public double width = 1.0;
+    public double height = 1.0;
     public Vector2d originOffset = new Vector2d();
     public Vector2d position = new Vector2d();
-    public double rotation;
+    public double rotation = 0.0;
 
     public RotatedRectangle(
+            final Vector2d position,
+            final Vector2d originOffset,
+            final double width,
+            final double height,
+            final double rotation
+    ) {
+        set(position, originOffset, width, height, rotation);
+    }
+
+    public void set(
             final Vector2d position,
             final Vector2d originOffset,
             final double width,

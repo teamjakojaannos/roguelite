@@ -11,6 +11,7 @@ module roguelite.game {
     requires transitive roguelite.engine.lwjgl;
 
     opens fi.jakojaannos.roguelite.game.data.resources to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.data.resources.collision to roguelite.engine.ecs;
 
     exports fi.jakojaannos.roguelite.game;
     exports fi.jakojaannos.roguelite.game.view;

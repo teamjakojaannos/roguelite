@@ -130,6 +130,7 @@ public class WorldGenerator<TTile> {
         entityManager.addComponentTo(spawner, new Transform(x, y));
         val spawnerComponent = new SpawnerComponent(spawnFrequency, factory);
         spawnerComponent.maxSpawnDistance = 0.25;
+        spawnerComponent.spawnFrequency = 0.5;
         entityManager.addComponentTo(spawner, spawnerComponent);
     }
 }

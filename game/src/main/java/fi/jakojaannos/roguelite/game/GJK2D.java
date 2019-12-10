@@ -14,6 +14,8 @@ public class GJK2D {
     private static final Vector2d tmpSupportB = new Vector2d();
     private static final Vector2d tmpDirection = new Vector2d();
 
+    private static final int MAX_ITERATIONS = 100;
+
     public static boolean intersects(
             final Transform transformA,
             final Shape shapeA,
@@ -73,7 +75,8 @@ public class GJK2D {
 
         // Negate the direction to get a point on the opposite side
         direction.negate();
-        while (true) {
+        var iterations = MAX_ITERATIONS;
+        while (iterations-- > 0) {
             val support = minkowskiSupport(direction, transformA, shapeA, transformB, shapeB, new Vector2d());
             simplex.add(support);
 
@@ -92,6 +95,8 @@ public class GJK2D {
                 }
             }
         }
+
+        return true;
     }
 
     private static boolean checkIfSimplexContainsTheOriginAndUpdateDirection(
