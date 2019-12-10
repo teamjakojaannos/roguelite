@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
+import fi.jakojaannos.roguelite.game.systems.collision.ColliderDataCollectorSystem;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
@@ -19,9 +20,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: Tests to verify collision layers work as expected
-
 class ApplyVelocitySystemTest {
+    private ColliderDataCollectorSystem dataCollectorSystem;
     private ApplyVelocitySystem system;
     private World world;
     private EntityManager entityManager;
@@ -41,6 +41,7 @@ class ApplyVelocitySystemTest {
         collider.height = collider.width = 1;
 
         system = new ApplyVelocitySystem();
+        dataCollectorSystem = new ColliderDataCollectorSystem();
     }
 
     @Test
@@ -48,6 +49,7 @@ class ApplyVelocitySystemTest {
         velocity.velocity = new Vector2d(0.0);
 
         world.getEntityManager().applyModifications();
+        dataCollectorSystem.tick(Stream.of(entity), world, 0.02);
         system.tick(Stream.of(entity), world, 1.0);
 
         assertEquals(0.0, transform.position.x);
@@ -59,6 +61,7 @@ class ApplyVelocitySystemTest {
         velocity.velocity = new Vector2d(10.0);
 
         world.getEntityManager().applyModifications();
+        dataCollectorSystem.tick(Stream.of(entity), world, 0.02);
         system.tick(Stream.of(entity), world, 1.0);
 
         assertEquals(10.0, transform.position.x, 0.02);
@@ -101,7 +104,7 @@ class ApplyVelocitySystemTest {
     void entityWithNonSolidColliderDoesNotBlockMovement() {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(1.0, 0.0);
-        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
+        Collider otherCollider = new Collider(CollisionLayer.NONE);
         otherCollider.solid = false;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
@@ -109,8 +112,9 @@ class ApplyVelocitySystemTest {
         velocity.velocity = new Vector2d(10.0, 0.75);
 
         world.getEntityManager().applyModifications();
-        for (int i = 0; i < 500; ++i) {
-            system.tick(Stream.of(entity), world, 0.002);
+        for (int i = 0; i < 50; ++i) {
+            dataCollectorSystem.tick(Stream.of(entity, other), world, 0.02);
+            system.tick(Stream.of(entity), world, 0.02);
         }
 
         assertEquals(10.0, transform.position.x, 0.01);
@@ -126,10 +130,11 @@ class ApplyVelocitySystemTest {
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
-        velocity.velocity = new Vector2d(10.0, 0.1);
+        velocity.velocity = new Vector2d(1.0, 0.1);
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
+            dataCollectorSystem.tick(Stream.of(entity, other), world, 0.02);
             system.tick(Stream.of(entity), world, 0.02);
         }
 
@@ -149,6 +154,7 @@ class ApplyVelocitySystemTest {
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
+            dataCollectorSystem.tick(Stream.of(entity, other), world, 0.02);
             system.tick(Stream.of(entity), world, 0.02);
         }
 
@@ -170,6 +176,7 @@ class ApplyVelocitySystemTest {
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
+            dataCollectorSystem.tick(Stream.of(entity, other), world, 0.02);
             system.tick(Stream.of(entity), world, 0.02);
         }
 
@@ -193,6 +200,7 @@ class ApplyVelocitySystemTest {
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
+            dataCollectorSystem.tick(Stream.of(entity), world, 0.02);
             system.tick(Stream.of(entity), world, 0.02);
         }
 
@@ -213,6 +221,7 @@ class ApplyVelocitySystemTest {
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
+            dataCollectorSystem.tick(Stream.of(entity), world, 0.02);
             system.tick(Stream.of(entity), world, 0.02);
         }
 
@@ -233,6 +242,7 @@ class ApplyVelocitySystemTest {
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
+            dataCollectorSystem.tick(Stream.of(entity), world, 0.02);
             system.tick(Stream.of(entity), world, 0.02);
         }
 
@@ -257,6 +267,7 @@ class ApplyVelocitySystemTest {
         world.getEntityManager().applyModifications();
         assertTimeout(Duration.ofMillis(500), () -> {
             for (int i = 0; i < 150; ++i) {
+                dataCollectorSystem.tick(Stream.of(entity, other), world, 0.02);
                 system.tick(Stream.of(entity), world, 0.02);
             }
         });

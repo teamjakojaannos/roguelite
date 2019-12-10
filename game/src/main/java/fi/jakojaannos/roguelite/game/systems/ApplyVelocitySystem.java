@@ -38,18 +38,18 @@ public class ApplyVelocitySystem implements ECSSystem {
     /**
      * If velocity length is smaller than this value, applying velocity will be skipped.
      */
-    private static final double VELOCITY_EPSILON = 0.000001;
+    private static final double VELOCITY_EPSILON = 0.0000001;
 
     /**
      * Maximum tries per tick per entity we may attempt to move.
      */
-    private static final int MAX_ITERATIONS = 10;
+    private static final int MAX_ITERATIONS = 25;
 
     /**
      * Should an entity move less than this value during an movement iteration, we may consider it
      * being still and can stop trying to move.
      */
-    private static final double MOVE_EPSILON = 0.001;
+    private static final double MOVE_EPSILON = 0.00001;
 
     /**
      * The size of a single movement step. When near collision, this is the resolution at which

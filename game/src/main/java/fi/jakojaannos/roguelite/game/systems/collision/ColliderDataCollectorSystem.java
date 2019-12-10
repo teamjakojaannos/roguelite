@@ -11,7 +11,6 @@ import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import lombok.val;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class ColliderDataCollectorSystem implements ECSSystem {
@@ -37,14 +36,15 @@ public class ColliderDataCollectorSystem implements ECSSystem {
             val collider = world.getEntityManager().getComponentOf(entity, Collider.class).orElseThrow();
             val transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
             val colliderEntity = new Colliders.ColliderEntity(entity, transform, collider);
-            Arrays.stream(CollisionLayer.values())
-                  .filter(collider.layer::isSolidTo)
-                  .map(layer -> colliders.solidForLayer.computeIfAbsent(layer, key -> new ArrayList<>()))
-                  .forEach(list -> list.add(colliderEntity));
-            Arrays.stream(CollisionLayer.values())
-                  .filter(collider.layer::canOverlapWith)
-                  .map(layer -> colliders.overlapsWithLayer.computeIfAbsent(layer, key -> new ArrayList<>()))
-                  .forEach(list -> list.add(colliderEntity));
+            for (val layer : CollisionLayer.values()) {
+                if (collider.layer.isSolidTo(layer)) {
+                    colliders.solidForLayer.computeIfAbsent(layer, key -> new ArrayList<>())
+                                           .add(colliderEntity);
+                } else if (collider.layer.canOverlapWith(layer)) {
+                    colliders.overlapsWithLayer.computeIfAbsent(layer, key -> new ArrayList<>())
+                                               .add(colliderEntity);
+                }
+            }
         });
     }
 }
