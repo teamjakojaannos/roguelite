@@ -35,14 +35,16 @@ public class ColliderDataCollectorSystem implements ECSSystem {
         colliders.overlapsWithLayer.clear();
         entities.forEach(entity -> {
             val collider = world.getEntityManager().getComponentOf(entity, Collider.class).orElseThrow();
+            val transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
+            val colliderEntity = new Colliders.ColliderEntity(entity, transform, collider);
             Arrays.stream(CollisionLayer.values())
                   .filter(collider.layer::isSolidTo)
                   .map(layer -> colliders.solidForLayer.computeIfAbsent(layer, key -> new ArrayList<>()))
-                  .forEach(list -> list.add(entity));
+                  .forEach(list -> list.add(colliderEntity));
             Arrays.stream(CollisionLayer.values())
                   .filter(collider.layer::canOverlapWith)
                   .map(layer -> colliders.overlapsWithLayer.computeIfAbsent(layer, key -> new ArrayList<>()))
-                  .forEach(list -> list.add(entity));
+                  .forEach(list -> list.add(colliderEntity));
         });
     }
 }
