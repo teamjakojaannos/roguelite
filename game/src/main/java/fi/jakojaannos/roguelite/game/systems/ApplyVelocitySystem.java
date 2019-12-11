@@ -97,17 +97,19 @@ public class ApplyVelocitySystem implements ECSSystem {
                 val translatedCollider = new StretchedCollider(collider, transform);
                 val translatedTransform = new Transform(transform);
                 translatedTransform.position.add(velocity.velocity.mul(delta, new Vector2d()));
+                translatedCollider.refreshTranslatedVertices(translatedTransform);
+                val bounds = translatedCollider.getBounds(translatedTransform);
 
                 collectRelevantTiles(tileMapLayers,
                                      translatedTransform,
                                      translatedCollider,
                                      collisionTargets::add,
                                      overlapTargets::add);
-                collectRelevantEntities(entitiesWithCollider,
-                                        entity,
-                                        collider.layer,
-                                        collisionTargets::add,
-                                        overlapTargets::add);
+                entitiesWithCollider.collectRelevantEntities(entity,
+                                                             collider.layer,
+                                                             bounds,
+                                                             collisionTargets::add,
+                                                             overlapTargets::add);
 
                 moveWithCollision(world,
                                   entity,
@@ -161,24 +163,11 @@ public class ApplyVelocitySystem implements ECSSystem {
             final Colliders entitiesWithCollider,
             final Entity entity,
             final CollisionLayer layer,
+            final Transform translatedTransform,
+            final StretchedCollider translatedCollider,
             final Consumer<CollisionCandidate> colliderConsumer,
             final Consumer<CollisionCandidate> overlapConsumer
     ) {
-        val potentialCollisions = entitiesWithCollider.solidForLayer.computeIfAbsent(layer, key -> List.of());
-        for (val other : potentialCollisions) {
-            if (other.entity.getId() == entity.getId()) {
-                continue;
-            }
-            colliderConsumer.accept(new CollisionCandidate(other));
-        }
-
-        val potentialOverlaps = entitiesWithCollider.overlapsWithLayer.computeIfAbsent(layer, key -> List.of());
-        for (val other : potentialOverlaps) {
-            if (other.entity.getId() == entity.getId()) {
-                continue;
-            }
-            overlapConsumer.accept(new CollisionCandidate(other));
-        }
     }
 
     private void moveWithCollision(
