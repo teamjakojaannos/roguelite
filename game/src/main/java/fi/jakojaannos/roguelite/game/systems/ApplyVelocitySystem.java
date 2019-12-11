@@ -355,10 +355,14 @@ public class ApplyVelocitySystem implements ECSSystem {
             final Vector2d direction,
             final double distanceToMove,
             final Transform translatedTransform,
-            final Shape translatedCollider,
+            final StretchedCollider translatedCollider,
             final Collection<CollisionCandidate> overlapTargets,
             final BiConsumer<CollisionCandidate, Collision.Mode> collisionConsumer
     ) {
+        translatedTransform.position.set(transform.position)
+                                    .add(direction.mul(distanceToMove, new Vector2d()));
+
+        translatedCollider.refreshTranslatedVertices(translatedTransform);
         for (val candidate : overlapTargets) {
             if (candidate.overlaps(translatedTransform, translatedCollider)) {
                 collisionConsumer.accept(candidate, Collision.Mode.OVERLAP);
@@ -374,12 +378,13 @@ public class ApplyVelocitySystem implements ECSSystem {
             final Vector2d direction,
             final Transform transform,
             final Transform translatedTransform,
-            final Shape translatedCollider,
+            final StretchedCollider translatedCollider,
             final Collection<CollisionCandidate> collisionTargets
     ) {
         translatedTransform.position.set(transform.position)
                                     .add(direction.mul(distance, new Vector2d()));
 
+        translatedCollider.refreshTranslatedVertices(translatedTransform);
         for (val target : collisionTargets) {
             if (target.overlaps(translatedTransform, translatedCollider)) {
                 return Optional.of(target);
@@ -504,15 +509,17 @@ public class ApplyVelocitySystem implements ECSSystem {
             this.vertices[3].set(vertices[3]);
         }
 
-        @Override
-        public final Vector2d[] getVerticesInLocalSpace(final Transform translatedTransform) {
+        public void refreshTranslatedVertices(final Transform translatedTransform) {
             val delta = translatedTransform.position.sub(this.transform.position, tmpDelta);
             val translatedVertices = collider.getVerticesInLocalSpace(translatedTransform);
             this.vertices[4].set(translatedVertices[0]).add(delta);
             this.vertices[5].set(translatedVertices[1]).add(delta);
             this.vertices[6].set(translatedVertices[2]).add(delta);
             this.vertices[7].set(translatedVertices[3]).add(delta);
+        }
 
+        @Override
+        public final Vector2d[] getVerticesInLocalSpace(final Transform ignored) {
             return this.vertices;
         }
     }
