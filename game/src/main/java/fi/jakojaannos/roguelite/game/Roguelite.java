@@ -82,7 +82,6 @@ public class Roguelite extends GameBase<GameState> {
         entities.addComponentTo(crosshair, new Transform(-999.0, -999.0));
         entities.addComponentTo(crosshair, new CrosshairTag());
         val crosshairCollider = new Collider(CollisionLayer.NONE);
-        crosshairCollider.solid = false;
         crosshairCollider.width = 0.30;
         crosshairCollider.height = 0.30;
         crosshairCollider.origin.set(0.15);

@@ -6,9 +6,9 @@ import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.GJK2D;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.collision.Collision;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -62,6 +62,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         requirements.addToGroup(SystemGroups.PHYSICS_TICK)
                     .withComponent(Transform.class)
                     .withComponent(Velocity.class)
+                    .requireResource(Collisions.class)
                     .requireResource(Colliders.class);
     }
 
@@ -75,6 +76,7 @@ public class ApplyVelocitySystem implements ECSSystem {
     ) {
         val entityManager = world.getEntityManager();
         val entitiesWithCollider = world.getResource(Colliders.class);
+        val collisionEvents = world.getResource(Collisions.class);
 
         val tileMapLayers = getTileMapLayersWithCollision(world);
 
@@ -111,11 +113,11 @@ public class ApplyVelocitySystem implements ECSSystem {
                                                              collisionTargets::add,
                                                              overlapTargets::add);
 
-                moveWithCollision(world,
+                moveWithCollision(collisionEvents,
+                                  world,
                                   entity,
                                   transform,
                                   velocity,
-                                  collider,
                                   translatedCollider,
                                   translatedTransform,
                                   collisionTargets,
@@ -151,7 +153,7 @@ public class ApplyVelocitySystem implements ECSSystem {
                 for (val layer : tileMapLayers) {
                     val tileType = layer.getTile(x, y);
                     if (tileType.isSolid()) {
-                        colliderConsumer.accept(new CollisionCandidate(x, y, tileType));
+                        colliderConsumer.accept(new CollisionCandidate(x, y));
                         break;
                     }
                 }
@@ -159,23 +161,12 @@ public class ApplyVelocitySystem implements ECSSystem {
         }
     }
 
-    private void collectRelevantEntities(
-            final Colliders entitiesWithCollider,
-            final Entity entity,
-            final CollisionLayer layer,
-            final Transform translatedTransform,
-            final StretchedCollider translatedCollider,
-            final Consumer<CollisionCandidate> colliderConsumer,
-            final Consumer<CollisionCandidate> overlapConsumer
-    ) {
-    }
-
     private void moveWithCollision(
+            final Collisions collisionEvents,
             final World world,
             final Entity entity,
             final Transform transform,
             final Velocity velocity,
-            final Collider collider,
             final StretchedCollider translatedCollider,
             final Transform translatedTransform,
             final Collection<CollisionCandidate> collisionTargets,
@@ -252,7 +243,7 @@ public class ApplyVelocitySystem implements ECSSystem {
             }
 
             for (val collision : actualCollisions) {
-                fireCollisionEvent(world, entity, collider, collision.candidate, collision.mode);
+                fireCollisionEvent(collisionEvents, world, entity, collision.candidate, collision.mode);
             }
 
             if (distanceMoved < MOVE_EPSILON) {
@@ -384,21 +375,21 @@ public class ApplyVelocitySystem implements ECSSystem {
     }
 
     private void fireCollisionEvent(
+            final Collisions collisions,
             final World world,
             final Entity entity,
-            final Collider collider,
             final CollisionCandidate candidate,
             final Collision.Mode mode
     ) {
         if (candidate.entity == null) {
-            collider.collisions.add(new CollisionEvent(Collision.tile(mode,
-                                                                      candidate.transform.position.x,
-                                                                      candidate.transform.position.y)));
+            collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.tile(mode,
+                                                                                    candidate.transform.position.x,
+                                                                                    candidate.transform.position.y)));
         } else {
-            collider.collisions.add(new CollisionEvent(Collision.entity(mode,
-                                                                        candidate.entity.entity)));
-            candidate.entity.collider.collisions.add(new CollisionEvent(Collision.entity(mode,
-                                                                                         entity)));
+            collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(mode,
+                                                                                      candidate.entity.entity)));
+            collisions.fireCollisionEvent(candidate.entity.entity, new CollisionEvent(Collision.entity(mode,
+                                                                                                       entity)));
 
             world.getEntityManager().addComponentIfAbsent(candidate.entity.entity, new RecentCollisionTag());
         }
@@ -434,8 +425,6 @@ public class ApplyVelocitySystem implements ECSSystem {
 
         private final Transform transform;
         @Nullable private final Colliders.ColliderEntity entity;
-        @Nullable private final TileType tileType;
-
 
         public boolean overlaps(final Transform transform, final Shape shape) {
             val initialDirection = transform.position.sub(this.transform.position, new Vector2d());
@@ -450,12 +439,9 @@ public class ApplyVelocitySystem implements ECSSystem {
 
         public CollisionCandidate(
                 final double x,
-                final double y,
-                final TileType tileType
+                final double y
         ) {
             this.transform = new Transform(x, y);
-            this.tileType = tileType;
-
             this.entity = null;
         }
 
@@ -464,7 +450,6 @@ public class ApplyVelocitySystem implements ECSSystem {
         ) {
             this.entity = entity;
             this.transform = entity.transform;
-            this.tileType = null;
         }
     }
 

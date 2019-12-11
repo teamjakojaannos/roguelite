@@ -23,7 +23,6 @@ public class ObstacleArchetype {
 
     private static Collider createCollider(final double size) {
         val collider = new Collider(CollisionLayer.OBSTACLE);
-        collider.solid = true;
         collider.width = size;
         collider.height = size;
         return collider;

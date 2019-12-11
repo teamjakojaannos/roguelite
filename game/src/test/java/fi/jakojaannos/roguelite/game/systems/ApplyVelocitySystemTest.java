@@ -105,7 +105,6 @@ class ApplyVelocitySystemTest {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(1.0, 0.0);
         Collider otherCollider = new Collider(CollisionLayer.NONE);
-        otherCollider.solid = false;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
@@ -126,7 +125,6 @@ class ApplyVelocitySystemTest {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(1.0, 0.0);
         Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
-        otherCollider.solid = true;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
@@ -146,7 +144,6 @@ class ApplyVelocitySystemTest {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(0.0, 1.0);
         Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
-        otherCollider.solid = true;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
@@ -167,7 +164,6 @@ class ApplyVelocitySystemTest {
         Entity other = entityManager.createEntity();
         Transform otherTransform = new Transform(1.0, 0.0);
         Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
-        otherCollider.solid = true;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
@@ -256,7 +252,6 @@ class ApplyVelocitySystemTest {
         Transform otherTransform = new Transform(1.0, 0.5);
         otherTransform.rotation = 45.0;
         Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
-        otherCollider.solid = true;
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 

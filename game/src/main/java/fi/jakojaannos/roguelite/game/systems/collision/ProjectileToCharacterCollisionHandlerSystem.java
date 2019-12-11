@@ -5,10 +5,10 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
-import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -20,7 +20,7 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.COLLISION_HANDLER)
-                    .withComponent(Collider.class)
+                    .requireResource(Collisions.class)
                     .withComponent(RecentCollisionTag.class)
                     .withComponent(ProjectileStats.class);
     }
@@ -32,18 +32,20 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
             final double delta
     ) {
         val entityManager = world.getEntityManager();
+        val collisions = world.getResource(Collisions.class);
+
         entities.forEach(entity -> {
-            val collider = entityManager.getComponentOf(entity, Collider.class).get();
             val stats = entityManager.getComponentOf(entity, ProjectileStats.class).get();
 
-            val entityCollisions = collider.getCollisions()
-                                           .filter(Collision::isEntity)
-                                           .map(Collision::getAsEntityCollision);
+            val entityCollisions = collisions.getEventsFor(entity)
+                                             .stream()
+                                             .map(CollisionEvent::getCollision)
+                                             .filter(Collision::isEntity)
+                                             .map(Collision::getAsEntityCollision);
 
             for (val collision : (Iterable<Collision.EntityCollision>) entityCollisions::iterator) {
                 if (entityManager.hasComponent(collision.getOther(), Health.class)) {
                     val health = entityManager.getComponentOf(collision.getOther(), Health.class).get();
-                    //LOG.debug("Hit!");
                     health.addDamageInstance(new DamageInstance(stats.damage));
                     entityManager.destroyEntity(entity);
                     // FIXME: Proper damage cool-down / invulnerability frame thingy

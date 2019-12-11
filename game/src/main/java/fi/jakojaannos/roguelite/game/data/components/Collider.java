@@ -27,8 +27,6 @@ import java.util.stream.Stream;
  */
 @Slf4j
 public class Collider implements Component, Shape {
-    public boolean solid = true;
-    public boolean overlaps = true;
     public double width = 1.0;
     public double height = 1.0;
     public CollisionLayer layer;
@@ -43,10 +41,6 @@ public class Collider implements Component, Shape {
     private transient Vector2d[] vertices = new Vector2d[]{
             new Vector2d(), new Vector2d(), new Vector2d(), new Vector2d()
     };
-
-    // TODO: Get rid of this, move to resources or sth. no reason to store these in individual
-    //  components. Also, breaks everything if we move components to native memory later on.
-    public final List<CollisionEvent> collisions = new ArrayList<>();
 
     private static final RotatedRectangle tmpBounds = new RotatedRectangle();
 
@@ -63,30 +57,5 @@ public class Collider implements Component, Shape {
         }
 
         return this.vertices;
-    }
-
-    public boolean isSolidTo(final Collider collider) {
-        return this.solid && this.layer.isSolidTo(collider.layer);
-    }
-
-    public boolean canOverlapWith(final Collider collider) {
-        return this.overlaps && this.layer.canOverlapWith(collider.layer);
-    }
-
-    public boolean canCollideWith(final Collider collider) {
-        return isSolidTo(collider) || canOverlapWith(collider);
-    }
-
-    public Stream<Collision> getCollisions() {
-        return this.collisions.stream()
-                              .map(CollisionEvent::getCollision);
-    }
-
-    public Stream<CollisionLayer> getCollidingLayers() {
-        return this.layer.getCollidingLayers();
-    }
-
-    public Stream<CollisionLayer> getOverlappingLayers() {
-        return this.layer.getOverlappingLayers();
     }
 }
