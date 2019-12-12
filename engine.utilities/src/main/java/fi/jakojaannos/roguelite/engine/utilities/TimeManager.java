@@ -5,7 +5,7 @@ public interface TimeManager {
 
     long getCurrentGameTime();
 
-    void progressGameTime(long timestep);
+    void progressGameTime(long amount);
 
     void refresh();
 }
