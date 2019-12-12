@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
 
+import java.util.Random;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -37,11 +38,14 @@ public class StalkerAIControllerSystem implements ECSSystem {
     ) {
         val player = world.getResource(Players.class).player;
         if (player == null) {
+            entities.forEach(entity -> world.getEntityManager()
+                                            .getComponentOf(entity, CharacterInput.class)
+                                            .orElseThrow().move.set(new Random().nextDouble() * 2 - 1.0,
+                                                                    new Random().nextDouble() * 2 - 1.0));
             return;
         }
 
-        var playerTransform = world.getEntityManager().getComponentOf(player, Transform.class);
-
+        val playerTransform = world.getEntityManager().getComponentOf(player, Transform.class);
         val playerPos = playerTransform.orElseThrow().position;
 
         entities.forEach(entity -> {
