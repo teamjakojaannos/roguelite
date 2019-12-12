@@ -2,10 +2,11 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
+import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 
 public class ObstacleArchetype {
@@ -18,6 +19,7 @@ public class ObstacleArchetype {
         entityManager.addComponentTo(obstacle, transform);
         entityManager.addComponentTo(obstacle, createCollider(size));
         entityManager.addComponentTo(obstacle, createSpriteInfo());
+        entityManager.addComponentTo(obstacle, new ObstacleTag());
         return obstacle;
     }
 

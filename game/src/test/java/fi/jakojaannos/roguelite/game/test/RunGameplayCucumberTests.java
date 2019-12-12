@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(plugin = "pretty",
-                 features = "src/test/resources/gameplay")
-public class RunCucumberTest {
+                 features = "src/test/resources/gameplay"
+                 //,tags = {"@problem"}
+                 )
+public class RunGameplayCucumberTests {
 }
