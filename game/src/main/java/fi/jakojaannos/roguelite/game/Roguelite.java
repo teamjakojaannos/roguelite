@@ -56,6 +56,8 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new DestroyProjectilesOnCollisionSystem())
                 .withSystem(new CollisionEventCleanupSystem())
                 .withSystem(new HealthUpdateSystem())
+                .withSystem(new EnemyAttackCoolDownSystem())
+                .withSystem(new EnemyToPlayerCollisionHandlerSystem())
                 .build();
     }
 
@@ -140,9 +142,5 @@ public class Roguelite extends GameBase<GameState> {
 
         this.dispatcher.dispatch(state.getWorld(), delta);
         state.getWorld().getEntityManager().applyModifications();
-
-        if (getTime().getCurrentGameTime() % 100 == 0) {
-            LOG.info("Entities: {}", state.getWorld().getEntityManager().entityCount());
-        }
     }
 }

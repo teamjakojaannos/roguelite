@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class CharacterAttackSystem implements ECSSystem {
     @Override
-    public void declareRequirements( RequirementsBuilder requirements) {
+    public void declareRequirements(RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
                     .withComponent(Transform.class)
                     .withComponent(CharacterInput.class)
@@ -29,18 +29,18 @@ public class CharacterAttackSystem implements ECSSystem {
 
     @Override
     public void tick(
-             Stream<Entity> entities,
-             World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world,
+            final double delta
     ) {
-        val cluster = world.getEntityManager();
+        val entityManager = world.getEntityManager();
         entities.forEach(entity -> {
-            val input = cluster.getComponentOf(entity, CharacterInput.class).get();
-            val abilities = cluster.getComponentOf(entity, CharacterAbilities.class).get();
-            val weapon = cluster.getComponentOf(entity, BasicWeaponStats.class).get();
+            val input = entityManager.getComponentOf(entity, CharacterInput.class).get();
+            val abilities = entityManager.getComponentOf(entity, CharacterAbilities.class).get();
+            val weapon = entityManager.getComponentOf(entity, BasicWeaponStats.class).get();
 
             if (input.attack && abilities.attackTimer >= 1.0 / weapon.attackRate) {
-                val character = cluster.getComponentOf(entity, Transform.class).get();
+                val character = entityManager.getComponentOf(entity, Transform.class).get();
 
                 val projectileX = character.position.x + 0.5;
                 val projectileY = character.position.y + 0.5;

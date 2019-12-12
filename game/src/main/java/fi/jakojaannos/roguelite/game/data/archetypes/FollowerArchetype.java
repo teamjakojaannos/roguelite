@@ -34,6 +34,9 @@ public class FollowerArchetype {
         entityManager.addComponentTo(follower, createCharacterStats());
         entityManager.addComponentTo(follower, createEnemyAI());
         entityManager.addComponentTo(follower, createSpriteInfo());
+        entityManager.addComponentTo(follower, new EnemyTag());
+        entityManager.addComponentTo(follower, new CharacterAbilities());
+        entityManager.addComponentTo(follower, new EnemyMeleeWeaponStats());
 
         return follower;
     }

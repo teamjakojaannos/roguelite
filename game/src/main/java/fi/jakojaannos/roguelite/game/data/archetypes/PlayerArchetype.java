@@ -24,6 +24,7 @@ public class PlayerArchetype {
         entityManager.addComponentTo(player, createCharacterStats());
         entityManager.addComponentTo(player, createWeaponStats());
         entityManager.addComponentTo(player, createSpriteInfo());
+        entityManager.addComponentTo(player, new Health(10));
         return player;
     }
 

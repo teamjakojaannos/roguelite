@@ -2,8 +2,8 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 
 public class StalkerArchetype {
@@ -33,6 +33,9 @@ public class StalkerArchetype {
         entityManager.addComponentTo(stalker, createCharacterStats());
         entityManager.addComponentTo(stalker, createStalkerAi());
         entityManager.addComponentTo(stalker, createSpriteInfo());
+        entityManager.addComponentTo(stalker, new EnemyTag());
+        entityManager.addComponentTo(stalker, new CharacterAbilities());
+        entityManager.addComponentTo(stalker, new EnemyMeleeWeaponStats());
 
         return stalker;
     }

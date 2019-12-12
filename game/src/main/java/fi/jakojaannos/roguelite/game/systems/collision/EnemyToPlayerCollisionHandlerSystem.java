@@ -5,9 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
-import fi.jakojaannos.roguelite.game.data.components.Health;
-import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
-import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
+import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +14,13 @@ import lombok.val;
 import java.util.stream.Stream;
 
 @Slf4j
-public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
+public class EnemyToPlayerCollisionHandlerSystem implements ECSSystem {
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.COLLISION_HANDLER)
                     .requireResource(Collisions.class)
                     .withComponent(RecentCollisionTag.class)
-                    .withComponent(ProjectileStats.class);
+                    .withComponent(PlayerTag.class);
     }
 
     @Override
@@ -35,7 +33,7 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
         val collisions = world.getResource(Collisions.class);
 
         entities.forEach(entity -> {
-            val stats = entityManager.getComponentOf(entity, ProjectileStats.class).get();
+            val health = entityManager.getComponentOf(entity, Health.class).get();
 
             val entityCollisions = collisions.getEventsFor(entity)
                                              .stream()
@@ -44,11 +42,20 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
                                              .map(Collision::getAsEntityCollision);
 
             for (val collision : (Iterable<Collision.EntityCollision>) entityCollisions::iterator) {
-                if (entityManager.hasComponent(collision.getOther(), Health.class)) {
-                    val health = entityManager.getComponentOf(collision.getOther(), Health.class).get();
+                val other = collision.getOther();
+                if (entityManager.hasComponent(other, EnemyTag.class)
+                        && entityManager.hasComponent(other, EnemyMeleeWeaponStats.class)
+                        && entityManager.hasComponent(other, CharacterAbilities.class)
+                ) {
+                    val abilities = entityManager.getComponentOf(other, CharacterAbilities.class).get();
+                    val stats = entityManager.getComponentOf(other, EnemyMeleeWeaponStats.class).get();
+
+                    if (abilities.attackTimer < stats.attackRate) {
+                        continue;
+                    }
+
                     health.addDamageInstance(new DamageInstance(stats.damage));
-                    entityManager.destroyEntity(entity);
-                    break;
+                    abilities.attackTimer = 0.0;
                 }
             }
         });

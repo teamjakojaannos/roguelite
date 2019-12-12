@@ -1,10 +1,9 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.Health;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -14,16 +13,16 @@ import java.util.stream.Stream;
 
 public class HealthUpdateSystem implements ECSSystem {
     @Override
-    public void declareRequirements( RequirementsBuilder requirements) {
+    public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.LATE_TICK)
                     .withComponent(Health.class);
     }
 
     @Override
     public void tick(
-             Stream<Entity> entities,
-             World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world,
+            final double delta
     ) {
         val entityManager = world.getEntityManager();
 
@@ -41,8 +40,16 @@ public class HealthUpdateSystem implements ECSSystem {
             if (hp.currentHealth <= 0.0f) {
                 LOG.debug("Dead");
                 entityManager.destroyEntity(entity);
-            }
 
+                // FIXME: Move this somewhere else once Reaper is merged to master
+                if (world.getResource(Players.class).player != null && entity.getId() == world.getResource(Players.class).player.getId()) {
+                    world.getResource(Players.class).player = null;
+                    entityManager.getEntitiesWith(Camera.class)
+                                 .map(EntityManager.EntityComponentPair::getComponent)
+                                 .filter(camera -> camera.followTarget == entity)
+                                 .forEach(camera -> camera.followTarget = null);
+                }
+            }
         });
     }
 }

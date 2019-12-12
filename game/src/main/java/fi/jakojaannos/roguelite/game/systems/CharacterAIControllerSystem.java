@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class CharacterAIControllerSystem implements ECSSystem {
     @Override
-    public void declareRequirements( RequirementsBuilder requirements) {
+    public void declareRequirements(RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
                     .requireResource(Players.class)
                     .withComponent(FollowerEnemyAI.class)
@@ -29,23 +29,28 @@ public class CharacterAIControllerSystem implements ECSSystem {
 
     @Override
     public void tick(
-             Stream<Entity> entities,
-             World world,
+            Stream<Entity> entities,
+            World world,
             double delta
     ) {
         val player = world.getResource(Players.class).player;
-        val playerPos = new Vector2d();
-        world.getEntityManager().getComponentOf(player, Transform.class)
-             .orElse(new Transform(5.0f, 5.0f))
-             .getCenter(playerPos);
+        if (player == null) {
+            return;
+        }
+
+        val playerPos = world.getEntityManager()
+                             .getComponentOf(player, Transform.class)
+                             .orElseThrow().position;
 
         entities.forEach(entity -> {
-            val aiPos = new Vector2d();
-            world.getEntityManager().getComponentOf(entity, Transform.class).get()
-                 .getCenter(aiPos);
+            val aiPos = world.getEntityManager()
+                             .getComponentOf(entity, Transform.class)
+                             .orElseThrow().position;
 
             tmpDirection.set(playerPos).sub(aiPos);
-            val input = world.getEntityManager().getComponentOf(entity, CharacterInput.class).get();
+            val input = world.getEntityManager()
+                             .getComponentOf(entity, CharacterInput.class)
+                             .orElseThrow();
             input.move.set(tmpDirection);
         });
     }

@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BasicWeaponStats implements Component {
-
     public double attackRate = 2.0; // Attacks per second
     public double attackProjectileSpeed = 40.0;
     public double attackSpread = 2.5;
-
 }

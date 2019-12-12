@@ -88,8 +88,8 @@ public class WorldGenerator<TTile> {
 
             val spawnerXH = hallwayStartX + hallwaySize / 2;
             val spawnerYH = hallwayLength - 2;
-            val stalkerFrequency = 10.0;
-            val followerFrequency = 10.0;
+            val stalkerFrequency = 5.0;
+            val followerFrequency = 5.0;
 
             createSpawner(spawnerXH - 1, startY - spawnerYH - 1, stalkerFrequency, entities, SpawnerComponent.FACTORY_STALKER);
             createSpawner(spawnerXH + 1, startY - spawnerYH - 1, followerFrequency, entities, SpawnerComponent.FACTORY_FOLLOWER);
@@ -130,7 +130,7 @@ public class WorldGenerator<TTile> {
         entityManager.addComponentTo(spawner, new Transform(x, y));
         val spawnerComponent = new SpawnerComponent(spawnFrequency, factory);
         spawnerComponent.maxSpawnDistance = 0.25;
-        spawnerComponent.spawnFrequency = 0.5;
+        spawnerComponent.spawnCoolDown = 1.0;
         entityManager.addComponentTo(spawner, spawnerComponent);
     }
 }

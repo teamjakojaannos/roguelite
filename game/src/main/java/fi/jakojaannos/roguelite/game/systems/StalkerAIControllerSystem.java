@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class StalkerAIControllerSystem implements ECSSystem {
     @Override
-    public void declareRequirements( RequirementsBuilder requirements) {
+    public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
                     .requireResource(Players.class)
                     .withComponent(StalkerAI.class)
@@ -31,21 +31,23 @@ public class StalkerAIControllerSystem implements ECSSystem {
 
     @Override
     public void tick(
-             Stream<Entity> entities,
-             World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world,
+            final double delta
     ) {
         val player = world.getResource(Players.class).player;
-        var opt = world.getEntityManager().getComponentOf(player, Transform.class);
-        if (opt.isEmpty()) return;
+        if (player == null) {
+            return;
+        }
 
-        val playerPos = new Vector2d();
-        opt.get().getCenter(playerPos);
+        var playerTransform = world.getEntityManager().getComponentOf(player, Transform.class);
+
+        val playerPos = playerTransform.orElseThrow().position;
 
         entities.forEach(entity -> {
-            val stalkerAI = world.getEntityManager().getComponentOf(entity, StalkerAI.class).get();
-            val characterInput = world.getEntityManager().getComponentOf(entity, CharacterInput.class).get();
-            val characterStats = world.getEntityManager().getComponentOf(entity, CharacterStats.class).get();
+            val stalkerAI = world.getEntityManager().getComponentOf(entity, StalkerAI.class).orElseThrow();
+            val characterInput = world.getEntityManager().getComponentOf(entity, CharacterInput.class).orElseThrow();
+            val characterStats = world.getEntityManager().getComponentOf(entity, CharacterStats.class).orElseThrow();
 
             stalkerAI.airTime -= delta;
             stalkerAI.jumpCoolDown -= delta;

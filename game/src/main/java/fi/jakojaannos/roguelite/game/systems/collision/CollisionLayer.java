@@ -4,9 +4,6 @@ import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 @Slf4j
 public enum CollisionLayer {
     NONE,
@@ -23,7 +20,6 @@ public enum CollisionLayer {
     private final byte[] overlapMask = new byte[MASK_SIZE];
 
     public boolean isSolidTo(final CollisionLayer other) {
-        // !hasNone = hasAny
         return other != NONE && BitMaskUtils.isNthBitSet(other.collisionMask, getIndex());
     }
 
@@ -49,18 +45,6 @@ public enum CollisionLayer {
             LOG.trace("\t-> {}", other.name());
             BitMaskUtils.setNthBit(this.overlapMask, other.getIndex());
         }
-    }
-
-    public Stream<CollisionLayer> getCollidingLayers() {
-        return IntStream.range(0, MASK_SIZE * 8)
-                        .filter(i -> BitMaskUtils.isNthBitSet(this.collisionMask, i))
-                        .mapToObj(i -> values()[i + 1]);
-    }
-
-    public Stream<CollisionLayer> getOverlappingLayers() {
-        return IntStream.range(0, MASK_SIZE * 8)
-                        .filter(i -> BitMaskUtils.isNthBitSet(this.overlapMask, i))
-                        .mapToObj(i -> values()[i + 1]);
     }
 
     static {
