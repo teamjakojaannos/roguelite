@@ -1,21 +1,7 @@
-import org.gradle.internal.os.OperatingSystem
-
 plugins{
     id "application"
     id "java"
     id "com.github.johnrengelman.shadow" version '5.1.0'
-}
-
-switch (OperatingSystem.current()) {
-    case OperatingSystem.LINUX:
-        project.ext.lwjglNatives = "natives-linux"
-        break
-    case OperatingSystem.MAC_OS:
-        project.ext.lwjglNatives = "natives-macos"
-        break
-    case OperatingSystem.WINDOWS:
-        project.ext.lwjglNatives = "natives-windows"
-        break
 }
 
 dependencies {
@@ -32,17 +18,15 @@ dependencies {
     implementation "org.lwjgl:lwjgl-openal"
     implementation "org.lwjgl:lwjgl-stb"
     implementation "org.lwjgl:lwjgl-opengl"
-    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    for (lwjglNatives in ["natives-linux", "natives-macos", "natives-windows"]) {
+        runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+        runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+        runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+        runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+        runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+        runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    }
     implementation "org.joml:joml:${jomlVersion}"
-
-    // Logging
-    //shadow "org.slf4j:slf4j-api:$slf4jVersion"
-    //shadow "org.slf4j:slf4j-simple:$slf4jVersion"
 }
 
 application {
