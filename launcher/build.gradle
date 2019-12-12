@@ -1,8 +1,29 @@
-plugins{
+import org.gradle.internal.os.OperatingSystem;
+
+plugins {
     id "application"
     id "java"
-    id "com.github.johnrengelman.shadow" version '5.1.0'
+    id "org.beryx.jlink" version "2.16.4"
 }
+
+def buildPlatformName = System.getenv("TARGET_PLATFORM")
+def buildPlatform = buildPlatformName != null ? OperatingSystem.forName(buildPlatformName) : null
+if (buildPlatform == null) {
+    buildPlatform = OperatingSystem.current()
+}
+
+switch (buildPlatform) {
+    case OperatingSystem.LINUX:
+        project.ext.lwjglNatives = "natives-linux"
+        break
+    case OperatingSystem.MAC_OS:
+        project.ext.lwjglNatives = "natives-macos"
+        break
+    case OperatingSystem.WINDOWS:
+        project.ext.lwjglNatives = "natives-windows"
+        break
+}
+
 
 dependencies {
     implementation project(':engine')
@@ -18,20 +39,63 @@ dependencies {
     implementation "org.lwjgl:lwjgl-openal"
     implementation "org.lwjgl:lwjgl-stb"
     implementation "org.lwjgl:lwjgl-opengl"
-    for (lwjglNatives in ["natives-linux", "natives-macos", "natives-windows"]) {
-        runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-        runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-        runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-        runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-        runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
-        runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    for (lwjglModule in ["", "-assimp", "-glfw", "-openal", "-opengl", "-stb", "-opengl"]) {
+        implementation "org.lwjgl:lwjgl${lwjglModule}::${lwjglNatives}"
     }
     implementation "org.joml:joml:${jomlVersion}"
 }
 
 application {
-    mainClassName = "fi.jakojaannos.roguelite.launcher.Main"
+    mainClassName = "roguelite.launcher/fi.jakojaannos.roguelite.launcher.Main"
     //applicationDefaultJvmArgs = ['-XX:+PrintGCDetails']
+}
+
+if (buildPlatformName != null) {
+    jlink {
+        switch (buildPlatform) {
+            case OperatingSystem.LINUX:
+                targetPlatform(buildPlatformName, System.getenv("JAVA_HOME_LINUX"))
+                break
+            case OperatingSystem.MAC_OS:
+                targetPlatform(buildPlatformName, System.getenv("JAVA_HOME_MACOS"))
+                break
+            case OperatingSystem.WINDOWS:
+                targetPlatform(buildPlatformName, System.getenv("JAVA_HOME_WINDOWS"))
+                break
+        }
+
+        mergedModule {
+        }
+        launcher {
+            name = 'konna'
+            jvmArgs = []
+        }
+    }
+
+    tasks.jlink.doLast {
+        copy {
+            from('../assets')
+            into("${buildDir}/image/konna-${buildPlatformName}/bin/assets")
+            exclude("**/*.aseprite")
+        }
+    }
+} else {
+    jlink {
+        mergedModule {
+        }
+        launcher {
+            name = 'konna'
+            jvmArgs = []
+        }
+    }
+
+    tasks.jlink.doLast {
+        copy {
+            from('../assets')
+            into("$buildDir/image/bin/assets")
+            exclude("**/*.aseprite")
+        }
+    }
 }
 
 run {
