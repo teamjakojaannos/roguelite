@@ -63,8 +63,8 @@ public final class RotatedRectangle {
         return CoordinateHelper.transformCoordinate(this.position.x - this.originOffset.x,
                                                     this.position.y - this.originOffset.y,
                                                     this.rotation,
-                                                    x,
-                                                    y,
+                                                    x - this.originOffset.x,
+                                                    y - this.originOffset.y,
                                                     result);
     }
 
