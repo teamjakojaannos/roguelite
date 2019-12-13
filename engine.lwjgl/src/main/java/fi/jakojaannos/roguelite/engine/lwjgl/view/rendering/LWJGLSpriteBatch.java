@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import fi.jakojaannos.roguelite.engine.content.view.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;

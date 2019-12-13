@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.game.app;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
 import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
-import fi.jakojaannos.roguelite.engine.view.Window;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.Roguelite;
 import fi.jakojaannos.roguelite.game.data.GameState;
@@ -21,7 +20,6 @@ public class RogueliteApplication {
     @Setter private boolean debugStackTraces = false;
     @Setter private int windowWidth = -1;
     @Setter private int windowHeight = -1;
-    @Setter private Window.Mode windowMode = Window.Mode.Windowed;
     @Setter private boolean floatWindow = false;
 
     public void setDebugMode(boolean state) {
@@ -38,7 +36,7 @@ public class RogueliteApplication {
                  val game = new Roguelite()
             ) {
                 val inputProvider = new LWJGLInputProvider(runner.getWindow(), this.enableForceClose);
-                runner.run(Roguelite::createInitialState, game, inputProvider, renderer);
+                runner.run(Roguelite::createInitialState, game, inputProvider, renderer::render);
             }
         } catch (Exception e) {
             LOG.error("The game loop unexpectedly stopped.");

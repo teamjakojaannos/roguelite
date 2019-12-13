@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.view;
 
-import fi.jakojaannos.roguelite.engine.content.view.SpriteRegistry;
-import fi.jakojaannos.roguelite.engine.content.view.TextureRegistry;
+import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;

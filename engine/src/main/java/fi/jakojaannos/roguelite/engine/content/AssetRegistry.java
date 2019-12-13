@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.content.view;
+package fi.jakojaannos.roguelite.engine.content;
 
 import fi.jakojaannos.roguelite.engine.content.AssetHandle;
 

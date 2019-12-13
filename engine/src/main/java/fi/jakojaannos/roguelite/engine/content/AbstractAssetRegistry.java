@@ -1,12 +1,9 @@
 package fi.jakojaannos.roguelite.engine.content;
 
-import fi.jakojaannos.roguelite.engine.content.view.AssetRegistry;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public abstract class AbstractAssetRegistry<TAsset>
         implements AssetRegistry<TAsset> {

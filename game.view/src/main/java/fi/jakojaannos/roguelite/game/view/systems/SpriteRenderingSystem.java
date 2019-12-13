@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import fi.jakojaannos.roguelite.engine.content.view.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;

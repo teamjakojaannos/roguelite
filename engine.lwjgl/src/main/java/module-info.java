@@ -10,6 +10,7 @@ module roguelite.engine.lwjgl {
     requires java.desktop;
 
     requires roguelite.engine;
+    requires roguelite.engine.view;
     requires roguelite.engine.utilities;
 
     exports fi.jakojaannos.roguelite.engine.lwjgl;

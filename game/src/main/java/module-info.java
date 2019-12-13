@@ -15,6 +15,6 @@ module roguelite.game {
 
     exports fi.jakojaannos.roguelite.game;
     exports fi.jakojaannos.roguelite.game.data;
-    exports fi.jakojaannos.roguelite.game.data.components to roguelite.game.view;
-    exports fi.jakojaannos.roguelite.game.data.resources to roguelite.game.view;
+    exports fi.jakojaannos.roguelite.game.data.components;
+    exports fi.jakojaannos.roguelite.game.data.resources;
 }

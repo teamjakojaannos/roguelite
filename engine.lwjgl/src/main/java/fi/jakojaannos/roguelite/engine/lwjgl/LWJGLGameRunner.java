@@ -4,10 +4,11 @@ import fi.jakojaannos.roguelite.engine.Game;
 import fi.jakojaannos.roguelite.engine.GameRunner;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
-import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import lombok.Getter;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+
+import java.util.function.BiConsumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -16,10 +17,6 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
         extends GameRunner<TGame, TInput, TState> {
     @Getter
     private final LWJGLWindow window;
-
-    public LWJGLGameRunner(int windowWidth, int windowHeight) {
-        this(windowWidth, windowHeight, false);
-    }
 
     public LWJGLGameRunner(int windowWidth, int windowHeight, boolean floatWindow) {
         GLFWErrorCallback.createPrint(System.err).set();
@@ -56,7 +53,7 @@ public class LWJGLGameRunner<TGame extends Game<TState>, TInput extends InputPro
     @Override
     public void presentGameState(
             TState state,
-            GameRenderer<TState> renderer,
+            BiConsumer<TState, Double> renderer,
             double partialTickAlpha
     ) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

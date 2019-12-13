@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import fi.jakojaannos.roguelite.engine.content.view.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
@@ -8,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
+import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
@@ -44,7 +44,7 @@ public class LevelRenderingSystem implements ECSSystem {
         val camera = world.getEntityManager()
                           .getComponentOf(world.getResource(CameraProperties.class).cameraEntity,
                                           Camera.class)
-                          .get();
+                          .orElseThrow();
 
         val regionX = (int) Math.floor(camera.pos.x - this.camera.getViewportWidthInUnits() / 2.0);
         val regionY = (int) Math.floor(camera.pos.y - this.camera.getViewportHeightInUnits() / 2.0);
@@ -53,7 +53,7 @@ public class LevelRenderingSystem implements ECSSystem {
 
         this.batch.begin(this.camera);
         entities.forEach(entity -> {
-            val level = world.getEntityManager().getComponentOf(entity, TileMapLayer.class).get();
+            val level = world.getEntityManager().getComponentOf(entity, TileMapLayer.class).orElseThrow();
 
             val tileSize = 1.0;
             for (int x = regionX; x < regionX + regionW; ++x) {

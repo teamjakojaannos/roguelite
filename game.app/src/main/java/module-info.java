@@ -4,6 +4,7 @@ module roguelite.game.app {
     requires jsr305;
 
     requires roguelite.engine;
+    requires roguelite.engine.view;
     requires roguelite.engine.lwjgl;
 
     requires roguelite.game;

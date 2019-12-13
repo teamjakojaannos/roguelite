@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.content.view;
+package fi.jakojaannos.roguelite.engine.view.content;
 
 import com.google.gson.*;
 import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;

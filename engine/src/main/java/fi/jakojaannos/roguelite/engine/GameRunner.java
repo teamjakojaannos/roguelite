@@ -2,13 +2,12 @@ package fi.jakojaannos.roguelite.engine;
 
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
-import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.Optional;
 import java.util.Queue;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -32,7 +31,7 @@ public abstract class GameRunner<
      * @return <code>true</code> if runner should continue with the game loop. <code>false</code> to
      * break from the loop.
      */
-    protected boolean shouldContinueLoop( TGame game) {
+    protected boolean shouldContinueLoop(TGame game) {
         return !game.isFinished();
     }
 
@@ -46,24 +45,16 @@ public abstract class GameRunner<
      *                      provided renderer is <code>null</code>.
      */
     public void run(
-             Supplier<TState> defaultStateSupplier,
-             TGame game,
-             TInput inputProvider,
-            GameRenderer<TState> renderer
+            final Supplier<TState> defaultStateSupplier,
+            final TGame game,
+            final TInput inputProvider,
+            final BiConsumer<TState, Double> renderer
     ) {
         if (game.isDisposed()) {
             throw new IllegalStateException("Tried running an already disposed game!");
         }
 
         LOG.info("Runner starting...");
-
-        // Create NOP-renderer if provided renderer is null and we are in the test environment
-        GameRenderer<TState> actualRenderer =
-                Optional.ofNullable(renderer)
-                        .or(() -> Optional.ofNullable(System.getenv("ENVIRONMENT"))
-                                          .filter(env -> env.equalsIgnoreCase("test"))
-                                          .map(env -> new NOPRenderer()))
-                        .orElseThrow(() -> new IllegalStateException("run called outside test environment without specifying a valid renderer!"));
 
         // Loop
         val state = defaultStateSupplier.get();
@@ -99,7 +90,8 @@ public abstract class GameRunner<
             }
 
             val partialTickAlpha = accumulator / (double) simulationTimestep;
-            presentGameState(state, actualRenderer, partialTickAlpha);
+            renderer.accept(state, partialTickAlpha);
+            presentGameState(state, renderer, partialTickAlpha);
             frames++;
         }
 
@@ -148,19 +140,9 @@ public abstract class GameRunner<
      */
     public void presentGameState(
             TState state,
-            GameRenderer<TState> renderer,
+            BiConsumer<TState, Double> renderer,
             double partialTickAlpha
     ) {
-        renderer.render(state, partialTickAlpha);
-    }
-
-    private class NOPRenderer implements GameRenderer<TState> {
-        @Override
-        public void render(TState game, double partialTickAlpha) {
-        }
-
-        @Override
-        public void close() {
-        }
+        renderer.accept(state, partialTickAlpha);
     }
 }
