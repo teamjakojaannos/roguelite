@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
@@ -8,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
+import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
@@ -37,7 +37,6 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     private final LWJGLCamera camera;
     private final SpriteBatch<String, LWJGLCamera> batch;
     private final BiFunction<String, Integer, LWJGLTexture> textureResolver;
-    private final SpriteRegistry<LWJGLTexture> sprites;
 
     public SpriteRenderingSystem(
             final Path assetRoot,
@@ -45,11 +44,10 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
             final SpriteRegistry<LWJGLTexture> sprites
     ) {
         this.camera = camera;
-        this.sprites = sprites;
 
         val batch = new LWJGLSpriteBatch(assetRoot, "sprite", sprites);
         this.batch = batch;
-        this.textureResolver = (s, integer) -> batch.resolveTexture(s, integer).getTexture();
+        this.textureResolver = (spriteName, frame) -> batch.resolveTexture(spriteName, frame).getTexture();
     }
 
     @Override
@@ -72,8 +70,8 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
         val renderQueue = new HashMap<Integer, HashMap<LWJGLTexture, List<SpriteRenderEntry>>>();
         entities.forEach(
                 entity -> {
-                    val transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
-                    val info = world.getEntityManager().getComponentOf(entity, SpriteInfo.class).get();
+                    val transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
+                    val info = world.getEntityManager().getComponentOf(entity, SpriteInfo.class).orElseThrow();
 
                     val texturesForZLayer = renderQueue.computeIfAbsent(info.zLayer,
                                                                         zLayer -> new HashMap<>());

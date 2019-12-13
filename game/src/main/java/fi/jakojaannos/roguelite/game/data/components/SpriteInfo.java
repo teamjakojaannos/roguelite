@@ -12,7 +12,7 @@ public class SpriteInfo implements Component {
     public String spriteName;
     public int zLayer;
 
-    public List<Integer> frames = List.of(-1);
+    public List<Integer> frames = List.of(0);
     public int frameIndex = 0;
 
     public double frameTimer;

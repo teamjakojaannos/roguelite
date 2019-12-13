@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import lombok.extern.slf4j.Slf4j;
@@ -91,9 +91,9 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     }
 
     @Override
-    public TextureRegion<LWJGLTexture> resolveTexture(String spriteName, int frame) {
+    public TextureRegion<LWJGLTexture> resolveTexture(final String spriteName, int frame) {
         return this.sprites.getByAssetName(spriteName)
-                           .getFrameOrWhole(frame);
+                           .getSpecificFrame("default", frame);
     }
 
     @Override

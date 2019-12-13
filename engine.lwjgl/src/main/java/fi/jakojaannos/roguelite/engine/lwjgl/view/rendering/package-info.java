@@ -1,7 +1,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @FieldsAreNonnullByDefault
-package fi.jakojaannos.roguelite.engine.lwjgl;
+package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.utilities.annotation.FieldsAreNonnullByDefault;
 import fi.jakojaannos.roguelite.engine.utilities.annotation.MethodsReturnNonnullByDefault;

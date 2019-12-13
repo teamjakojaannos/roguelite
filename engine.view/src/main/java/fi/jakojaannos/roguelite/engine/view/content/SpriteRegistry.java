@@ -1,22 +1,22 @@
 package fi.jakojaannos.roguelite.engine.view.content;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;
 import fi.jakojaannos.roguelite.engine.content.AssetHandle;
-import fi.jakojaannos.roguelite.engine.view.rendering.Sprite;
+import fi.jakojaannos.roguelite.engine.view.LogCategories;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.sprite.serialization.SpriteDeserializer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -37,9 +37,9 @@ public class SpriteRegistry<TTexture extends Texture>
         this.assetRoot = assetRoot;
         this.textures = textures;
 
-        this.defaultSprite = new Sprite<>(List.of(new TextureRegion<>(textures.getDefault(),
+        this.defaultSprite = Sprite.ofSingleFrame(new TextureRegion<>(textures.getDefault(),
                                                                       0, 0,
-                                                                      1, 1)));
+                                                                      1, 1));
     }
 
     @Override
@@ -50,9 +50,12 @@ public class SpriteRegistry<TTexture extends Texture>
     @Override
     protected Optional<Sprite<TTexture>> loadAsset(final AssetHandle handle) {
         Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Sprite.class, (JsonDeserializer<Sprite<TTexture>>) this::deserializeSprite)
+                .registerTypeAdapter(Sprite.class, new SpriteDeserializer<>(textures))
                 .create();
-        try (val reader = new InputStreamReader(Files.newInputStream(assetRoot.resolve(handle.getName() + ".json"), StandardOpenOption.READ))) {
+        val path = assetRoot.resolve(handle.getName() + ".json");
+        try (val reader = new InputStreamReader(Files.newInputStream(path, StandardOpenOption.READ))) {
+            LOG.trace(LogCategories.SPRITE_SERIALIZATION,
+                      "Loading sprite {}", path.toString());
             // noinspection unchecked
             return Optional.ofNullable(gson.fromJson(reader, Sprite.class));
         } catch (IOException e) {
@@ -60,33 +63,6 @@ public class SpriteRegistry<TTexture extends Texture>
             LOG.error("Exception: ", e);
             return Optional.empty();
         }
-    }
-
-    private Sprite<TTexture> deserializeSprite(
-            final JsonElement json,
-            final Type typeOfT,
-            final JsonDeserializationContext context
-    ) throws JsonParseException {
-        val jsonObject = json.getAsJsonObject();
-        val framesJson = jsonObject.getAsJsonArray("frames");
-
-        val frames = new ArrayList<TextureRegion<TTexture>>();
-        for (val frameElement : framesJson) {
-            val frameJson = frameElement.getAsJsonObject();
-            val textureHandle = frameJson.get("texture").getAsString();
-            val texture = this.textures.getByAssetName(textureHandle);
-            val x = frameJson.get("x").getAsDouble();
-            val y = frameJson.get("y").getAsDouble();
-            val w = frameJson.get("w").getAsDouble();
-            val h = frameJson.get("h").getAsDouble();
-            val u0 = x / texture.getWidth();
-            val v0 = y / texture.getHeight();
-            val u1 = u0 + w / texture.getWidth();
-            val v1 = v0 + h / texture.getHeight();
-            frames.add(new TextureRegion<>(texture, u0, v0, u1, v1));
-        }
-
-        return new Sprite<>(frames);
     }
 
     @Override
