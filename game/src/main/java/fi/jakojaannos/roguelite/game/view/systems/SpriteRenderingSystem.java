@@ -82,10 +82,10 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                                                                               tex -> new ArrayList<>());
 
                     val bounds = world.getEntityManager().getComponentOf(entity, Collider.class)
-                                      .map(collider -> new Rectangled(transform.position.x - 0 * collider.origin.x,
-                                                                      transform.position.y - 0 * collider.origin.y,
-                                                                      transform.position.x - 0 * collider.origin.x + collider.width,
-                                                                      transform.position.y - 0 * collider.origin.y + collider.height))
+                                      .map(collider -> new Rectangled(transform.position.x - collider.origin.x,
+                                                                      transform.position.y - collider.origin.y,
+                                                                      transform.position.x - collider.origin.x + collider.width,
+                                                                      transform.position.y - collider.origin.y + collider.height))
                                       .orElseGet(() -> new Rectangled(transform.position.x,
                                                                       transform.position.y,
                                                                       transform.position.x + 1.0,

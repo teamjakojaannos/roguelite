@@ -11,7 +11,6 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.*;
@@ -196,17 +195,13 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     }
 
     private static ShaderProgram createShader(final Path assetRoot, final String shader) {
-        return new ShaderProgram(
-                assetRoot.resolve("shaders").resolve(shader + ".vert"),
-                assetRoot.resolve("shaders").resolve(shader + ".frag"),
-                Map.ofEntries(
-                        Map.entry(0, "in_pos"),
-                        Map.entry(1, "in_uv"),
-                        Map.entry(2, "in_tint")
-                ),
-                Map.ofEntries(
-                        Map.entry(0, "out_fragColor")
-                )
-        );
+        return ShaderProgram.builder()
+                            .vertexShader(assetRoot.resolve("shaders").resolve(shader + ".vert"))
+                            .fragmentShader(assetRoot.resolve("shaders").resolve(shader + ".frag"))
+                            .attributeLocation(0, "in_pos")
+                            .attributeLocation(1, "in_uv")
+                            .attributeLocation(2, "in_tint")
+                            .fragmentDataLocation(0, "out_fragColor")
+                            .build();
     }
 }

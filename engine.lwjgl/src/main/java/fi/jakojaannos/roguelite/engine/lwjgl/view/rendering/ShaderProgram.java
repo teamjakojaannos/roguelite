@@ -1,15 +1,11 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryStack;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL20.*;
@@ -17,51 +13,22 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
 
 @Slf4j
 public class ShaderProgram implements AutoCloseable {
-    @Getter private final int shaderProgram;
-    private final int vertexShader;
-    private final int fragmentShader;
+    private final int shaderProgram;
+    private final Collection<Shader> shaders;
 
-    public ShaderProgram(
-            final Path vertexShaderPath,
-            final Path fragmentShaderPath,
+    public static ShaderBuilder builder() {
+        return new ShaderBuilder();
+    }
+
+    ShaderProgram(
+            final int programPtr,
+            final Collection<Shader> shaders,
             final Map<Integer, String> attributeLocations,
             final Map<Integer, String> fragDataLocations
     ) {
-        this.vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        this.fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        this.shaderProgram = glCreateProgram();
+        this.shaderProgram = programPtr;
+        this.shaders = shaders;
 
-        // Compile the vertex shader
-        try {
-            GL20.glShaderSource(this.vertexShader,
-                                Files.readString(vertexShaderPath));
-        } catch (IOException e) {
-            LOG.error("Loading vertex shader \"{}\" failed!", vertexShaderPath);
-            return;
-        }
-        glCompileShader(this.vertexShader);
-
-        // Compile the fragment shader
-        try {
-            glShaderSource(this.fragmentShader,
-                           Files.readString(fragmentShaderPath));
-        } catch (IOException e) {
-            LOG.error("Loading fragment shader \"{}\" failed!", fragmentShaderPath);
-            return;
-        }
-        glCompileShader(this.fragmentShader);
-
-        // Check for errors
-        if (glGetShaderi(this.vertexShader, GL_COMPILE_STATUS) != GL_TRUE) {
-            LOG.error("Error compiling vertex shader:\n{}", glGetShaderInfoLog(this.vertexShader));
-        }
-        if (glGetShaderi(this.fragmentShader, GL_COMPILE_STATUS) != GL_TRUE) {
-            LOG.error("Error compiling fragment shader:\n{}", glGetShaderInfoLog(this.fragmentShader));
-        }
-
-        // Attach shaders and bind data locations
-        glAttachShader(this.shaderProgram, this.vertexShader);
-        glAttachShader(this.shaderProgram, this.fragmentShader);
         attributeLocations.forEach((index, name) -> glBindAttribLocation(this.shaderProgram, index, name));
         fragDataLocations.forEach((colorNumber, name) -> glBindFragDataLocation(this.shaderProgram, colorNumber, name));
 
@@ -76,20 +43,20 @@ public class ShaderProgram implements AutoCloseable {
         glUseProgram(this.shaderProgram);
     }
 
-    public void setUniformMat4x4(int uniformLocation, Matrix4f matrix) {
+    public void setUniformMat4x4(final int uniformLocation, final Matrix4f matrix) {
         try (val stack = MemoryStack.stackPush()) {
             glUniformMatrix4fv(uniformLocation, false, matrix.get(stack.mallocFloat(16)));
         }
     }
 
-    public int getUniformLocation(String name) {
+    public int getUniformLocation(final String name) {
         return glGetUniformLocation(shaderProgram, name);
     }
 
     @Override
     public void close() {
-        glDeleteShader(this.vertexShader);
-        glDeleteShader(this.fragmentShader);
+        this.shaders.forEach(Shader::close);
+
         glDeleteProgram(this.shaderProgram);
     }
 }

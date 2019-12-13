@@ -10,9 +10,10 @@ import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.game.view.systems.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.LevelRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
+import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
+import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -40,6 +41,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
 
         if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, this.camera));
+            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, this.camera));
         }
         this.rendererDispatcher = builder.build();
 

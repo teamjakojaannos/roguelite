@@ -5,6 +5,7 @@ module roguelite.engine.lwjgl {
     requires org.lwjgl.glfw;
     requires org.lwjgl.opengl;
     requires org.slf4j;
+    requires jsr305;
 
     requires java.desktop;
 
