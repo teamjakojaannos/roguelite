@@ -1,4 +1,4 @@
-import org.gradle.internal.os.OperatingSystem;
+import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id "application"
@@ -26,9 +26,7 @@ switch (buildPlatform) {
 
 
 dependencies {
-    implementation project(':engine')
-    implementation project(':engine.lwjgl')
-    implementation project(':game')
+    implementation project(':game.app')
 
     // LWJGL and its components
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")

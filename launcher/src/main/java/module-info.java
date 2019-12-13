@@ -1,8 +1,7 @@
 module roguelite.launcher {
     requires static lombok;
     requires org.slf4j;
-    requires roguelite.engine;
-    requires roguelite.game;
+    requires roguelite.game.app;
 
     // Make sure jlink packages the natives
     requires org.lwjgl.natives;

@@ -8,3 +8,5 @@ include 'engine.lwjgl'
 include 'engine.utilities'
 
 include 'game'
+include 'game.view'
+include 'game.app'

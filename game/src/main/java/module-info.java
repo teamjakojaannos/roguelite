@@ -14,6 +14,7 @@ module roguelite.game {
     opens fi.jakojaannos.roguelite.game.data.resources.collision to roguelite.engine.ecs;
 
     exports fi.jakojaannos.roguelite.game;
-    exports fi.jakojaannos.roguelite.game.view;
     exports fi.jakojaannos.roguelite.game.data;
+    exports fi.jakojaannos.roguelite.game.data.components to roguelite.game.view;
+    exports fi.jakojaannos.roguelite.game.data.resources to roguelite.game.view;
 }

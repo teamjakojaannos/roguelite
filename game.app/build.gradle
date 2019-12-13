@@ -1,0 +1,13 @@
+dependencies {
+    implementation project(':engine')
+    implementation project(':engine.lwjgl')
+
+    implementation project(':game')
+    implementation project(':game.view')
+}
+
+test {
+    moduleOptions {
+        runOnClasspath = true
+    }
+}
