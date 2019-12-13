@@ -78,8 +78,6 @@ public class SlimeAIControllerSystem implements ECSSystem {
             }
 
             if (ai.jumpCoolDown < 0.0) {
-                LOG.debug("HOP!");
-
                 tempDir.set(playerPos)
                         .sub(tempPos);
 

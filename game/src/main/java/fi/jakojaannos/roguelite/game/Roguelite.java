@@ -62,6 +62,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new EnemyAttackCoolDownSystem())
                 .withSystem(new EnemyToPlayerCollisionHandlerSystem())
                 .withSystem(new ReaperSystem())
+                .withSystem(new CleanUpDeadPlayersSystem())
                 .build();
     }
 
@@ -78,9 +79,9 @@ public class Roguelite extends GameBase<GameState> {
         state.getWorld().getResource(Players.class).player = player;
 
         val camera = entities.createEntity();
-        val camComponent = new Camera();
-        camComponent.followTarget = player;
-        entities.addComponentTo(camera, camComponent);
+        val cameraComponent = new Camera();
+        cameraComponent.followTarget = player;
+        entities.addComponentTo(camera, cameraComponent);
         entities.addComponentTo(camera, new NoDrawTag());
         state.getWorld().getResource(CameraProperties.class).cameraEntity = camera;
 
@@ -88,9 +89,9 @@ public class Roguelite extends GameBase<GameState> {
         entities.addComponentTo(crosshair, new Transform(-999.0, -999.0));
         entities.addComponentTo(crosshair, new CrosshairTag());
         val crosshairCollider = new Collider(CollisionLayer.NONE);
-        crosshairCollider.width = 2.0;
-        crosshairCollider.height = 2.0;
-        crosshairCollider.origin.set(1.0);
+        crosshairCollider.width = 0.3;
+        crosshairCollider.height = 0.3;
+        crosshairCollider.origin.set(0.15);
         entities.addComponentTo(crosshair, crosshairCollider);
 
         val emptiness = new TileType(0, false);

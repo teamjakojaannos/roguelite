@@ -1,10 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.game.data.components.Camera;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.LogCategories;
 import fi.jakojaannos.roguelite.game.data.components.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.Health;
-import fi.jakojaannos.roguelite.game.data.resources.Players;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -16,7 +18,7 @@ public class HealthUpdateSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.LATE_TICK)
-                .withComponent(Health.class);
+                    .withComponent(Health.class);
     }
 
     @Override
@@ -28,27 +30,19 @@ public class HealthUpdateSystem implements ECSSystem {
         val entityManager = world.getEntityManager();
 
         entities.forEach(entity -> {
-            val hp = entityManager.getComponentOf(entity, Health.class).get();
+            val health = entityManager.getComponentOf(entity, Health.class).get();
 
-            val dmgList = hp.damageInstances;
-            for (val dmg : dmgList) {
-                LOG.debug("Oof");
-                hp.currentHealth -= dmg.damage;
+            val damageInstances = health.damageInstances;
+            for (val instance : damageInstances) {
+                health.currentHealth -= instance.damage;
+                LOG.debug(LogCategories.HEALTH, "Entity {} took {} damage. Has {} health remaining", entity.getId(), instance.damage, health.currentHealth);
             }
 
-            dmgList.clear();
+            damageInstances.clear();
 
-            if (hp.currentHealth <= 0.0f) {
-                LOG.debug("Dead");
+            if (health.currentHealth <= 0.0f) {
+                LOG.debug(LogCategories.HEALTH, "Entity {} health less than or equal to zero. Marking as dead.", entity.getId());
                 entityManager.addComponentIfAbsent(entity, new DeadTag());
-                // FIXME: Move this somewhere else once Reaper is merged to master
-                if (world.getResource(Players.class).player != null && entity.getId() == world.getResource(Players.class).player.getId()) {
-                    world.getResource(Players.class).player = null;
-                    entityManager.getEntitiesWith(Camera.class)
-                            .map(EntityManager.EntityComponentPair::getComponent)
-                            .filter(camera -> camera.followTarget == entity)
-                            .forEach(camera -> camera.followTarget = null);
-                }
             }
         });
     }

@@ -19,19 +19,21 @@ public class CameraControlSystem implements ECSSystem {
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world,
+            final double delta
     ) {
+        val entityManager = world.getEntityManager();
         entities.forEach(entity -> {
-            val camera = world.getEntityManager()
-                              .getComponentOf(entity, Camera.class)
-                              .orElseThrow();
-            if (camera.followTarget != null) {
-                world.getEntityManager()
-                     .getComponentOf(camera.followTarget, Transform.class)
-                     .ifPresent(transform -> camera.pos.set(transform.position));
+            val camera = entityManager.getComponentOf(entity, Camera.class)
+                                      .orElseThrow();
+            if (camera.followTarget == null || camera.followTarget.isMarkedForRemoval()) {
+                camera.followTarget = null;
+                return;
             }
+
+            entityManager.getComponentOf(camera.followTarget, Transform.class)
+                         .ifPresent(transform -> camera.pos.set(transform.position));
         });
     }
 }
