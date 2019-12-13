@@ -1,17 +1,14 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
+import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.lwjgl.system.MemoryStack;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_CLAMP_TO_BORDER;
@@ -20,14 +17,15 @@ import static org.lwjgl.opengl.GL13.GL_CLAMP_TO_BORDER;
 
 @Slf4j
 @EqualsAndHashCode
-public class LWJGLTexture implements AutoCloseable {
+public class LWJGLTexture implements Texture, AutoCloseable {
     private final int texture;
     @Getter private final int width;
     @Getter private final int height;
 
     public LWJGLTexture(
-            Path assetRoot,
-            String path
+            final int width,
+            final int height,
+            final BufferedImage image
     ) {
         this.texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, this.texture);
@@ -38,23 +36,14 @@ public class LWJGLTexture implements AutoCloseable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        int width, height;
-        try (val inputStream = Files.newInputStream(assetRoot.resolve(path));
-             val stack = MemoryStack.stackPush()
-        ) {
-            val image = ImageIO.read(inputStream);
-            width = image.getWidth();
-            height = image.getHeight();
+
+        try (val stack = MemoryStack.stackPush()) {
             val buffer = loadImageData(stack, image, width, height);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-        } catch (IOException e) {
-            LOG.warn("Image in path \"{}\" could not be opened!", assetRoot.resolve(path).toString());
-            width = 0;
-            height = 0;
         }
+
         this.width = width;
         this.height = height;
-
         LOG.debug("Done loading texture! {}×{}", width, height);
     }
 

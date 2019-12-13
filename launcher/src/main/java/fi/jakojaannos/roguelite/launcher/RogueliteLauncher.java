@@ -15,6 +15,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -33,7 +34,7 @@ public class RogueliteLauncher {
     @Setter private Window.Mode windowMode = Window.Mode.Windowed;
     @Setter private boolean floatWindow = false;
 
-    public void parseCommandLineArguments( String... args) {
+    public void parseCommandLineArguments(String... args) {
         try {
             Arguments.builder()
                      .with(Argument.withName("window")
@@ -59,7 +60,7 @@ public class RogueliteLauncher {
                      .with(Argument.withName("height")
                                    .withAction(params -> {
                                        val height = params.parameter(Parameter.integer("height")
-                                                                             .withMin(1));
+                                                                              .withMin(1));
                                        this.setWindowHeight(height);
                                    }))
                      .with(Argument.withName("windowMode")
@@ -122,9 +123,10 @@ public class RogueliteLauncher {
                 this.windowWidth,
                 this.windowHeight,
                 this.floatWindow
-        )) {
+        )
+        ) {
             try (val renderer = new RogueliteGameRenderer(
-                    this.assetRoot,
+                    Path.of(this.assetRoot),
                     runner.getWindow());
                  val game = new Roguelite()
             ) {

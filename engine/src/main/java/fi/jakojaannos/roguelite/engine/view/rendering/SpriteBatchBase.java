@@ -8,7 +8,7 @@ import lombok.val;
 import org.joml.Matrix4f;
 
 @Slf4j
-public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTexture>
+public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTexture extends Texture>
         implements SpriteBatch<TSpriteID, TCamera> {
     private final int maxFramesPerBatch;
 
@@ -31,8 +31,8 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
      * @param transformation global transformations to apply
      */
     protected abstract void flush(
-             TTexture texture,
-             TCamera camera,
+            TTexture texture,
+            TCamera camera,
             Matrix4f transformation
     );
 
@@ -45,7 +45,7 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
      * @return texture which can be used to render the sprite
      */
 
-    public abstract TextureRegion<TTexture> resolveTexture( TSpriteID sprite, int frame);
+    public abstract TextureRegion<TTexture> resolveTexture(TSpriteID sprite, int frame);
 
     /**
      * Queues a new sprite animation frame for rendering. Passing in -1 as the frame renders the
@@ -58,7 +58,7 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
      * @param height  vertical size of the sprite in world units
      */
     protected abstract void queueFrame(
-             TextureRegion<TTexture> texture,
+            TextureRegion<TTexture> texture,
             double x,
             double y,
             double width,

@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
+import fi.jakojaannos.roguelite.engine.content.view.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Rectangled;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,10 +37,17 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     private final LWJGLCamera camera;
     private final SpriteBatch<String, LWJGLCamera> batch;
     private final BiFunction<String, Integer, LWJGLTexture> textureResolver;
+    private final SpriteRegistry<LWJGLTexture> sprites;
 
-    public SpriteRenderingSystem(String assetRoot, LWJGLCamera camera) {
+    public SpriteRenderingSystem(
+            final Path assetRoot,
+            final LWJGLCamera camera,
+            final SpriteRegistry<LWJGLTexture> sprites
+    ) {
         this.camera = camera;
-        val batch = new LWJGLSpriteBatch(assetRoot, "sprite");
+        this.sprites = sprites;
+
+        val batch = new LWJGLSpriteBatch(assetRoot, "sprite", sprites);
         this.batch = batch;
         this.textureResolver = (s, integer) -> batch.resolveTexture(s, integer).getTexture();
     }

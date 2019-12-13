@@ -1,8 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import com.google.gson.*;
+import fi.jakojaannos.roguelite.engine.content.view.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.view.rendering.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import lombok.extern.slf4j.Slf4j;
@@ -10,17 +9,8 @@ import lombok.val;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -37,8 +27,6 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     private static final int VERTICES_PER_SPRITE = 4;
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
 
-    private final TextureRegion<LWJGLTexture> defaultTextureRegion;
-
     private final ShaderProgram shader;
     private final int uniformProjectionMatrix;
     private final int uniformViewMatrix;
@@ -48,18 +36,16 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     private final int vbo;
     private final int ebo;
 
-    private ByteBuffer vertexDataBuffer;
-    private Map<String, LWJGLTexture> textures = new HashMap<>();
-    private Map<String, Sprite<LWJGLTexture>> sprites = new HashMap<>();
-    private Path assetRoot;
+    private final ByteBuffer vertexDataBuffer;
+    private final SpriteRegistry<LWJGLTexture> sprites;
 
     public LWJGLSpriteBatch(
-            String assetRoot,
-            String shader
+            final Path assetRoot,
+            final String shader,
+            final SpriteRegistry<LWJGLTexture> sprites
     ) {
         super(MAX_SPRITES_PER_BATCH);
-        this.assetRoot = Paths.get(assetRoot);
-        this.defaultTextureRegion = new TextureRegion<>(new LWJGLTexture(this.assetRoot, "textures/sheep.png"), 0, 0, 1, 1);
+        this.sprites = sprites;
         this.shader = createShader(assetRoot, shader);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
         this.uniformViewMatrix = this.shader.getUniformLocation("view");
@@ -83,60 +69,17 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
 
     @Override
     public TextureRegion<LWJGLTexture> resolveTexture(String spriteName, int frame) {
-        return this.sprites.computeIfAbsent(spriteName,
-                                            key -> loadSprite(spriteName))
+        return this.sprites.getByAssetName(spriteName)
                            .getFrameOrWhole(frame);
-    }
-
-    private Sprite<LWJGLTexture> loadSprite(String spriteName) {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Sprite.class, (JsonDeserializer<Sprite<LWJGLTexture>>) this::deserializeSprite)
-                .create();
-        try (val reader = new InputStreamReader(Files.newInputStream(assetRoot.resolve(spriteName + ".json"), StandardOpenOption.READ))) {
-            // noinspection unchecked
-            return gson.fromJson(reader, Sprite.class);
-        } catch (IOException e) {
-            LOG.error("Reading sprite \"{}\" failed!", spriteName);
-            LOG.error("Exception: ", e);
-            return new Sprite<>(List.of(this.defaultTextureRegion));
-        }
-    }
-
-    public Sprite<LWJGLTexture> deserializeSprite(
-            JsonElement json,
-            Type typeOfT,
-            JsonDeserializationContext context
-    ) throws JsonParseException {
-        val jsonObject = json.getAsJsonObject();
-        val framesJson = jsonObject.getAsJsonArray("frames");
-
-        val frames = new ArrayList<TextureRegion<LWJGLTexture>>();
-        for (val frameElement : framesJson) {
-            val frameJson = frameElement.getAsJsonObject();
-            val texturePath = frameJson.get("texture").getAsString();
-            val texture = this.textures.computeIfAbsent(texturePath,
-                                                        key -> new LWJGLTexture(this.assetRoot, texturePath));
-            val x = frameJson.get("x").getAsDouble();
-            val y = frameJson.get("y").getAsDouble();
-            val w = frameJson.get("w").getAsDouble();
-            val h = frameJson.get("h").getAsDouble();
-            val u0 = x / texture.getWidth();
-            val v0 = y / texture.getHeight();
-            val u1 = u0 + w / texture.getWidth();
-            val v1 = v0 + h / texture.getHeight();
-            frames.add(new TextureRegion<>(texture, u0, v0, u1, v1));
-        }
-
-        return new Sprite<>(frames);
     }
 
     @Override
     protected void queueFrame(
-            TextureRegion<LWJGLTexture> region,
-            double x,
-            double y,
-            double width,
-            double height
+            final TextureRegion<LWJGLTexture> region,
+            final double x,
+            final double y,
+            final double width,
+            final double height
     ) {
         val offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
         updateVertex(offset,
@@ -237,27 +180,25 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
         glDeleteBuffers(this.ebo);
 
         this.shader.close();
-        this.sprites.clear();
-        this.textures.values().forEach(LWJGLTexture::close);
     }
 
     private int[] constructIndicesArray() {
         val indices = new int[MAX_SPRITES_PER_BATCH * 6];
         for (int i = 0, j = 0; i < indices.length; i += 6, j += 4) {
-            indices[i + 0] = j + 0;
+            indices[i] = j;
             indices[i + 1] = j + 1;
             indices[i + 2] = j + 2;
             indices[i + 3] = j + 2;
             indices[i + 4] = j + 3;
-            indices[i + 5] = j + 0;
+            indices[i + 5] = j;
         }
         return indices;
     }
 
-    private static ShaderProgram createShader(String assetRoot, String shader) {
+    private static ShaderProgram createShader(final Path assetRoot, final String shader) {
         return new ShaderProgram(
-                Paths.get(assetRoot, "shaders", shader + ".vert").toString(),
-                Paths.get(assetRoot, "shaders", shader + ".frag").toString(),
+                assetRoot.resolve("shaders").resolve(shader + ".vert"),
+                assetRoot.resolve("shaders").resolve(shader + ".frag"),
                 Map.ofEntries(
                         Map.entry(0, "in_pos"),
                         Map.entry(1, "in_uv"),

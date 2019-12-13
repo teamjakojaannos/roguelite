@@ -9,7 +9,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL20.*;
@@ -22,10 +22,10 @@ public class ShaderProgram implements AutoCloseable {
     private final int fragmentShader;
 
     public ShaderProgram(
-            String vertexShaderPath,
-            String fragmentShaderPath,
-            Map<Integer, String> attributeLocations,
-            Map<Integer, String> fragDataLocations
+            final Path vertexShaderPath,
+            final Path fragmentShaderPath,
+            final Map<Integer, String> attributeLocations,
+            final Map<Integer, String> fragDataLocations
     ) {
         this.vertexShader = glCreateShader(GL_VERTEX_SHADER);
         this.fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -34,7 +34,7 @@ public class ShaderProgram implements AutoCloseable {
         // Compile the vertex shader
         try {
             GL20.glShaderSource(this.vertexShader,
-                                Files.readString(Paths.get(vertexShaderPath)));
+                                Files.readString(vertexShaderPath));
         } catch (IOException e) {
             LOG.error("Loading vertex shader \"{}\" failed!", vertexShaderPath);
             return;
@@ -44,7 +44,7 @@ public class ShaderProgram implements AutoCloseable {
         // Compile the fragment shader
         try {
             glShaderSource(this.fragmentShader,
-                           Files.readString(Paths.get(fragmentShaderPath)));
+                           Files.readString(fragmentShaderPath));
         } catch (IOException e) {
             LOG.error("Loading fragment shader \"{}\" failed!", fragmentShaderPath);
             return;

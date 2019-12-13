@@ -1,7 +1,10 @@
 package fi.jakojaannos.roguelite.game.view;
 
+import fi.jakojaannos.roguelite.engine.content.view.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.content.view.TextureRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.GameState;
@@ -13,28 +16,31 @@ import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.nio.file.Path;
+
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final SystemDispatcher rendererDispatcher;
     private final RogueliteCamera camera;
+    private final TextureRegistry<LWJGLTexture> textureRegistry;
+    private final SpriteRegistry<LWJGLTexture> spriteRegistry;
 
-    public RogueliteGameRenderer( String assetRoot,  LWJGLWindow window) {
+    public RogueliteGameRenderer(final Path assetRoot, final LWJGLWindow window) {
         LOG.debug("Constructing GameRenderer...");
         LOG.debug("asset root: {}", assetRoot);
+
+        this.textureRegistry = new TextureRegistry<>(assetRoot, LWJGLTexture::new);
+        this.spriteRegistry = new SpriteRegistry<>(assetRoot, this.textureRegistry);
 
 
         this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
         val builder = SystemDispatcher.builder()
-                                      .withSystem(new LevelRenderingSystem(assetRoot, this.camera))
-                                      .withSystem(new SpriteRenderingSystem(assetRoot, this.camera));
-        //.withSystem("render_level", new LevelRenderingSystem(assetRoot, this.camera))
-        //.withSystem("render_sprites", new SpriteRenderingSystem(assetRoot, this.camera), "render_level");
+                                      .withSystem(new LevelRenderingSystem(assetRoot, this.camera, this.spriteRegistry))
+                                      .withSystem(new SpriteRenderingSystem(assetRoot, this.camera, this.spriteRegistry));
 
         if (DebugConfig.debugModeEnabled) {
-            //builder.withSystem("render_debug", new EntityBoundsRenderingSystem(assetRoot, this.camera));
             builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, this.camera));
         }
-
         this.rendererDispatcher = builder.build();
 
         window.addResizeCallback(this.camera::resizeViewport);
@@ -58,5 +64,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     @Override
     public void close() throws Exception {
         this.rendererDispatcher.close();
+        this.textureRegistry.close();
+        this.spriteRegistry.close();
     }
 }

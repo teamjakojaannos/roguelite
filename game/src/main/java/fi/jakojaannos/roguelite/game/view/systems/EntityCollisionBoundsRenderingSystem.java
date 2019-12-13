@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -42,11 +43,14 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
     private final Matrix4f modelMatrix = new Matrix4f();
 
-    public EntityCollisionBoundsRenderingSystem(String assetRoot, LWJGLCamera camera) {
+    public EntityCollisionBoundsRenderingSystem(
+            final Path assetRoot,
+            final LWJGLCamera camera
+    ) {
         this.camera = camera;
         this.shader = new ShaderProgram(
-                assetRoot + "shaders/bounds.vert",
-                assetRoot + "shaders/bounds.frag",
+                assetRoot.resolve("shaders/bounds.vert"),
+                assetRoot.resolve("shaders/bounds.frag"),
                 Map.ofEntries(Map.entry(0, "in_pos")),
                 Map.ofEntries(Map.entry(0, "out_fragColor"))
         );
