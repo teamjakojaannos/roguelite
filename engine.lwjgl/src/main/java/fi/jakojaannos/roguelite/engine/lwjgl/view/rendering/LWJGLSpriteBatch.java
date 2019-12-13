@@ -65,6 +65,30 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
             updateVertex(i * SIZE_IN_BYTES, 0, 0, 0, 0, 0, 0, 0);
         }
 
+        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
+        glBufferData(GL_ARRAY_BUFFER, this.vertexDataBuffer, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0,
+                              2,
+                              GL_FLOAT,
+                              false,
+                              SIZE_IN_BYTES,
+                              0); // offset: pos is first attribute -> 0
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1,
+                              2,
+                              GL_FLOAT,
+                              false,
+                              SIZE_IN_BYTES,
+                              2 * 4); // offset: pos = 2 * sizeof(float)
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2,
+                              3,
+                              GL_FLOAT,
+                              false,
+                              SIZE_IN_BYTES,
+                              4 * 4); // offset: pos + uv = 4 * sizeof(float)
     }
 
     @Override
@@ -138,31 +162,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
         glBindVertexArray(this.vao);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
         this.vertexDataBuffer.limit(getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES);
-        // FIXME: BufferSubData causes segfault in native code
-        //glBufferSubData(GL_ARRAY_BUFFER, 0, this.vertexDataBuffer);
-        glBufferData(GL_ARRAY_BUFFER, this.vertexDataBuffer, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0,
-                              2,
-                              GL_FLOAT,
-                              false,
-                              SIZE_IN_BYTES,
-                              0); // offset: pos is first attribute -> 0
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1,
-                              2,
-                              GL_FLOAT,
-                              false,
-                              SIZE_IN_BYTES,
-                              2 * 4); // offset: pos = 2 * sizeof(float)
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2,
-                              3,
-                              GL_FLOAT,
-                              false,
-                              SIZE_IN_BYTES,
-                              4 * 4); // offset: pos + uv = 4 * sizeof(float)
+        glBufferSubData(GL_ARRAY_BUFFER, 0, this.vertexDataBuffer);
 
         glDrawElements(GL_TRIANGLES,
                        getNFrames() * 6,
