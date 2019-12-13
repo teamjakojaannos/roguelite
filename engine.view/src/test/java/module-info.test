@@ -2,4 +2,4 @@
     org.junit.jupiter.api,org.junit.jupiter.params
 
 --add-reads
-    roguelite.engine.lwjgl=org.junit.jupiter.api,org.junit.jupiter.params
+    roguelite.engine.view=org.junit.jupiter.api,org.junit.jupiter.params

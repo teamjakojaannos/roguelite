@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.sprite.serialization;
 
 import com.google.gson.*;
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
+import fi.jakojaannos.roguelite.engine.utilities.json.JsonUtils;
 import fi.jakojaannos.roguelite.engine.view.LogCategories;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
@@ -50,9 +51,30 @@ public class SpriteDeserializer<TTexture extends Texture>
             final ArrayList<TextureRegion<TTexture>> outFrames
     ) {
         val framesElement = root.get("frames");
+        if (framesElement == null) {
+            throw new JsonParseException("Sprite definition missing frames!");
+        }
+
         if (framesElement.isJsonObject()) {
-            // TODO: Serialize as atlas
-            throw new UnsupportedOperationException("Not implemented");
+            val framesJsonObject = framesElement.getAsJsonObject();
+            val textureHandle = framesJsonObject.get("texture").getAsString();
+            val texture = this.textures.getByAssetName(textureHandle);
+            val rows = framesJsonObject.get("rows").getAsInt();
+            val columns = framesJsonObject.get("columns").getAsInt();
+
+            val frameU = 1.0 / rows;
+            val frameV = 1.0 / columns;
+            for (var row = 0; row < rows; ++row) {
+                for (var column = 0; column < columns; ++column) {
+                    val u0 = column * frameU;
+                    val v0 = row * frameV;
+                    val u1 = (column + 1) * frameU;
+                    val v1 = (row + 1) * frameV;
+                    outFrames.add(new TextureRegion<>(texture,
+                                                      u0, v0,
+                                                      u1, v1));
+                }
+            }
         } else {
             val framesJsonArray = framesElement.getAsJsonArray();
             for (val frameElement : framesJsonArray) {
@@ -66,6 +88,10 @@ public class SpriteDeserializer<TTexture extends Texture>
             final JsonElement frameElement
     ) {
         val frameJson = frameElement.getAsJsonObject();
+        if (!JsonUtils.hasAll(frameJson, "x", "y", "w", "h", "texture")) {
+            throw new JsonParseException("Malformed frame texture region definition!");
+        }
+
         val textureHandle = frameJson.get("texture").getAsString();
         val texture = this.textures.getByAssetName(textureHandle);
         val x = frameJson.get("x").getAsDouble();
@@ -87,7 +113,7 @@ public class SpriteDeserializer<TTexture extends Texture>
         if (animationsJson == null) {
             LOG.trace(LogCategories.SPRITE_SERIALIZATION,
                       "=> No animations found. Defaulting to infinite individual frames of all available frames.");
-            animations.put("default", Animation.forFrameRange(0, frameCount, Double.POSITIVE_INFINITY));
+            animations.put("default", Animation.forFrameRange(0, frameCount - 1, Double.POSITIVE_INFINITY));
             return;
         }
 
@@ -103,7 +129,7 @@ public class SpriteDeserializer<TTexture extends Texture>
         val animationName = animationEntry.getKey();
         val animationElement = animationEntry.getValue();
 
-        Animation animation;
+        Animation animation = null;
         // JsonArray => list of frames
         if (animationElement.isJsonArray()) {
             val animationArray = animationElement.getAsJsonArray();
@@ -119,11 +145,39 @@ public class SpriteDeserializer<TTexture extends Texture>
         }
         // Object => single frame or range
         else if (animationElement.isJsonObject()) {
-            // TODO
-            throw new UnsupportedOperationException("Not implemented");
+            val animationJsonObject = animationElement.getAsJsonObject();
+            if (JsonUtils.hasAll(animationJsonObject, "first", "last")
+                    && JsonUtils.hasAnyOf(animationJsonObject, "totalDuration", "durations")) {
+
+                val first = animationJsonObject.get("first").getAsInt();
+                val last = animationJsonObject.get("last").getAsInt();
+                if (animationJsonObject.has("totalDuration")) {
+                    animation = Animation.forFrameRange(first,
+                                                        last,
+                                                        animationJsonObject.get("totalDuration").getAsDouble());
+                } else {
+                    val durationsArray = animationJsonObject.getAsJsonArray("durations");
+                    val durations = new double[last - first + 1];
+                    int index = 0;
+                    for (val duration : durationsArray) {
+                        if (index >= durations.length) {
+                            throw new JsonParseException("Animation duration count does not match frame count!");
+                        }
+                        durations[index] = duration.getAsDouble();
+                        ++index;
+                    }
+
+                    animation = Animation.forFrameRangeWithDurations(first,
+                                                                     last,
+                                                                     durations);
+                }
+            } else if (animationJsonObject.has("index")) {
+                animation = Animation.forSingleFrame(animationJsonObject.get("index").getAsInt(),
+                                                     animationJsonObject.get("duration").getAsDouble());
+            }
         }
-        // Something else? Error.
-        else {
+
+        if (animation == null) {
             throw new JsonParseException("Malformed animation frame definition!");
         }
 

@@ -7,5 +7,11 @@
       "w": 8,
       "h": 8
     }
-  ]
+  ],
+  "animations": {
+    "default": {
+      "index": 0,
+      "duration": -1
+    }
+  }
 }

@@ -35,5 +35,12 @@
       "w": 8,
       "h": 8
     }
-  ]
+  ],
+  "animations": {
+    "default": {
+      "first": 0,
+      "last": 4,
+      "totalDuration": -1
+    }
+  }
 }

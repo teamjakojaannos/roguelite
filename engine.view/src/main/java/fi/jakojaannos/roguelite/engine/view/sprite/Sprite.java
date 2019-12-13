@@ -15,6 +15,10 @@ public final class Sprite<TTexture extends Texture> {
     @Getter private final List<TextureRegion<TTexture>> frames;
     @Getter private final Map<String, Animation> animations;
 
+    public int getAnimationFrameCount(final String animation) {
+        return this.animations.get(animation).frameCount();
+    }
+
     public TextureRegion<TTexture> getSpecificFrame(final String animation, final int frame) {
         return this.frames.get(this.animations.get(animation)
                                               .getFrameIndexOfFrame(frame));
