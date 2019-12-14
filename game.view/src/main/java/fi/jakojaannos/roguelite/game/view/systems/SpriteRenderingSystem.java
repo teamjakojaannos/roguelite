@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.joml.Rectangled;
+import org.joml.Vector2d;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 
 @Slf4j
 public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
+    private static final Vector2d ZERO_VECTOR = new Vector2d(0.0);
+
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.tickAfter(LevelRenderingSystem.class)
@@ -52,9 +54,9 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            World world,
-            double partialTickAlpha
+            final Stream<Entity> entities,
+            final World world,
+            final double partialTickAlpha
     ) {
         // Render using two-pass approach. By using correct data-structures with sensible estimates
         // for the initial capacity, the time complexity should be quite close to O(n). The process
@@ -79,25 +81,24 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                     val spritesForTexture = texturesForZLayer.computeIfAbsent(texture,
                                                                               tex -> new ArrayList<>());
 
-                    val bounds = world.getEntityManager().getComponentOf(entity, Collider.class)
-                                      .map(collider -> new Rectangled(transform.position.x - collider.origin.x,
-                                                                      transform.position.y - collider.origin.y,
-                                                                      transform.position.x - collider.origin.x + collider.width,
-                                                                      transform.position.y - collider.origin.y + collider.height))
-                                      .orElseGet(() -> new Rectangled(transform.position.x,
-                                                                      transform.position.y,
-                                                                      transform.position.x + 1.0,
-                                                                      transform.position.y + 1.0));
+                    val maybeCollider = world.getEntityManager().getComponentOf(entity, Collider.class);
+                    val origin = maybeCollider.map(collider -> collider.origin)
+                                              .orElse(ZERO_VECTOR);
+                    val size = maybeCollider.map(collider -> new Vector2d(collider.width,
+                                                                          collider.height))
+                                            .orElse(ZERO_VECTOR);
+                    val position = transform.position;
 
-                    val width = bounds.maxX - bounds.minX;
-                    val height = bounds.maxY - bounds.minY;
                     spritesForTexture.add(new SpriteRenderEntry(info.spriteName,
                                                                 info.getCurrentFrame(),
                                                                 info.zLayer,
-                                                                bounds.minX,
-                                                                bounds.minY,
-                                                                width,
-                                                                height));
+                                                                position.x,
+                                                                position.y,
+                                                                origin.x,
+                                                                origin.y,
+                                                                size.x,
+                                                                size.y,
+                                                                transform.rotation));
                 }
         );
 
@@ -112,8 +113,11 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                                                                                                                entry.getFrame(),
                                                                                                                entry.getX(),
                                                                                                                entry.getY(),
+                                                                                                               entry.getOriginX(),
+                                                                                                               entry.getOriginY(),
                                                                                                                entry.getWidth(),
-                                                                                                               entry.getHeight()))));
+                                                                                                               entry.getHeight(),
+                                                                                                               entry.getRotation()))));
         this.batch.end();
     }
 
@@ -128,6 +132,8 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
         @Getter private final int frame;
         @Getter private final int zLayer;
         @Getter private final double x, y;
+        @Getter private final double originX, originY;
         @Getter private final double width, height;
+        @Getter private final double rotation;
     }
 }

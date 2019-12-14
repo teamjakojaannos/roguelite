@@ -16,6 +16,7 @@ public class PlayerArchetype {
     ) {
         val player = entityManager.createEntity();
         entityManager.addComponentTo(player, transform);
+        transform.rotation = Math.toRadians(15.0);
         entityManager.addComponentTo(player, new Velocity());
         entityManager.addComponentTo(player, new CharacterInput());
         entityManager.addComponentTo(player, new CharacterAbilities());
@@ -33,6 +34,7 @@ public class PlayerArchetype {
         val collider = new Collider(CollisionLayer.PLAYER);
         collider.width = 1.0;
         collider.height = 1.0;
+        collider.origin.set(0.5);
         return collider;
     }
 

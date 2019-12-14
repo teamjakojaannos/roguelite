@@ -61,8 +61,11 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
             TextureRegion<TTexture> texture,
             double x,
             double y,
+            double originX,
+            double originY,
             double width,
-            double height
+            double height,
+            double rotation
     );
 
     @Override
@@ -98,7 +101,17 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
     }
 
     @Override
-    public void draw(TSpriteID sprite, int frame, double x, double y, double width, double height) {
+    public void draw(
+            final TSpriteID sprite,
+            final int frame,
+            final double x,
+            final double y,
+            final double originX,
+            final double originY,
+            final double width,
+            final double height,
+            final double rotation
+    ) {
         val textureRegion = resolveTexture(sprite, frame);
         if (this.activeTexture == null) {
             this.activeTexture = textureRegion.getTexture();
@@ -113,7 +126,7 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
             ++this.drawCalls;
         }
 
-        queueFrame(textureRegion, x, y, width, height);
+        queueFrame(textureRegion, x, y, originX, originY, width, height, rotation);
         this.nFrames += 1;
     }
 }

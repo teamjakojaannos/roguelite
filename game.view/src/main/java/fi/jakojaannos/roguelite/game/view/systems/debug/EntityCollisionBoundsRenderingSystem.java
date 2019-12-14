@@ -75,13 +75,7 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
         this.vbo = glGenBuffers();
         this.ebo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
-        val indices = new int[]{
-                0, 1,
-                1, 2,
-                2, 0,
-                2, 3,
-                3, 0,
-        };
+        val indices = new int[]{0, 1, 3, 2,};
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
         glBindVertexArray(this.vao);
@@ -103,21 +97,31 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
         this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
 
         glBindVertexArray(this.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
         entities.forEach(
                 entity -> {
                     if (world.getEntityManager().hasComponent(entity, NoDrawTag.class) || (!DebugConfig.renderBounds && world.getEntityManager().hasComponent(entity, SpriteInfo.class))) {
                         return;
                     }
 
-                    Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
-                    Collider collider = world.getEntityManager().getComponentOf(entity, Collider.class).get();
+                    Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
+                    Collider collider = world.getEntityManager().getComponentOf(entity, Collider.class).orElseThrow();
                     this.shader.setUniformMat4x4(this.uniformModelMatrix,
                                                  modelMatrix.identity()
-                                                            .translate((float) (transform.position.x - collider.origin.x),
-                                                                       (float) (transform.position.y - collider.origin.y), 0.0f)
-                                                            .scaleXY((float) collider.width, (float) collider.height)
-                    );
-                    glDrawElements(GL_LINES, 10, GL_UNSIGNED_INT, 0);
+                                                            .translate((float) transform.position.x,
+                                                                       (float) transform.position.y, 0.0f));
+                    val vertices = collider.getVerticesInLocalSpace(transform);
+                    val vertexArray = new float[8];
+                    for (int i = 0, j = 0; i < 4; ++i, j += 2) {
+                        vertexArray[j] = (float) vertices[i].x;
+                        vertexArray[j + 1] = (float) vertices[i].y;
+                    }
+
+                    glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STATIC_DRAW);
+                    glEnableVertexAttribArray(0);
+                    glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * 2, 0);
+
+                    glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, 0);
                 }
         );
     }

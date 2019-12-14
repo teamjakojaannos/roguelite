@@ -1,12 +1,14 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
+import org.joml.Vector2d;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
@@ -25,6 +27,9 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     private static final int MAX_SPRITES_PER_BATCH = 4096;
     private static final int VERTICES_PER_SPRITE = 4;
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
+
+    private final RotatedRectangle tmpRectangle = new RotatedRectangle();
+    private final Vector2d tmpVertex = new Vector2d();
 
     private final ShaderProgram shader;
     private final int uniformProjectionMatrix;
@@ -101,24 +106,32 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
             final TextureRegion<LWJGLTexture> region,
             final double x,
             final double y,
+            final double originX,
+            final double originY,
             final double width,
-            final double height
+            final double height,
+            final double rotation
     ) {
         val offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
+        tmpRectangle.set(x, y, originX, originY, width, height, rotation);
+        tmpRectangle.getTopLeft(tmpVertex);
         updateVertex(offset,
-                     x, y,
+                     tmpVertex.x, tmpVertex.y,
                      (float) region.getU0(), (float) region.getV0(),
                      1.0f, 1.0f, 1.0f);
+        tmpRectangle.getTopRight(tmpVertex);
         updateVertex(offset + SIZE_IN_BYTES,
-                     x + width, y,
+                     tmpVertex.x, tmpVertex.y,
                      (float) region.getU1(), (float) region.getV0(),
                      1.0f, 1.0f, 1.0f);
+        tmpRectangle.getBottomRight(tmpVertex);
         updateVertex(offset + (2 * SIZE_IN_BYTES),
-                     x + width, y + height,
+                     tmpVertex.x, tmpVertex.y,
                      (float) region.getU1(), (float) region.getV1(),
                      1.0f, 1.0f, 1.0f);
+        tmpRectangle.getBottomLeft(tmpVertex);
         updateVertex(offset + (3 * SIZE_IN_BYTES),
-                     x, y + height,
+                     tmpVertex.x, tmpVertex.y,
                      (float) region.getU0(), (float) region.getV1(),
                      1.0f, 1.0f, 1.0f);
     }

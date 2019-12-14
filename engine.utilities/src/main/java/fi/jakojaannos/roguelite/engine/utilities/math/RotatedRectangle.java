@@ -28,8 +28,20 @@ public final class RotatedRectangle {
             final double height,
             final double rotation
     ) {
-        this.position.set(position);
-        this.originOffset.set(originOffset);
+        set(position.x, position.y, originOffset.x, originOffset.y, width, height, rotation);
+    }
+
+    public void set(
+            final double x,
+            final double y,
+            final double originX,
+            final double originY,
+            final double width,
+            final double height,
+            final double rotation
+    ) {
+        this.position.set(x, y);
+        this.originOffset.set(originX, originY);
         this.width = width;
         this.height = height;
         this.rotation = rotation;
