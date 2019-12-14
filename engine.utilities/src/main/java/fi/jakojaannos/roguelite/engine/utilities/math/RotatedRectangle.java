@@ -72,8 +72,8 @@ public final class RotatedRectangle {
     }
 
     public Vector2d getRelative(final double x, final double y, final Vector2d result) {
-        return CoordinateHelper.transformCoordinate(this.position.x - this.originOffset.x,
-                                                    this.position.y - this.originOffset.y,
+        return CoordinateHelper.transformCoordinate(this.position.x,
+                                                    this.position.y,
                                                     this.rotation,
                                                     x - this.originOffset.x,
                                                     y - this.originOffset.y,

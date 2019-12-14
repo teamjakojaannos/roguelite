@@ -1,16 +1,15 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectileArchetype;
-import fi.jakojaannos.roguelite.game.data.components.BasicWeaponStats;
-import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
-import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
 import org.joml.Vector2d;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -20,6 +19,7 @@ public class CharacterAttackSystem implements ECSSystem {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
                     .withComponent(Transform.class)
                     .withComponent(CharacterInput.class)
+                    .withComponent(CharacterStats.class)
                     .withComponent(CharacterAbilities.class)
                     .withComponent(BasicWeaponStats.class);
     }
@@ -35,15 +35,22 @@ public class CharacterAttackSystem implements ECSSystem {
     ) {
         val entityManager = world.getEntityManager();
         entities.forEach(entity -> {
-            val input = entityManager.getComponentOf(entity, CharacterInput.class).get();
-            val abilities = entityManager.getComponentOf(entity, CharacterAbilities.class).get();
-            val weapon = entityManager.getComponentOf(entity, BasicWeaponStats.class).get();
+            val input = entityManager.getComponentOf(entity, CharacterInput.class).orElseThrow();
+            val abilities = entityManager.getComponentOf(entity, CharacterAbilities.class).orElseThrow();
+            val weapon = entityManager.getComponentOf(entity, BasicWeaponStats.class).orElseThrow();
 
             if (input.attack && abilities.attackTimer >= 1.0 / weapon.attackRate) {
-                val character = entityManager.getComponentOf(entity, Transform.class).get();
+                val characterTransform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+                val characterStats = entityManager.getComponentOf(entity, CharacterStats.class).orElseThrow();
 
-                val projectileX = character.position.x + 0.5;
-                val projectileY = character.position.y + 0.5;
+                val weaponOffset = CoordinateHelper.transformCoordinate(0,
+                                                                        0,
+                                                                        characterTransform.rotation,
+                                                                        characterStats.weaponOffset.x,
+                                                                        characterStats.weaponOffset.y,
+                                                                        new Vector2d());
+                val projectileX = characterTransform.position.x + weaponOffset.x;
+                val projectileY = characterTransform.position.y + weaponOffset.y;
                 val direction = new Vector2d(abilities.attackTarget)
                         .sub(projectileX, projectileY)
                         .normalize();

@@ -126,6 +126,7 @@ public class WorldGenerator<TTile> {
             final EntityManager entityManager,
             final SpawnerComponent.EntityFactory factory
     ) {
+        if (true) return;
         val spawner = entityManager.createEntity();
         entityManager.addComponentTo(spawner, new Transform(x, y));
         val spawnerComponent = new SpawnerComponent(spawnFrequency, factory);

@@ -84,14 +84,14 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
         this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
 
         glBindVertexArray(this.vao);
-        glPointSize(10.0f);
+        glPointSize(5.0f);
         entities.forEach(
                 entity -> {
                     if (world.getEntityManager().hasComponent(entity, NoDrawTag.class) || (!DebugConfig.renderTransform && world.getEntityManager().hasComponent(entity, SpriteInfo.class))) {
                         return;
                     }
 
-                    Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
+                    Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
                     this.shader.setUniformMat4x4(this.uniformModelMatrix,
                                                  modelMatrix.identity()
                                                             .translate((float) transform.position.x,

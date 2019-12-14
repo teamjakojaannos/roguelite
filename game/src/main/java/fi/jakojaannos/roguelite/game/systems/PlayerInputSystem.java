@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 public class PlayerInputSystem implements ECSSystem {
     @Override
-    public void declareRequirements( RequirementsBuilder requirements) {
+    public void declareRequirements(RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
                     .withComponent(CharacterInput.class)
                     .withComponent(CharacterAbilities.class)
@@ -32,9 +32,9 @@ public class PlayerInputSystem implements ECSSystem {
 
     @Override
     public void tick(
-             Stream<Entity> entities,
-             World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world,
+            final double delta
     ) {
         val inputs = world.getResource(Inputs.class);
         val mouse = world.getResource(Mouse.class);

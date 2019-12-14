@@ -16,7 +16,6 @@ public class PlayerArchetype {
     ) {
         val player = entityManager.createEntity();
         entityManager.addComponentTo(player, transform);
-        transform.rotation = Math.toRadians(15.0);
         entityManager.addComponentTo(player, new Velocity());
         entityManager.addComponentTo(player, new CharacterInput());
         entityManager.addComponentTo(player, new CharacterAbilities());

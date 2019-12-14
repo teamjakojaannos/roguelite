@@ -63,6 +63,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new EnemyToPlayerCollisionHandlerSystem())
                 .withSystem(new ReaperSystem())
                 .withSystem(new CleanUpDeadPlayersSystem())
+                .withSystem(new RotatePlayerTowardsAttackTargetSystem())
                 .build();
     }
 
