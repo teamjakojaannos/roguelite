@@ -286,9 +286,10 @@ public class RotatedRectangleTest {
                                                      Math.toRadians(12.5));
 
         Vector2d actual = rect.getBottomRight(new Vector2d());
+        // TODO: Actually verify these are correct with pen & paper
         assertAll(
-                () -> assertEquals(-481.364636, actual.x, 0.02),
-                () -> assertEquals(90.77219968727594, actual.y, 0.02)
+                () -> assertEquals(-465.4347350, actual.x, 0.02),
+                () -> assertEquals(83.317311, actual.y, 0.02)
         );
     }
 }

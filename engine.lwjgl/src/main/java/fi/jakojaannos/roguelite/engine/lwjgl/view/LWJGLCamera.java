@@ -21,8 +21,8 @@ public class LWJGLCamera extends Camera {
     @Getter private float viewportWidthInUnits;
     @Getter private float viewportHeightInUnits;
 
-    private int viewportWidth;
-    private int viewportHeight;
+    private int viewportWidthInPixels;
+    @Getter private int viewportHeightInPixels;
 
     private final Matrix4f projectionMatrix;
     private boolean projectionMatrixDirty;
@@ -52,12 +52,12 @@ public class LWJGLCamera extends Camera {
     }
 
     public void resizeViewport(int viewportWidth, int viewportHeight) {
-        this.viewportWidth = viewportWidth;
-        this.viewportHeight = viewportHeight;
-        glViewport(0, 0, this.viewportWidth, this.viewportHeight);
+        this.viewportWidthInPixels = viewportWidth;
+        this.viewportHeightInPixels = viewportHeight;
+        glViewport(0, 0, this.viewportWidthInPixels, this.viewportHeightInPixels);
 
         this.projectionMatrixDirty = true;
-        LOG.info("Resizing viewport: {}x{}", this.viewportWidth, this.viewportHeight);
+        LOG.info("Resizing viewport: {}x{}", this.viewportWidthInPixels, this.viewportHeightInPixels);
     }
 
     @Override
@@ -72,8 +72,8 @@ public class LWJGLCamera extends Camera {
 
     public LWJGLCamera(int viewportWidth, int viewportHeight) {
         super(new Vector2d(0.0, 0.0));
-        this.viewportWidth = viewportWidth;
-        this.viewportHeight = viewportHeight;
+        this.viewportWidthInPixels = viewportWidth;
+        this.viewportHeightInPixels = viewportHeight;
 
         this.projectionMatrix = new Matrix4f().identity();
         this.projectionMatrixDirty = true;
@@ -88,16 +88,16 @@ public class LWJGLCamera extends Camera {
         if (this.projectionMatrixDirty) {
             LOG.trace("Refreshing projection matrix");
 
-            val horizontalMajor = this.viewportWidth > this.viewportHeight;
-            double major = horizontalMajor ? this.viewportWidth : this.viewportHeight;
-            double minor = horizontalMajor ? this.viewportHeight : this.viewportWidth;
+            val horizontalMajor = this.viewportWidthInPixels > this.viewportHeightInPixels;
+            double major = horizontalMajor ? this.viewportWidthInPixels : this.viewportHeightInPixels;
+            double minor = horizontalMajor ? this.viewportHeightInPixels : this.viewportWidthInPixels;
 
             // TODO: Find such realTargetSize that pixelsPerUnit is a positive whole number to avoid
             //  aliasing.
             double realTargetSize = this.targetScreenSizeInUnits;
             val pixelsPerUnit = horizontalMajor
-                    ? this.viewportWidth / realTargetSize
-                    : this.viewportHeight / realTargetSize;
+                    ? this.viewportWidthInPixels / realTargetSize
+                    : this.viewportHeightInPixels / realTargetSize;
 
             val ratio = major / minor;
             this.viewportWidthInUnits = (float) (horizontalMajor

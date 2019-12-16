@@ -2,6 +2,7 @@ Feature: The player can move around the game world.
 
   Background:
     Given the game world just finished loading
+    And there are no spawners
     And there are no obstacles
     And the player max speed is 10.0, acceleration is 50.0 and friction is 10.0
 

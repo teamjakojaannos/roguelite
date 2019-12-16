@@ -96,6 +96,15 @@ public class GameplaySteps {
              .forEach(state.getWorld().getEntityManager()::destroyEntity);
     }
 
+    @Given("there are no spawners")
+    public void there_are_no_spawners() {
+        state.getWorld()
+             .getEntityManager()
+             .getEntitiesWith(SpawnerComponent.class)
+             .map(EntityManager.EntityComponentPair::getEntity)
+             .forEach(state.getWorld().getEntityManager()::destroyEntity);
+    }
+
     @Given("the player has released the key {string}")
     public void the_player_has_released_the_key(String key) {
         releaseKey(key);
@@ -222,6 +231,7 @@ public class GameplaySteps {
     private void simulateTick() {
         game.tick(state, inputEvents, 0.02);
         game.getTime().progressGameTime(20L);
+        inputEvents.clear();
     }
 
     private void simulateSeconds(double seconds) {

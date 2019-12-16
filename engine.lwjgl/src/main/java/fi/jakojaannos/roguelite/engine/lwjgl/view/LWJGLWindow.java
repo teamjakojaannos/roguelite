@@ -7,6 +7,7 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,14 @@ public class LWJGLWindow implements Window, AutoCloseable {
                 .set(this.id);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer pContentScaleX = stack.mallocFloat(1);
+            FloatBuffer pContentScaleY = stack.mallocFloat(1);
+            glfwGetWindowContentScale(this.id, pContentScaleX, pContentScaleY);
+
+            LOG.debug("Window content scale after creation: {}×{}",
+                      pContentScaleX.get(0),
+                      pContentScaleY.get(0));
+
             IntBuffer pWidth = stack.mallocInt(1);
             IntBuffer pHeight = stack.mallocInt(1);
 

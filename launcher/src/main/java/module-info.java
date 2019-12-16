@@ -5,6 +5,7 @@ module roguelite.launcher {
 
     // Make sure jlink packages the natives
     requires org.lwjgl.natives;
+    requires org.lwjgl.stb.natives;
     requires org.lwjgl.glfw.natives;
     requires org.lwjgl.opengl.natives;
 }

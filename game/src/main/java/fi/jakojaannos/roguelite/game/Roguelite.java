@@ -115,9 +115,9 @@ public class Roguelite extends GameBase<GameState> {
 
     @Override
     public void tick(
-            GameState state,
-            Queue<InputEvent> inputEvents,
-            double delta
+            final GameState state,
+            final Queue<InputEvent> inputEvents,
+            final double delta
     ) {
         super.tick(state, inputEvents, delta);
         val inputs = state.getWorld().getResource(Inputs.class);
