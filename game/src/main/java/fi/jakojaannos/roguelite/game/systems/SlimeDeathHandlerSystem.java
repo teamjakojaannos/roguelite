@@ -7,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.SlimeAI;
+import fi.jakojaannos.roguelite.game.data.components.SlimeSharedAI;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.val;
 import org.joml.Vector2d;
@@ -38,11 +39,20 @@ public class SlimeDeathHandlerSystem implements ECSSystem {
 
         entities.forEach(entity -> {
 
+            val optSharedAi = entityManager.getComponentOf(entity, SlimeSharedAI.class);
+            if (optSharedAi.isPresent()) {
+                val sharedAi = optSharedAi.get();
+                sharedAi.slimes.remove(entity);
+                entityManager.removeComponentIfPresent(entity, SlimeSharedAI.class);
+            }
+
+
             val ai = entityManager.getComponentOf(entity, SlimeAI.class).get();
             if (ai.slimeSize <= 1) return;
 
 
             val pos = entityManager.getComponentOf(entity, Transform.class).get();
+            val sharedAi = new SlimeSharedAI();
 
             for (int i = 0; i < 4; i++) {
                 double xSpread = random.nextDouble() * 2.0 - 1.0;
@@ -55,22 +65,27 @@ public class SlimeDeathHandlerSystem implements ECSSystem {
 
 
                 if (ai.slimeSize == 3) {
-                    SlimeArchetype.createMediumSlimeWithInitialVelocity(
+                    val slime = SlimeArchetype.createMediumSlimeWithInitialVelocity(
                             entityManager,
                             pos.getCenterX() + xSpread,
                             pos.getCenterY() + ySpread,
                             tempDir,
                             0.4
                     );
+                    entityManager.addComponentTo(slime, sharedAi);
+                    sharedAi.slimes.add(slime);
 
                 } else if (ai.slimeSize == 2) {
-                    SlimeArchetype.createSmallSlimeWithInitialVelocity(
+                    val slime = SlimeArchetype.createSmallSlimeWithInitialVelocity(
                             entityManager,
                             pos.getCenterX() + xSpread,
                             pos.getCenterY() + ySpread,
                             tempDir,
                             0.25
                     );
+                    entityManager.addComponentTo(slime, sharedAi);
+                    sharedAi.slimes.add(slime);
+
                 }
             }
 
