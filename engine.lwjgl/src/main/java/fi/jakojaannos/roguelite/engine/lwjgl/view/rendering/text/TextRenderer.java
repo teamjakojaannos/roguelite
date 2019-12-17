@@ -42,7 +42,7 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
     private final int lineGap;
     private final int scaledBitmapW, scaledBitmapH;
     private final float contentScaleX, contentScaleY;
-    private final boolean kerningEnabled = true;
+    private final boolean kerningEnabled = false;
 
     private final ShaderProgram shader;
     private final int uniformModelMatrix;
@@ -102,7 +102,7 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
         this.ebo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
         val indices = new int[]{
-                0, 2, 1,
+                0, 1, 2,
                 3, 0, 2,
         };
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
@@ -140,19 +140,54 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
         return cdata;
     }
 
-    public void draw(final double x, final double y, final double h, final String string) {
-        val unitsPerPixelVertical = this.camera.getViewportHeightInUnits() / this.camera.getViewportHeightInPixels();
-        val scale = stbtt_ScaleForPixelHeight(this.fontInfo, (float) h / unitsPerPixelVertical);
-
+    public void drawOnScreen(
+            final double x,
+            final double y,
+            final double height,
+            final String string
+    ) {
         this.shader.use();
-        glBindTexture(GL_TEXTURE_2D, this.textureId);
+        this.shader.setUniformMat4x4(this.uniformProjectionMatrix, new Matrix4f()
+                .ortho(0,
+                       this.camera.getViewportWidthInPixels(),
+                       this.camera.getViewportHeightInPixels(),
+                       0,
+                       0,
+                       100));
+        this.shader.setUniformMat4x4(this.uniformViewMatrix, new Matrix4f().identity());
+        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
+        draw(x, y, (float) height, string, 1, 1);
+    }
 
+    public void drawInWorld(
+            final double x,
+            final double y,
+            final double height,
+            final String string
+    ) {
+        this.shader.use();
         this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());
         this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
         this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
 
+        val pixelsPerUnitVertical = this.camera.getViewportHeightInPixels() / this.camera.getViewportHeightInUnits();
+        val pixelsPerUnitHorizontal = this.camera.getViewportWidthInPixels() / this.camera.getViewportWidthInUnits();
+        draw(x, y, (float) (pixelsPerUnitVertical / height), string, pixelsPerUnitVertical, pixelsPerUnitHorizontal);
+    }
+
+    private void draw(
+            final double x,
+            final double y,
+            final float height,
+            final String string,
+            final double pixelsPerUnitVertical,
+            final double pixelsPerUnitHorizontal
+    ) {
+        val scale = stbtt_ScaleForPixelHeight(this.fontInfo, height);
+
         glBindVertexArray(this.vao);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
+        glBindTexture(GL_TEXTURE_2D, this.textureId);
         try (val stack = MemoryStack.stackPush()) {
             val pCodePoint = stack.mallocInt(1);
 
@@ -161,8 +196,8 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
 
             val alignedQuad = STBTTAlignedQuad.mallocStack(stack);
 
-            val factorX = 1.0f / this.contentScaleX * scale;
-            val factorY = 1.0f / this.contentScaleY * scale;
+            val factorX = height / this.contentScaleX;
+            val factorY = height / this.contentScaleY;
 
             var lineStart = 0;
             var lineY = 0.0f;
@@ -173,7 +208,7 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
                 val cp = pCodePoint.get(0);
                 if (cp == '\n') {
                     pX.put(0, 0.0f);
-                    pY.put(0, lineY = pY.get(0) + (float) h/*(this.ascent - this.descent + this.lineGap) * scale*/);
+                    pY.put(0, lineY = pY.get(0) + (this.ascent - this.descent + this.lineGap) * scale);
 
                     lineStart = i;
                     continue;
@@ -190,16 +225,16 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
                                    pY,
                                    alignedQuad,
                                    true);
-                pX.put(0, scale(cpX, pX.get(0), factorX));
+                pX.put(0, (float) scale(cpX, pX.get(0), factorX / pixelsPerUnitHorizontal));
                 if (this.kerningEnabled && i < to) {
                     getCP(string, to, i, pCodePoint);
                     pX.put(0, pX.get(0) + stbtt_GetCodepointKernAdvance(this.fontInfo, cp, pCodePoint.get(0)) * scale);
                 }
 
-                val x0 = x + scale(cpX, alignedQuad.x0(), factorX);
-                val x1 = x + scale(cpX, alignedQuad.x1(), factorX);
-                val y0 = y + scale(lineY, alignedQuad.y0(), factorY);
-                val y1 = y + scale(lineY, alignedQuad.y1(), factorY);
+                val x0 = x + scale(cpX, alignedQuad.x0(), factorX / pixelsPerUnitHorizontal);
+                val x1 = x + scale(cpX, alignedQuad.x1(), factorX / pixelsPerUnitHorizontal);
+                val y0 = y + scale(lineY, alignedQuad.y0(), factorY / pixelsPerUnitVertical);
+                val y1 = y + scale(lineY, alignedQuad.y1(), factorY / pixelsPerUnitVertical);
                 val u0 = alignedQuad.s0();
                 val u1 = alignedQuad.s1();
                 val v0 = alignedQuad.t0();
@@ -280,10 +315,10 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
         return 1;
     }
 
-    private float scale(
-            final float center,
-            final float offset,
-            final float factor
+    private double scale(
+            final double center,
+            final double offset,
+            final double factor
     ) {
         return (offset - center) * factor + center;
     }

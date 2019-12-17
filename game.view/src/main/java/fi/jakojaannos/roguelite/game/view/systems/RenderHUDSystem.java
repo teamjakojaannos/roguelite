@@ -27,6 +27,7 @@ public class RenderHUDSystem implements ECSSystem {
             final World world,
             final double delta
     ) {
-        this.textRenderer.draw(-12, -5, 4, "This is some test text\n(in-world)");
+        this.textRenderer.drawOnScreen(0, 0, 24, "This is some test text\n(on-screen)");
+        this.textRenderer.drawInWorld(-12, -5, 4, "This is some test text\n(in-world)");
     }
 }

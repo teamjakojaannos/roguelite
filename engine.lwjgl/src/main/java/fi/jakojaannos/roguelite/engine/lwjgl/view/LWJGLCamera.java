@@ -18,10 +18,10 @@ public class LWJGLCamera extends Camera {
     private double targetScreenSizeInUnits = 32.0;
     private boolean targetSizeIsRespectiveToMinorAxis;
 
-    @Getter private float viewportWidthInUnits;
-    @Getter private float viewportHeightInUnits;
+    @Getter private double viewportWidthInUnits;
+    @Getter private double viewportHeightInUnits;
 
-    private int viewportWidthInPixels;
+    @Getter private int viewportWidthInPixels;
     @Getter private int viewportHeightInPixels;
 
     private final Matrix4f projectionMatrix;
@@ -108,8 +108,8 @@ public class LWJGLCamera extends Camera {
                     : ratio * realTargetSize);
             this.projectionMatrix.setOrtho2D(
                     0.0f,
-                    viewportWidthInUnits,
-                    viewportHeightInUnits,
+                    (float) viewportWidthInUnits,
+                    (float) viewportHeightInUnits,
                     0.0f);
 
             this.projectionMatrixDirty = false;
