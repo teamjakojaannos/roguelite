@@ -7,6 +7,13 @@ import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 
 public class StalkerArchetype {
+    public static Entity spawnStalker(
+            EntityManager entityManager,
+            Transform spawnerTransform,
+            SpawnerComponent spawnerComponent
+    ) {
+        return create(entityManager, new Transform(spawnerTransform));
+    }
 
     public static Entity create(
             final EntityManager entityManager,

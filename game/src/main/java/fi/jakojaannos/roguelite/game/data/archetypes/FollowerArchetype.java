@@ -1,29 +1,24 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 
 public class FollowerArchetype {
-
-
-    public static Entity create(
-             final EntityManager entityManager,
-            double x,
-            double y
+    public static Entity spawnFollower(
+            final EntityManager entityManager,
+            final Transform spawnerTransform,
+            final SpawnerComponent spawnerComponent
     ) {
-        return create(
-                entityManager,
-                new Transform(x, y)
-        );
+        return create(entityManager, new Transform(spawnerTransform));
     }
 
 
     public static Entity create(
-             final EntityManager entityManager,
-             final Transform transform
+            final EntityManager entityManager,
+            final Transform transform
     ) {
         val follower = entityManager.createEntity();
         entityManager.addComponentTo(follower, transform);

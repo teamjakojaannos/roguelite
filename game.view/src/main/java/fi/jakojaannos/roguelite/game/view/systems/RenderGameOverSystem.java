@@ -39,7 +39,6 @@ public class RenderGameOverSystem implements ECSSystem {
 
         renderCentered(0, 48, GAME_OVER_MESSAGE);
         renderCentered(50, 24, HELP_TEXT);
-        //this.textRenderer.drawOnScreen(textX, textY, fontSize, HELP_TEXT);
     }
 
     private void renderCentered(final double yOffset, final int fontSize, final String text) {

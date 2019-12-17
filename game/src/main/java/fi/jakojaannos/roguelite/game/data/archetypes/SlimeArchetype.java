@@ -8,6 +8,15 @@ import lombok.val;
 import org.joml.Vector2d;
 
 public class SlimeArchetype {
+    public static Entity spawnLargeSlime(
+            final EntityManager entityManager,
+            final Transform spawnerTransform,
+            final SpawnerComponent spawnerComponent
+    ) {
+        return createLargeSlime(entityManager,
+                                spawnerTransform.position.x,
+                                spawnerTransform.position.y);
+    }
 
     public static Entity createSmallSlimeWithInitialVelocity(
             final EntityManager entityManager,
@@ -22,7 +31,9 @@ public class SlimeArchetype {
         entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 0.6));
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
-
+        entityManager.addComponentTo(slime, new EnemyTag());
+        entityManager.addComponentTo(slime, new CharacterAbilities());
+        entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
         val slimeAi = new SlimeAI(
                 0.2,
                 0.4,
@@ -58,7 +69,9 @@ public class SlimeArchetype {
         entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 1.0));
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
-
+        entityManager.addComponentTo(slime, new EnemyTag());
+        entityManager.addComponentTo(slime, new CharacterAbilities());
+        entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
         val slimeAi = new SlimeAI(
                 0.3,
                 0.8,
@@ -69,33 +82,6 @@ public class SlimeArchetype {
         slimeAi.jumpDir.set(dir);
 
         entityManager.addComponentTo(slime, slimeAi);
-        entityManager.addComponentTo(slime, new CharacterStats(
-                6.0,
-                100.0,
-                800.0
-        ));
-        entityManager.addComponentTo(slime, createSpriteInfo());
-
-
-        return slime;
-    }
-
-    public static Entity createMediumSlime(
-            final EntityManager entityManager,
-            double x,
-            double y
-    ) {
-        val slime = entityManager.createEntity();
-        entityManager.addComponentTo(slime, new Transform(x, y));
-        entityManager.addComponentTo(slime, new Health(7));
-        entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 1.0));
-        entityManager.addComponentTo(slime, new Velocity());
-        entityManager.addComponentTo(slime, new CharacterInput());
-        entityManager.addComponentTo(slime, new SlimeAI(
-                0.3,
-                0.8,
-                2
-        ));
         entityManager.addComponentTo(slime, new CharacterStats(
                 6.0,
                 100.0,
@@ -119,6 +105,9 @@ public class SlimeArchetype {
         entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 1.75));
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
+        entityManager.addComponentTo(slime, new EnemyTag());
+        entityManager.addComponentTo(slime, new CharacterAbilities());
+        entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
         entityManager.addComponentTo(slime, new SlimeAI(
                 0.6,
                 1.0,

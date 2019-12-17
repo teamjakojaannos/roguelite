@@ -82,9 +82,9 @@ public class GameplaySteps {
                                                   playerPosition.add(-2.0, 0.0, new Vector2d()),
                                                   playerPosition.add(0.0, 2.0, new Vector2d()),
                                                   playerPosition.add(0.0, -2.0, new Vector2d())))
-             .forEach(enemyPosition -> FollowerArchetype.create(state.getWorld().getEntityManager(),
-                                                                enemyPosition.x,
-                                                                enemyPosition.y));
+             .forEach(enemyPosition -> FollowerArchetype.spawnFollower(state.getWorld().getEntityManager(),
+                                                                       enemyPosition.x,
+                                                                       enemyPosition.y));
     }
 
     @Given("there are no obstacles")

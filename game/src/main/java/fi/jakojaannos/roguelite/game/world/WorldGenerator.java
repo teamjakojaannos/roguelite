@@ -3,7 +3,10 @@ package fi.jakojaannos.roguelite.game.world;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
+import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.StalkerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.val;
@@ -90,19 +93,24 @@ public class WorldGenerator<TTile> {
             val spawnerYH = hallwayLength - 2;
             val stalkerFrequency = 10.0;
             val followerFrequency = 7.5;
+            val slimeFrequency = 15;
 
-            createSpawner(spawnerXH - 1, startY - spawnerYH - 1, stalkerFrequency, entities, SpawnerComponent.FACTORY_STALKER);
-            createSpawner(spawnerXH + 1, startY - spawnerYH - 1, followerFrequency, entities, SpawnerComponent.FACTORY_FOLLOWER);
-            createSpawner(spawnerXH - 1, startY + mainRoomHeight + spawnerYH, stalkerFrequency, entities, SpawnerComponent.FACTORY_STALKER);
-            createSpawner(spawnerXH + 1, startY + mainRoomHeight + spawnerYH, followerFrequency, entities, SpawnerComponent.FACTORY_FOLLOWER);
+            val followerFactory = SpawnerComponent.EntityFactory.withRandomDistance(FollowerArchetype::spawnFollower);
+            val stalkerFactory = SpawnerComponent.EntityFactory.withRandomDistance(StalkerArchetype::spawnStalker);
+
+            createSpawner(spawnerXH - 1, startY - spawnerYH - 1, stalkerFrequency, entities, stalkerFactory);
+            createSpawner(spawnerXH + 1, startY - spawnerYH - 1, followerFrequency, entities, followerFactory);
+            createSpawner(spawnerXH - 1, startY + mainRoomHeight + spawnerYH, stalkerFrequency, entities, stalkerFactory);
+            createSpawner(spawnerXH + 1, startY + mainRoomHeight + spawnerYH, followerFrequency, entities, followerFactory);
+            createSpawner(spawnerXH, startY - spawnerYH, slimeFrequency, entities, SlimeArchetype::spawnLargeSlime);
 
             val spawnerXV = hallwayLength - 2;
             val spawnerYV = hallwayStartY + hallwaySize / 2;
 
-            createSpawner(startX - spawnerXV - 1, spawnerYV - 1, stalkerFrequency, entities, SpawnerComponent.FACTORY_STALKER);
-            createSpawner(startX - spawnerXV - 1, spawnerYV + 1, followerFrequency, entities, SpawnerComponent.FACTORY_FOLLOWER);
-            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV - 1, stalkerFrequency, entities, SpawnerComponent.FACTORY_STALKER);
-            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV + 1, followerFrequency, entities, SpawnerComponent.FACTORY_FOLLOWER);
+            createSpawner(startX - spawnerXV - 1, spawnerYV - 1, stalkerFrequency, entities, stalkerFactory);
+            createSpawner(startX - spawnerXV - 1, spawnerYV + 1, followerFrequency, entities, followerFactory);
+            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV - 1, stalkerFrequency, entities, stalkerFactory);
+            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV + 1, followerFrequency, entities, followerFactory);
         }
 
         val nObstacles = 10;

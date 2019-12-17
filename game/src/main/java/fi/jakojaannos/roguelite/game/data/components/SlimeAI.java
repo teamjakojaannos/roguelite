@@ -5,7 +5,7 @@ import org.joml.Vector2d;
 
 public class SlimeAI implements Component {
 
-    public double chaseRadiusSquared = 10.0 * 10.0,
+    public double chaseRadiusSquared = 100.0 * 100.0,
             targetRadiusSquared = 1.0;
 
     public double airTime = 0.0, setAirTimeCoolDown = 0.6,
