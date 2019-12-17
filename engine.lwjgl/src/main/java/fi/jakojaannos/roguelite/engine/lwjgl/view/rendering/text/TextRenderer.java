@@ -18,8 +18,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.stb.STBTruetype.stbtt_GetCodepointKernAdvance;
-import static org.lwjgl.stb.STBTruetype.stbtt_ScaleForPixelHeight;
+import static org.lwjgl.stb.STBTruetype.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
@@ -65,6 +64,33 @@ public class TextRenderer implements AutoCloseable {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
         this.vertexDataBuffer = MemoryUtil.memAlloc(4 * SIZE_IN_BYTES);
+    }
+
+    public double getStringWidthInPixels(int fontSize, String string) {
+        int width = 0;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer pCodePoint = stack.mallocInt(1);
+            IntBuffer pAdvancedWidth = stack.mallocInt(1);
+            IntBuffer pLeftSideBearing = stack.mallocInt(1);
+
+            val from = 0;
+            val to = string.length();
+            int i = from;
+            while (i < to) {
+                i += getCP(string, to, i, pCodePoint);
+                int cp = pCodePoint.get(0);
+
+                stbtt_GetCodepointHMetrics(this.font.getFontInfo(), cp, pAdvancedWidth, pLeftSideBearing);
+                width += pAdvancedWidth.get(0);
+
+                if (this.kerningEnabled && i < to) {
+                    getCP(string, to, i, pCodePoint);
+                    width += stbtt_GetCodepointKernAdvance(this.font.getFontInfo(), cp, pCodePoint.get(0));
+                }
+            }
+        }
+
+        return width * stbtt_ScaleForPixelHeight(this.font.getFontInfo(), fontSize);
     }
 
     public void drawOnScreen(

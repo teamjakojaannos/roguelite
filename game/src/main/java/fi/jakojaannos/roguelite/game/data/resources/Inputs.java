@@ -8,4 +8,6 @@ public class Inputs implements Resource {
     public boolean inputUp = false;
     public boolean inputDown = false;
     public boolean inputAttack = false;
+
+    public boolean inputRestart = false;
 }

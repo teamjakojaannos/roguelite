@@ -12,6 +12,7 @@ import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.view.systems.LevelRenderingSystem;
+import fi.jakojaannos.roguelite.game.view.systems.RenderGameOverSystem;
 import fi.jakojaannos.roguelite.game.view.systems.RenderHUDSystem;
 import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
@@ -41,7 +42,8 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         val builder = SystemDispatcher.builder()
                                       .withSystem(new LevelRenderingSystem(assetRoot, this.camera, this.spriteRegistry))
                                       .withSystem(new SpriteRenderingSystem(assetRoot, this.camera, this.spriteRegistry))
-                                      .withSystem(new RenderHUDSystem(this.textRenderer));
+                                      .withSystem(new RenderHUDSystem(this.textRenderer))
+                                      .withSystem(new RenderGameOverSystem(this.textRenderer, this.camera));
 
         if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, this.camera));

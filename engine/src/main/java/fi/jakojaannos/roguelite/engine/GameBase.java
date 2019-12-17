@@ -35,8 +35,9 @@ public abstract class GameBase<TState> implements Game<TState> {
     }
 
     @Override
-    public void tick(final TState state, final Queue<InputEvent> inputEvents, final double delta) {
+    public TState tick(final TState state, final Queue<InputEvent> inputEvents, final double delta) {
         this.timeManager.refresh();
+        return state;
     }
 
     @Override

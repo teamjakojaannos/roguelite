@@ -14,5 +14,5 @@ public interface Game<TState> extends AutoCloseable {
 
     boolean isDisposed();
 
-    void tick(TState state, Queue<InputEvent> inputEvents, double delta);
+    TState tick(TState state, Queue<InputEvent> inputEvents, double delta);
 }

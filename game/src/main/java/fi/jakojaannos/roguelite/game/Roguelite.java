@@ -14,10 +14,7 @@ import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.data.resources.Mouse;
-import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.data.resources.*;
 import fi.jakojaannos.roguelite.game.systems.*;
 import fi.jakojaannos.roguelite.game.systems.collision.*;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
@@ -64,6 +61,7 @@ public class Roguelite extends GameBase<GameState> {
                 .withSystem(new ReaperSystem())
                 .withSystem(new CleanUpDeadPlayersSystem())
                 .withSystem(new RotatePlayerTowardsAttackTargetSystem())
+                .withSystem(new RestartGameSystem())
                 .build();
     }
 
@@ -114,12 +112,12 @@ public class Roguelite extends GameBase<GameState> {
     }
 
     @Override
-    public void tick(
-            final GameState state,
+    public GameState tick(
+            GameState state,
             final Queue<InputEvent> inputEvents,
             final double delta
     ) {
-        super.tick(state, inputEvents, delta);
+        state = super.tick(state, inputEvents, delta);
         val inputs = state.getWorld().getResource(Inputs.class);
         val mouse = state.getWorld().getResource(Mouse.class);
 
@@ -145,11 +143,19 @@ public class Roguelite extends GameBase<GameState> {
                     inputs.inputDown = input.getAction() != ButtonInput.Action.RELEASE;
                 } else if (input.getButton() == InputButton.Mouse.button(0)) {
                     inputs.inputAttack = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_SPACE) {
+                    inputs.inputRestart = input.getAction() != ButtonInput.Action.RELEASE;
                 }
             });
         }
 
         this.dispatcher.dispatch(state.getWorld(), delta);
         state.getWorld().getEntityManager().applyModifications();
+
+        if (state.getWorld().getResource(GameStatus.class).shouldRestart) {
+            return Roguelite.createInitialState();
+        }
+
+        return state;
     }
 }

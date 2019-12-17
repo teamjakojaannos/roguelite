@@ -57,7 +57,7 @@ public abstract class GameRunner<
         LOG.info("Runner starting...");
 
         // Loop
-        val state = defaultStateSupplier.get();
+        var state = defaultStateSupplier.get();
         game.getTime().refresh();
         val initialTime = System.currentTimeMillis();
         var previousFrameTime = game.getTime().getCurrentRealTime();
@@ -82,7 +82,7 @@ public abstract class GameRunner<
 
             accumulator += frameElapsedTime;
             while (accumulator >= simulationTimestep) {
-                simulateTick(state, game, inputProvider.pollEvents(), simulationTimestepInSeconds);
+                state = simulateTick(state, game, inputProvider.pollEvents(), simulationTimestepInSeconds);
 
                 game.getTime().progressGameTime(simulationTimestep);
                 accumulator -= simulationTimestep;
@@ -119,7 +119,7 @@ public abstract class GameRunner<
      * @param inputEvents Input events to process during this tick
      * @param delta       Time since the last tick
      */
-    public void simulateTick(
+    public TState simulateTick(
             TState state,
             TGame game,
             Queue<InputEvent> inputEvents,
@@ -129,7 +129,7 @@ public abstract class GameRunner<
             throw new IllegalStateException("Simulating tick for already disposed game!");
         }
 
-        game.tick(state, inputEvents, delta);
+        return game.tick(state, inputEvents, delta);
     }
 
     /**
