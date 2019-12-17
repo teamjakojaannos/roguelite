@@ -19,6 +19,7 @@ import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.stb.STBTruetype.stbtt_GetCodepointKernAdvance;
+import static org.lwjgl.stb.STBTruetype.stbtt_ScaleForPixelHeight;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
@@ -88,16 +89,23 @@ public class TextRenderer implements AutoCloseable {
     public void drawInWorld(
             final double x,
             final double y,
+            final int fontSize,
             final String string
     ) {
+        val pixelsPerUnitVertical = this.camera.getViewportHeightInPixels() / this.camera.getViewportHeightInUnits();
+        val pixelsPerUnitHorizontal = this.camera.getViewportWidthInPixels() / this.camera.getViewportWidthInUnits();
+
         this.shader.use();
         this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());
         this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
-        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
+        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity()
+                                                                            .translate((float) x, (float) y, 0.0f)
+                                                                            .scale((float) (1.0 / pixelsPerUnitHorizontal),
+                                                                                   (float) (1.0 / pixelsPerUnitVertical),
+                                                                                   1.0f)
+        );
 
-        val pixelsPerUnitVertical = this.camera.getViewportHeightInPixels() / this.camera.getViewportHeightInUnits();
-        val pixelsPerUnitHorizontal = this.camera.getViewportWidthInPixels() / this.camera.getViewportWidthInUnits();
-        draw(x, y, 8, string);
+        draw(0, 0, fontSize, string);
     }
 
     private void draw(
