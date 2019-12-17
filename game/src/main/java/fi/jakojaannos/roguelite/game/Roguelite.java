@@ -12,7 +12,6 @@ import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
-import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.*;
 import fi.jakojaannos.roguelite.game.systems.*;
@@ -98,9 +97,6 @@ public class Roguelite extends GameBase<GameState> {
         val wall = new TileType(2, true);
         val generator = new WorldGenerator<TileType>(emptiness);
         generator.prepareInitialRoom(seed, state.getWorld(), floor, wall, 25, 45, 5, 5, 2);
-
-        SlimeArchetype.createLargeSlime(entities, 5.0, 5.0);
-
 
         val levelEntity = entities.createEntity();
         val layer = new TileMapLayer(generator.getTileMap());
