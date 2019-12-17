@@ -2,22 +2,15 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
-import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTAlignedQuad;
-import org.lwjgl.stb.STBTTBakedChar;
-import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -25,23 +18,13 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.stb.STBTruetype.*;
+import static org.lwjgl.stb.STBTruetype.stbtt_GetCodepointKernAdvance;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
-public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
+public class TextRenderer implements AutoCloseable {
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
 
-    private final STBTTBakedChar.Buffer bakedCharacters;
-    private final ByteBuffer ttf;
-    private final STBTTFontinfo fontInfo;
-    private final int fontHeight;
-
-    private final int ascent;
-    private final int descent;
-    private final int lineGap;
-    private final int scaledBitmapW, scaledBitmapH;
-    private final float contentScaleX, contentScaleY;
     private final boolean kerningEnabled = false;
 
     private final ShaderProgram shader;
@@ -53,42 +36,15 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
     private final int vao;
     private final int vbo;
     private final int ebo;
-    private final int textureId;
     private final LWJGLCamera camera;
+    private final Font font;
 
     public TextRenderer(
             final Path assetRoot,
             final LWJGLCamera camera
     ) {
         this.camera = camera;
-
-        val path = assetRoot.resolve("fonts/VCR_OSD_MONO.ttf");
-        try (SeekableByteChannel fc = Files.newByteChannel(path)) {
-            this.ttf = BufferUtils.createByteBuffer((int) fc.size() + 1);
-            //noinspection StatementWithEmptyBody
-            while (fc.read(this.ttf) != -1) ;
-            this.ttf.flip();
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not load font!");
-        }
-
-        this.fontInfo = STBTTFontinfo.create();
-        if (!stbtt_InitFont(this.fontInfo, this.ttf)) {
-            throw new IllegalStateException("Failed to initialize font descriptor.");
-        }
-
-        try (val stack = MemoryStack.stackPush()) {
-            val pAscent = stack.mallocInt(1);
-            val pDescent = stack.mallocInt(1);
-            val pLineGap = stack.mallocInt(1);
-
-            stbtt_GetFontVMetrics(this.fontInfo, pAscent, pDescent, pLineGap);
-            this.ascent = pAscent.get(0);
-            this.descent = pDescent.get(0);
-            this.lineGap = pLineGap.get(0);
-        }
-
-        this.textureId = glGenTextures();
+        this.font = new Font(assetRoot, 1.0f, 1.0f);
 
         this.shader = createShader(assetRoot);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
@@ -108,42 +64,12 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
         this.vertexDataBuffer = MemoryUtil.memAlloc(4 * SIZE_IN_BYTES);
-
-        this.contentScaleX = 4f;
-        this.contentScaleY = 4f;
-        this.scaledBitmapW = Math.round(512 * this.contentScaleX);
-        this.scaledBitmapH = Math.round(512 * this.contentScaleY);
-        this.fontHeight = 24;
-        this.bakedCharacters = bakeFontToBitmap();
-
-        glEnable(GL_TEXTURE_2D);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    private STBTTBakedChar.Buffer bakeFontToBitmap() {
-        val cdata = STBTTBakedChar.malloc(96); // 96 ???
-        val bitmap = BufferUtils.createByteBuffer(this.scaledBitmapW * this.scaledBitmapH);
-        glBindTexture(GL_TEXTURE_2D, this.textureId);
-        stbtt_BakeFontBitmap(this.ttf,
-                             this.fontHeight * this.contentScaleY,
-                             bitmap,
-                             this.scaledBitmapW,
-                             this.scaledBitmapH,
-                             32,
-                             cdata);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, this.scaledBitmapW, this.scaledBitmapH, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap);
-
-        return cdata;
     }
 
     public void drawOnScreen(
             final double x,
             final double y,
-            final double height,
+            final int fontSize,
             final String string
     ) {
         this.shader.use();
@@ -156,13 +82,12 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
                        100));
         this.shader.setUniformMat4x4(this.uniformViewMatrix, new Matrix4f().identity());
         this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
-        draw(x, y, (float) height, string, 1, 1);
+        draw(x, y + fontSize, fontSize, string);
     }
 
     public void drawInWorld(
             final double x,
             final double y,
-            final double height,
             final String string
     ) {
         this.shader.use();
@@ -172,22 +97,21 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
 
         val pixelsPerUnitVertical = this.camera.getViewportHeightInPixels() / this.camera.getViewportHeightInUnits();
         val pixelsPerUnitHorizontal = this.camera.getViewportWidthInPixels() / this.camera.getViewportWidthInUnits();
-        draw(x, y, (float) (pixelsPerUnitVertical / height), string, pixelsPerUnitVertical, pixelsPerUnitHorizontal);
+        draw(x, y, 8, string);
     }
 
     private void draw(
             final double x,
             final double y,
-            final float height,
-            final String string,
-            final double pixelsPerUnitVertical,
-            final double pixelsPerUnitHorizontal
+            final int fontSize,
+            final String string
     ) {
-        val scale = stbtt_ScaleForPixelHeight(this.fontInfo, height);
-
         glBindVertexArray(this.vao);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        glBindTexture(GL_TEXTURE_2D, this.textureId);
+        val fontTexture = this.font.getTextureForSize(fontSize);
+        val fontPixelHeightScale = fontTexture.getPixelHeightScale();
+
+        fontTexture.bind();
         try (val stack = MemoryStack.stackPush()) {
             val pCodePoint = stack.mallocInt(1);
 
@@ -196,8 +120,8 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
 
             val alignedQuad = STBTTAlignedQuad.mallocStack(stack);
 
-            val factorX = height / this.contentScaleX;
-            val factorY = height / this.contentScaleY;
+            val factorX = 1.0f / fontTexture.getContentScaleX();
+            val factorY = 1.0f / fontTexture.getContentScaleY();
 
             var lineStart = 0;
             var lineY = 0.0f;
@@ -208,7 +132,11 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
                 val cp = pCodePoint.get(0);
                 if (cp == '\n') {
                     pX.put(0, 0.0f);
-                    pY.put(0, lineY = pY.get(0) + (this.ascent - this.descent + this.lineGap) * scale);
+
+                    val lineOffset = this.font.getLineOffset() * fontPixelHeightScale;
+                    val nextLineY = pY.get(0) + lineOffset;
+                    pY.put(0, nextLineY);
+                    lineY = nextLineY;
 
                     lineStart = i;
                     continue;
@@ -217,24 +145,17 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
                 }
 
                 val cpX = pX.get(0);
-                stbtt_GetBakedQuad(this.bakedCharacters,
-                                   this.scaledBitmapW,
-                                   this.scaledBitmapH,
-                                   cp - 32,
-                                   pX,
-                                   pY,
-                                   alignedQuad,
-                                   true);
-                pX.put(0, (float) scale(cpX, pX.get(0), factorX / pixelsPerUnitHorizontal));
+                fontTexture.getNextCharacterToQuad(cp, pX, pY, alignedQuad);
+                pX.put(0, (float) scale(cpX, pX.get(0), factorX));
                 if (this.kerningEnabled && i < to) {
                     getCP(string, to, i, pCodePoint);
-                    pX.put(0, pX.get(0) + stbtt_GetCodepointKernAdvance(this.fontInfo, cp, pCodePoint.get(0)) * scale);
+                    pX.put(0, pX.get(0) + stbtt_GetCodepointKernAdvance(this.font.getFontInfo(), cp, pCodePoint.get(0)) * fontPixelHeightScale);
                 }
 
-                val x0 = x + scale(cpX, alignedQuad.x0(), factorX / pixelsPerUnitHorizontal);
-                val x1 = x + scale(cpX, alignedQuad.x1(), factorX / pixelsPerUnitHorizontal);
-                val y0 = y + scale(lineY, alignedQuad.y0(), factorY / pixelsPerUnitVertical);
-                val y1 = y + scale(lineY, alignedQuad.y1(), factorY / pixelsPerUnitVertical);
+                val x0 = x + scale(cpX, alignedQuad.x0(), factorX);
+                val x1 = x + scale(cpX, alignedQuad.x1(), factorX);
+                val y0 = y + scale(lineY, alignedQuad.y0(), factorY);
+                val y1 = y + scale(lineY, alignedQuad.y1(), factorY);
                 val u0 = alignedQuad.s0();
                 val u1 = alignedQuad.s1();
                 val v0 = alignedQuad.t0();
@@ -336,7 +257,7 @@ public class TextRenderer<TTexture extends Texture> implements AutoCloseable {
 
     @Override
     public void close() {
-        this.bakedCharacters.close();
+        this.font.close();
 
         MemoryUtil.memFree(this.vertexDataBuffer);
         glDeleteVertexArrays(this.vao);

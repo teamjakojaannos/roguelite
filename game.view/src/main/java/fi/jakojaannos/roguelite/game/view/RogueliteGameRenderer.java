@@ -27,7 +27,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final RogueliteCamera camera;
     private final TextureRegistry<LWJGLTexture> textureRegistry;
     private final SpriteRegistry<LWJGLTexture> spriteRegistry;
-    private final TextRenderer<LWJGLTexture> textRenderer;
+    private final TextRenderer textRenderer;
 
     public RogueliteGameRenderer(final Path assetRoot, final LWJGLWindow window) {
         LOG.debug("Constructing GameRenderer...");
@@ -36,7 +36,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
         this.textureRegistry = new TextureRegistry<>(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry<>(assetRoot, this.textureRegistry);
-        this.textRenderer = new TextRenderer<>(assetRoot, this.camera);
+        this.textRenderer = new TextRenderer(assetRoot, this.camera);
 
         val builder = SystemDispatcher.builder()
                                       .withSystem(new LevelRenderingSystem(assetRoot, this.camera, this.spriteRegistry))
