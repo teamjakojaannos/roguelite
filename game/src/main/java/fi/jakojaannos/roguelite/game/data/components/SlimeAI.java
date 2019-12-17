@@ -6,8 +6,7 @@ import org.joml.Vector2d;
 public class SlimeAI implements Component {
 
     public double chaseRadiusSquared = 100.0 * 100.0,
-            targetRadiusSquared = 1.0,
-            regroupRadiusSquared = 0.01;
+            targetRadiusSquared = 1.0;
 
     public double crawlSpeed = 0.5;
 

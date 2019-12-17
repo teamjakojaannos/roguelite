@@ -14,5 +14,7 @@ public class SlimeSharedAI implements Component {
     public boolean regrouping = false;
     public Vector2d regroupPos = new Vector2d();
 
+    public double regroupRadiusSquared = 0.01;
+
 
 }
