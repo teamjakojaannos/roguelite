@@ -64,6 +64,14 @@ task jacocoRootReport(type: JacocoReport) {
     classDirectories.from files(subprojects.sourceSets.main.output)
     executionData.from files(subprojects.jacocoTestReport.executionData)
 
+    afterEvaluate {
+        classDirectories.setFrom files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/engine/lwjgl/**/*"
+            ])
+        })
+    }
+
     reports {
         html.enabled = true
         xml.enabled = true
