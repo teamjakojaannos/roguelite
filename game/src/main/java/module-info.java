@@ -1,13 +1,13 @@
 module roguelite.game {
     requires static lombok;
+    requires transitive org.joml;
     requires org.slf4j;
     requires org.lwjgl.opengl;
-    requires org.joml;
     requires jsr305;
 
-    requires roguelite.engine;
-    requires roguelite.engine.utilities;
-    requires roguelite.engine.ecs;
+    requires transitive roguelite.engine;
+    requires transitive roguelite.engine.utilities;
+    requires transitive roguelite.engine.ecs;
     requires transitive roguelite.engine.lwjgl;
 
     opens fi.jakojaannos.roguelite.game.data.resources to roguelite.engine.ecs;
@@ -15,6 +15,7 @@ module roguelite.game {
 
     exports fi.jakojaannos.roguelite.game;
     exports fi.jakojaannos.roguelite.game.data;
+    exports fi.jakojaannos.roguelite.game.data.archetypes;
     exports fi.jakojaannos.roguelite.game.data.components;
     exports fi.jakojaannos.roguelite.game.data.resources;
 }

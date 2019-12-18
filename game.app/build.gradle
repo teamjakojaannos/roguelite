@@ -1,10 +1,19 @@
 dependencies {
     implementation project(':engine')
+    implementation project(':engine.ecs')
+    implementation project(':engine.utilities')
     implementation project(':engine.view')
     implementation project(':engine.lwjgl')
 
     implementation project(':game')
     implementation project(':game.view')
+
+    implementation "org.joml:joml:${jomlVersion}"
+
+    // Cucumber for fancy tests
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${jUnitVersion}"
 }
 
 test {
