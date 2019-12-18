@@ -71,14 +71,8 @@ public class SlimeAIControllerSystem implements ECSSystem {
 
             val dist = tempPlayerPos.distanceSquared(tempPos);
 
-            if (dist > ai.chaseRadiusSquared) {
-                ai.regroupTimer -= delta;
-
-                input.move.set(0);
-                return;
-            }
-
-            if (dist < ai.targetRadiusSquared) {
+            ai.regroupTimer -= delta;
+            if (dist > ai.chaseRadiusSquared || dist < ai.targetRadiusSquared) {
                 input.move.set(0);
                 return;
             }
