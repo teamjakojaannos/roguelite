@@ -11,10 +11,8 @@ import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.game.view.systems.LevelRenderingSystem;
-import fi.jakojaannos.roguelite.game.view.systems.RenderGameOverSystem;
-import fi.jakojaannos.roguelite.game.view.systems.RenderHUDSystem;
-import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
+import fi.jakojaannos.roguelite.game.view.systems.*;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +41,8 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                                       .withSystem(new LevelRenderingSystem(assetRoot, this.camera, this.spriteRegistry))
                                       .withSystem(new SpriteRenderingSystem(assetRoot, this.camera, this.spriteRegistry))
                                       .withSystem(new RenderHUDSystem(this.textRenderer))
-                                      .withSystem(new RenderGameOverSystem(this.textRenderer, this.camera));
+                                      .withSystem(new RenderGameOverSystem(this.textRenderer, this.camera))
+                                      .withSystem(new HealthBarRenderingSystem(assetRoot, this.camera));
 
         if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, this.camera));
@@ -58,6 +57,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
 
     @Override
     public void render(GameState state, double partialTickAlpha) {
+        state.getWorld().getResource(Time.class).setTimeManager(state.getTime());
         // Make sure that the camera configuration matches the current state
         this.camera.updateConfigurationFromState(state);
 

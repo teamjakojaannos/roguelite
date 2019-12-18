@@ -34,5 +34,8 @@ public class Health implements Component {
         damageInstances.add(dmg);
     }
 
-
+    public double asPercentage() {
+        if (maxHealth == 0.0) return 0.0;
+        return currentHealth / maxHealth;
+    }
 }

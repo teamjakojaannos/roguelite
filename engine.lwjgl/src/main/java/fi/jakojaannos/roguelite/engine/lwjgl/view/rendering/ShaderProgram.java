@@ -49,6 +49,10 @@ public class ShaderProgram implements AutoCloseable {
         }
     }
 
+    public void setUniform1f(final int uniformLocation, final float value) {
+        glUniform1f(uniformLocation, value);
+    }
+
     public int getUniformLocation(final String name) {
         return glGetUniformLocation(shaderProgram, name);
     }

@@ -30,9 +30,20 @@ public class Collider implements Component, Shape {
     }
 
     public Collider(CollisionLayer layer, double size) {
+        this(layer, size, size, 0.0, 0.0);
+    }
+
+    public Collider(
+            CollisionLayer layer,
+            double width,
+            double height,
+            double originX,
+            double originY
+    ) {
         this.layer = layer;
-        this.width = size;
-        this.height = size;
+        this.width = width;
+        this.height = height;
+        this.origin.set(originX, originY);
     }
 
     public final Vector2d origin = new Vector2d();

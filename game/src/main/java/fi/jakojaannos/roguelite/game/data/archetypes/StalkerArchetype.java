@@ -36,7 +36,7 @@ public class StalkerArchetype {
         entityManager.addComponentTo(stalker, new Velocity());
         entityManager.addComponentTo(stalker, new CharacterInput());
         entityManager.addComponentTo(stalker, new Health(3));
-        entityManager.addComponentTo(stalker, new Collider(CollisionLayer.ENEMY));
+        entityManager.addComponentTo(stalker, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
         entityManager.addComponentTo(stalker, createCharacterStats());
         entityManager.addComponentTo(stalker, createStalkerAi());
         entityManager.addComponentTo(stalker, createSpriteInfo());
