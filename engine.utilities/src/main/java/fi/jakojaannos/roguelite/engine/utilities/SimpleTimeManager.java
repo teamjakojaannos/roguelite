@@ -1,12 +1,24 @@
 package fi.jakojaannos.roguelite.engine.utilities;
 
-public class SimpleTimeManager implements TimeManager {
-    private long currentTime;
+public class SimpleTimeManager implements UpdateableTimeManager {
+    private final long timestep;
+    private final double timestepInSeconds;
+
     private long currentGameTime;
 
+    public SimpleTimeManager(long timestepInMs) {
+        this.timestep = timestepInMs;
+        this.timestepInSeconds = 1.0 / timestepInMs;
+    }
+
     @Override
-    public long getCurrentRealTime() {
-        return this.currentTime;
+    public long getTimeStep() {
+        return this.timestep;
+    }
+
+    @Override
+    public double getTimeStepInSeconds() {
+        return this.timestepInSeconds;
     }
 
     @Override
@@ -15,12 +27,7 @@ public class SimpleTimeManager implements TimeManager {
     }
 
     @Override
-    public void progressGameTime(long timestep) {
-        this.currentGameTime += timestep;
-    }
-
-    @Override
     public void refresh() {
-        this.currentTime = System.currentTimeMillis();
+        this.currentGameTime += this.timestep;
     }
 }

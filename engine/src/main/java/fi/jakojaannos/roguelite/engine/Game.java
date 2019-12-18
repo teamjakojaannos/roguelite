@@ -1,12 +1,12 @@
 package fi.jakojaannos.roguelite.engine;
 
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 
 import java.util.Queue;
 
 public interface Game<TState> extends AutoCloseable {
-    TimeManager getTime();
+    UpdateableTimeManager getTime();
 
     boolean isFinished();
 

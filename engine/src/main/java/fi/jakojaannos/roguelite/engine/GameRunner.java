@@ -60,7 +60,7 @@ public abstract class GameRunner<
         var state = defaultStateSupplier.get();
         game.getTime().refresh();
         val initialTime = System.currentTimeMillis();
-        var previousFrameTime = game.getTime().getCurrentRealTime();
+        var previousFrameTime = initialTime;
         var accumulator = 0L;
         var ticks = 0;
         var frames = 0;
@@ -70,8 +70,7 @@ public abstract class GameRunner<
 
         LOG.info("Entering main loop");
         while (shouldContinueLoop(game)) {
-            game.getTime().refresh();
-            val currentFrameTime = game.getTime().getCurrentRealTime();
+            val currentFrameTime = System.currentTimeMillis();
             var frameElapsedTime = currentFrameTime - previousFrameTime;
             if (frameElapsedTime > 250L) {
                 LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
@@ -84,7 +83,7 @@ public abstract class GameRunner<
             while (accumulator >= simulationTimestep) {
                 state = simulateTick(state, game, inputProvider.pollEvents(), simulationTimestepInSeconds);
 
-                game.getTime().progressGameTime(simulationTimestep);
+                game.getTime().refresh();
                 accumulator -= simulationTimestep;
                 ++ticks;
             }

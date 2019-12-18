@@ -37,7 +37,7 @@ public class GlobalState {
 
     public static void simulateTick() {
         game.tick(state, inputEvents, 0.02);
-        game.getTime().progressGameTime(20L);
+        game.getTime().refresh();
         inputEvents.clear();
     }
 

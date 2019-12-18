@@ -2,20 +2,20 @@ package fi.jakojaannos.roguelite.engine;
 
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Queue;
 
 @Slf4j
 public abstract class GameBase<TState> implements Game<TState> {
-    private final SimpleTimeManager timeManager = new SimpleTimeManager();
+    private final SimpleTimeManager timeManager = new SimpleTimeManager(20);
 
     private boolean disposed = false;
     private boolean finished = false;
 
     @Override
-    public TimeManager getTime() {
+    public UpdateableTimeManager getTime() {
         return this.timeManager;
     }
 
@@ -43,7 +43,7 @@ public abstract class GameBase<TState> implements Game<TState> {
     @Override
     public void close() {
         if (this.disposed) {
-            LOG.error(".close() called more than once for a game!");
+            LOG.error(".close() called more than once for a game instance!");
             return;
         }
         this.disposed = true;
