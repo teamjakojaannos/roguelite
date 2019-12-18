@@ -45,7 +45,7 @@ class CollisionEventCleanupSystemTest {
         collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
         collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
 
-        system.tick(Stream.of(entity), world, 0.02);
+        system.tick(Stream.of(entity), world);
         assertTrue(collisions.getEventsFor(entity).isEmpty());
     }
 
@@ -56,7 +56,7 @@ class CollisionEventCleanupSystemTest {
         collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
         collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
 
-        system.tick(Stream.of(entity), world, 0.02);
+        system.tick(Stream.of(entity), world);
         verify(entityManager).removeComponentFrom(eq(entity), eq(RecentCollisionTag.class));
     }
 }

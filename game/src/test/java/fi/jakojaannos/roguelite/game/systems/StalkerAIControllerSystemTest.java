@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,6 +14,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class StalkerAIControllerSystemTest {
     private StalkerAIControllerSystem system;
@@ -27,6 +30,9 @@ public class StalkerAIControllerSystemTest {
         system = new StalkerAIControllerSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
+        Time time = mock(Time.class);
+        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        world.getResource(Time.class).setTimeManager(time);
 
 
         Entity player = entityManager.createEntity();
@@ -72,7 +78,7 @@ public class StalkerAIControllerSystemTest {
         this.stalkerPos.setPosition(stalkerX, stalkerY);
         this.stalkerAI.jumpCoolDown = 100.0f;
 
-        this.system.tick(Stream.of(stalker), this.world, 1.0f);
+        this.system.tick(Stream.of(stalker), this.world);
 
         assertEquals(expectedSpeed, stalkerStats.speed, 0.001f);
     }
@@ -95,7 +101,7 @@ public class StalkerAIControllerSystemTest {
         this.stalkerPos.setPosition(stalkerX, stalkerY);
         this.stalkerAI.jumpCoolDown = 0.0f;
 
-        this.system.tick(Stream.of(stalker), this.world, 0.2f);
+        this.system.tick(Stream.of(stalker), this.world);
 
         boolean didUseAbility = (stalkerAI.jumpCoolDown > 0);
         assertEquals(expectedToUseAbility, didUseAbility);
@@ -107,11 +113,11 @@ public class StalkerAIControllerSystemTest {
         this.stalkerAI.jumpCoolDown = 0.0f;
         this.stalkerAI.jumpAbilityGoesCoolDownThisLong = 2.0f;
 
-        this.system.tick(Stream.of(stalker), this.world, 0.1f);
+        this.system.tick(Stream.of(stalker), this.world);
         assertEquals(2.0f, this.stalkerAI.jumpCoolDown, 0.001f);
 
-        for (int i = 0; i < 9; i++) {
-            this.system.tick(Stream.of(stalker), this.world, 0.1f);
+        for (int i = 0; i < 45; i++) {
+            this.system.tick(Stream.of(stalker), this.world);
         }
 
         assertEquals(1.1f, stalkerAI.jumpCoolDown, 0.001f);
@@ -119,8 +125,8 @@ public class StalkerAIControllerSystemTest {
         // move player out so stalker doesn't instantly leap on them
         this.playerPos.setPosition(100.0f, 100.0f);
 
-        for (int i = 0; i < 11; i++) {
-            this.system.tick(Stream.of(stalker), this.world, 0.1f);
+        for (int i = 0; i < 55; i++) {
+            this.system.tick(Stream.of(stalker), this.world);
         }
         assertEquals(0.0f, stalkerAI.jumpCoolDown, 0.001f);
     }

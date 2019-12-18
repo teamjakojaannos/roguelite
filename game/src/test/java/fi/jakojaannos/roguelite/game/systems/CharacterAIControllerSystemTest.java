@@ -66,10 +66,10 @@ public class CharacterAIControllerSystemTest {
             double expectedDirectionX,
             double expectedDirectionY
     ) {
-        this.playerPos.setPosition(playerX, playerY);
-        this.followerPos.setPosition(followerX, followerY);
+        this.playerPos.position.set(playerX, playerY);
+        this.followerPos.position.set(followerX, followerY);
 
-        this.system.tick(Stream.of(follower), this.world, 1.0f);
+        this.system.tick(Stream.of(follower), this.world);
 
         if (followerInput.move.length() != 0)
             followerInput.move.normalize();

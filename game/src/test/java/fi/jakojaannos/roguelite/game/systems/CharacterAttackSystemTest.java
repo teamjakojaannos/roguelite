@@ -4,12 +4,15 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class CharacterAttackSystemTest {
     private CharacterAttackSystem system;
@@ -25,6 +28,10 @@ class CharacterAttackSystemTest {
         this.system = new CharacterAttackSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
+
+        Time time = mock(Time.class);
+        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        world.getResource(Time.class).setTimeManager(time);
 
         entity = entityManager.createEntity();
         this.characterInput = new CharacterInput();
@@ -44,7 +51,7 @@ class CharacterAttackSystemTest {
 
         // Warm-up
         for (int i = 0; i < 100; ++i) {
-            this.system.tick(Stream.of(entity), this.world, 0.02);
+            this.system.tick(Stream.of(entity), this.world);
             this.world.getEntityManager().applyModifications();
         }
     }
@@ -55,7 +62,7 @@ class CharacterAttackSystemTest {
         weaponStats.attackRate = 1.0;
 
         characterInput.attack = false;
-        this.system.tick(Stream.of(entity), this.world, 0.02);
+        this.system.tick(Stream.of(entity), this.world);
         this.world.getEntityManager().applyModifications();
 
         assertEquals(0, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
@@ -67,7 +74,7 @@ class CharacterAttackSystemTest {
         weaponStats.attackRate = 1.0;
 
         characterInput.attack = true;
-        this.system.tick(Stream.of(entity), this.world, 0.02);
+        this.system.tick(Stream.of(entity), this.world);
         this.world.getEntityManager().applyModifications();
 
         assertEquals(1, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
@@ -80,7 +87,7 @@ class CharacterAttackSystemTest {
 
         characterInput.attack = true;
         for (int i = 0; i < 175; ++i) {
-            this.system.tick(Stream.of(entity), this.world, 0.02);
+            this.system.tick(Stream.of(entity), this.world);
             this.world.getEntityManager().applyModifications();
         }
 
@@ -93,12 +100,12 @@ class CharacterAttackSystemTest {
         weaponStats.attackRate = 1.0;
 
         characterInput.attack = true;
-        this.system.tick(Stream.of(entity), this.world, 0.02);
+        this.system.tick(Stream.of(entity), this.world);
         this.world.getEntityManager().applyModifications();
 
         characterInput.attack = false;
         for (int i = 0; i < 200; ++i) {
-            this.system.tick(Stream.of(entity), this.world, 0.02);
+            this.system.tick(Stream.of(entity), this.world);
             this.world.getEntityManager().applyModifications();
         }
 

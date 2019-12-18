@@ -23,7 +23,7 @@ public class ReaperSystemTest {
         entityManager.addComponentTo(entity, new DeadTag());
 
 
-        system.tick(Stream.of(entity), world, 0.2f);
+        system.tick(Stream.of(entity), world);
 
         assertTrue(entity.isMarkedForRemoval());
     }
@@ -43,7 +43,7 @@ public class ReaperSystemTest {
         Entity e3 = entityManager.createEntity();
         entityManager.addComponentTo(e3, new DeadTag());
 
-        system.tick(Stream.of(e1, e2, e3), world, 0.2f);
+        system.tick(Stream.of(e1, e2, e3), world);
 
         assertTrue(e1.isMarkedForRemoval());
         assertTrue(e2.isMarkedForRemoval());

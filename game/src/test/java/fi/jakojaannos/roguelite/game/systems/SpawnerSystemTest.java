@@ -7,10 +7,9 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.stream.Stream;
 
@@ -30,24 +29,22 @@ public class SpawnerSystemTest {
         this.entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
 
+        Time time = mock(Time.class);
+        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        world.getResource(Time.class).setTimeManager(time);
+
         entityManager.applyModifications();
     }
 
 
-    @ParameterizedTest
-    @CsvSource({
-                       "1.0f,225,0.1f,20",
-                       "20.0f,5,0.1f,0",
-                       "3.3f,12,0.3f,1",
-                       "0.2f,15,0.4f,15",
-                       "0.0f,15,1.0f,15"
-               })
+    @Test
     void spawnerCreatesCorrectAmountOfEnemies(
-            double spawnFrequency,
-            int nTicks,
-            double delta,
-            long expectedAmount
     ) {
+        double spawnFrequency = 1.0;
+        int nTicks = 100;
+        double delta = 0.02;
+        long expectedAmount = 2;
+
         Entity spawner = this.entityManager.createEntity();
         entityManager.addComponentTo(spawner, new Transform());
         entityManager.addComponentTo(spawner,
@@ -62,7 +59,7 @@ public class SpawnerSystemTest {
         long enemiesBefore = this.world.getEntityManager().getEntitiesWith(FollowerEnemyAI.class).count();
 
         for (int i = 0; i < nTicks; i++) {
-            this.spawnerSystem.tick(Stream.of(spawner), this.world, delta);
+            this.spawnerSystem.tick(Stream.of(spawner), this.world);
         }
 
         entityManager.applyModifications();
@@ -83,8 +80,8 @@ public class SpawnerSystemTest {
         entityManager.addComponentTo(spawner, spawnerComponent);
         entityManager.addComponentTo(spawner, new Transform());
 
-        for (int i = 0; i < 20; i++) {
-            spawnerSystem.tick(Stream.of(spawner), world, 0.2f);
+        for (int i = 0; i < 200; i++) {
+            spawnerSystem.tick(Stream.of(spawner), world);
         }
 
         verify(mockFactory, times(4)).get(eq(entityManager), any(), eq(spawnerComponent));

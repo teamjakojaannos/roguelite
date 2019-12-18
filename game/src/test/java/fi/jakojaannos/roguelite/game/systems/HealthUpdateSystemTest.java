@@ -37,7 +37,7 @@ public class HealthUpdateSystemTest {
         entityManager.addComponentTo(entity, hp);
         hp.addDamageInstance(new DamageInstance(damage));
 
-        system.tick(Stream.of(entity), world, 0.2f);
+        system.tick(Stream.of(entity), world);
 
         boolean hasDeadTag = entityManager.getComponentOf(entity, DeadTag.class).isPresent();
         assertEquals(shouldBeRemoved, hasDeadTag);

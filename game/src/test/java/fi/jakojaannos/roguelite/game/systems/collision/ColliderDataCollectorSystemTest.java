@@ -53,7 +53,7 @@ class ColliderDataCollectorSystemTest {
 
     @Test
     void entityWithColliderIsAddedToRelevantLists() {
-        system.tick(Stream.of(entityA, entityB), world, 0.02);
+        system.tick(Stream.of(entityA, entityB), world);
 
         Colliders colliders = world.getResource(Colliders.class);
         assertTrue(colliders.overlapsWithLayer.get(CollisionLayer.PLAYER_PROJECTILE)

@@ -25,7 +25,7 @@ class SystemDispatcherTest {
 
         @Override
         public void tick(
-                Stream<Entity> entities, World world, double delta
+                Stream<Entity> entities, World world
         ) {
             synchronized (callOrderLock) {
                 callOrder.add(this);
@@ -329,8 +329,7 @@ class SystemDispatcherTest {
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() > 0),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -349,8 +348,7 @@ class SystemDispatcherTest {
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() > 0),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -372,8 +370,7 @@ class SystemDispatcherTest {
                 .tick(streamThat(entities -> entities.allMatch(
                         entity -> entityManager.hasComponent(entity, ComponentA.class)
                                 && entityManager.hasComponent(entity, ComponentB.class))),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -392,8 +389,7 @@ class SystemDispatcherTest {
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() > 0),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -414,8 +410,7 @@ class SystemDispatcherTest {
                 .tick(streamThat(entities -> entities.allMatch(
                         entity -> entityManager.hasComponent(entity, ComponentC.class)
                                 || entityManager.hasComponent(entity, ComponentD.class))),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -435,8 +430,7 @@ class SystemDispatcherTest {
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() > 0),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -459,8 +453,7 @@ class SystemDispatcherTest {
                         entity -> (entityManager.hasComponent(entity, ComponentC.class)
                                 || entityManager.hasComponent(entity, ComponentD.class))
                                 && entityManager.hasComponent(entity, ComponentB.class))),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -484,8 +477,7 @@ class SystemDispatcherTest {
                                 || entityManager.hasComponent(entity, ComponentD.class))
                                 && entityManager.hasComponent(entity, ComponentB.class)
                                 && entityManager.hasComponent(entity, ComponentA.class))),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -504,8 +496,7 @@ class SystemDispatcherTest {
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() == 3),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -525,8 +516,7 @@ class SystemDispatcherTest {
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.noneMatch(
                         entity -> entityManager.hasComponent(entity, ComponentD.class))),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -548,8 +538,7 @@ class SystemDispatcherTest {
                 .tick(streamThat(entities -> entities.allMatch(
                         entity -> entityManager.hasComponent(entity, ComponentB.class)
                                 && !entityManager.hasComponent(entity, ComponentD.class))),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     @Test
@@ -572,8 +561,7 @@ class SystemDispatcherTest {
                         entity -> entityManager.hasComponent(entity, ComponentB.class)
                                 && !entityManager.hasComponent(entity, ComponentD.class)
                                 && !entityManager.hasComponent(entity, ComponentC.class))),
-                      any(),
-                      eq(0.02));
+                      any());
     }
 
     private static <T> Stream<T> streamThat(ArgumentMatcher<Stream<T>> matcher) {
