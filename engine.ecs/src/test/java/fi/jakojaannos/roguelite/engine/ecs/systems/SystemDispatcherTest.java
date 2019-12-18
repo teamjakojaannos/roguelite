@@ -184,12 +184,12 @@ class SystemDispatcherTest {
                 .withSystem(systemD = mock(SystemD.class))
                 .build();
 
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
-        verify(systemA).tick(any(), eq(world), eq(0.02));
-        verify(systemB).tick(any(), eq(world), eq(0.02));
-        verify(systemC).tick(any(), eq(world), eq(0.02));
-        verify(systemD).tick(any(), eq(world), eq(0.02));
+        verify(systemA).tick(any(), eq(world));
+        verify(systemB).tick(any(), eq(world));
+        verify(systemC).tick(any(), eq(world));
+        verify(systemD).tick(any(), eq(world));
     }
 
     @Test
@@ -206,7 +206,7 @@ class SystemDispatcherTest {
                                                       .withSystem(systemA)
                                                       .withSystem(systemB)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         assertEquals(systemB, callOrder.get(0));
         assertEquals(systemA, callOrder.get(1));
@@ -226,7 +226,7 @@ class SystemDispatcherTest {
                                                       .withSystem(systemB)
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         assertEquals(systemA, callOrder.get(0));
         assertEquals(systemB, callOrder.get(1));
@@ -254,7 +254,7 @@ class SystemDispatcherTest {
                                                       .withSystem(systemB)
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         assertEquals(systemB, callOrder.get(0));
         assertEquals(systemA, callOrder.get(1));
@@ -282,7 +282,7 @@ class SystemDispatcherTest {
                                                       .withSystem(systemB)
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         //assertEquals(systemA, callOrder.get(0));
         //assertEquals(systemB, callOrder.get(1));
@@ -312,7 +312,7 @@ class SystemDispatcherTest {
                                                       .withSystem(systemB)
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         assertEquals(systemB, callOrder.get(0));
         assertEquals(systemA, callOrder.get(1));
@@ -325,7 +325,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() > 0),
@@ -345,7 +345,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() > 0),
@@ -366,7 +366,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.allMatch(
@@ -388,7 +388,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() > 0),
@@ -408,7 +408,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.allMatch(
@@ -431,7 +431,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() > 0),
@@ -452,7 +452,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.allMatch(
@@ -476,7 +476,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.anyMatch(
@@ -500,7 +500,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.count() == 3),
@@ -520,7 +520,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.noneMatch(
@@ -542,7 +542,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.allMatch(
@@ -565,7 +565,7 @@ class SystemDispatcherTest {
         SystemDispatcher dispatcher = SystemDispatcher.builder()
                                                       .withSystem(systemA)
                                                       .build();
-        dispatcher.dispatch(world, 0.02);
+        dispatcher.dispatch(world);
 
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.allMatch(

@@ -23,8 +23,7 @@ public class RenderHUDSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double delta
+            final World world
     ) {
         this.textRenderer.drawOnScreen(0, 0, 24, "This is some test text\n(on-screen)");
         this.textRenderer.drawInWorld(-12, -5, 24, "This is some test text\n(in-world)");

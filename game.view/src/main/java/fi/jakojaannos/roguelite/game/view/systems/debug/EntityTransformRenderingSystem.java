@@ -76,8 +76,7 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double partialTickAlpha
+            final World world
     ) {
         this.shader.use();
         this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());

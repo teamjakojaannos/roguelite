@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.view;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import lombok.val;
 

@@ -55,8 +55,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double partialTickAlpha
+            final World world
     ) {
         // Render using two-pass approach. By using correct data-structures with sensible estimates
         // for the initial capacity, the time complexity should be quite close to O(n). The process

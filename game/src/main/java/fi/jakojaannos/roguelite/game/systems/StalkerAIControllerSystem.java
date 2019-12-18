@@ -4,11 +4,13 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.state.TimeProvider;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
@@ -33,9 +35,10 @@ public class StalkerAIControllerSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double delta
+            final World world
     ) {
+        val delta = world.getResource(Time.class).getTimeStepInSeconds();
+
         val player = world.getResource(Players.class).player;
         if (player == null) {
             entities.forEach(entity -> world.getEntityManager()

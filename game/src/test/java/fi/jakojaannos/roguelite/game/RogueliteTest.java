@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.input.*;
-import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ class RogueliteTest {
     void inputsAreFalseByDefault() {
         GameState state = Roguelite.createInitialState();
         Roguelite roguelite = new Roguelite();
-        roguelite.tick(state, new ArrayDeque<>(), 1.0);
+        roguelite.tick(state, new ArrayDeque<>());
 
         Inputs inputs = state.getWorld().getResource(Inputs.class);
         assertFalse(inputs.inputLeft);
@@ -48,7 +48,7 @@ class RogueliteTest {
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(new InputEvent(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
 
-        roguelite.tick(state, events, 1.0);
+        roguelite.tick(state, events);
 
         Inputs inputs = state.getWorld().getResource(Inputs.class);
         assertEquals(inputs.inputLeft, left);
@@ -81,7 +81,7 @@ class RogueliteTest {
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(new InputEvent(new AxialInput(axisPos, newPos)));
 
-        roguelite.tick(state, events, 1.0);
+        roguelite.tick(state, events);
 
         assertEquals(newPos, horizontal ? mouse.pos.x : mouse.pos.y);
     }
@@ -94,7 +94,7 @@ class RogueliteTest {
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(0)));
 
-        roguelite.tick(state, events, 1.0);
+        roguelite.tick(state, events);
 
         Inputs inputs = state.getWorld().getResource(Inputs.class);
         assertTrue(inputs.inputAttack);
@@ -111,7 +111,7 @@ class RogueliteTest {
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(3)));
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(4)));
 
-        roguelite.tick(state, events, 1.0);
+        roguelite.tick(state, events);
 
         Inputs inputs = state.getWorld().getResource(Inputs.class);
         assertFalse(inputs.inputAttack);
@@ -125,11 +125,11 @@ class RogueliteTest {
 
         // Pressed
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(0)));
-        roguelite.tick(state, events, 1.0);
+        roguelite.tick(state, events);
 
         // Released
         events.offer(ButtonInput.released(InputButton.Mouse.button(0)));
-        roguelite.tick(state, events, 1.0);
+        roguelite.tick(state, events);
 
         Inputs inputs = state.getWorld().getResource(Inputs.class);
         assertFalse(inputs.inputAttack);

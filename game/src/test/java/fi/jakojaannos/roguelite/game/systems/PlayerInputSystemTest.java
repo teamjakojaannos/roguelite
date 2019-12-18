@@ -65,7 +65,7 @@ class PlayerInputSystemTest {
         inputs.inputRight = right;
         inputs.inputUp = up;
         inputs.inputDown = down;
-        system.tick(Stream.of(player), this.world, 1.0);
+        system.tick(Stream.of(player), this.world);
         world.getEntityManager().applyModifications();
 
         assertEquals(expectedHorizontal, this.input.move.x);
@@ -87,7 +87,7 @@ class PlayerInputSystemTest {
         mouse.pos.x = mouseX;
         mouse.pos.y = mouseY;
 
-        system.tick(Stream.of(player), this.world, 1.0);
+        system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();
 
         assertEquals(expectedX, abilities.attackTarget.x);
@@ -99,17 +99,17 @@ class PlayerInputSystemTest {
         Inputs inputs = this.world.getResource(Inputs.class);
         inputs.inputAttack = false;
 
-        system.tick(Stream.of(player), this.world, 1.0);
+        system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();
         assertFalse(input.attack);
 
         inputs.inputAttack = true;
-        system.tick(Stream.of(player), this.world, 1.0);
+        system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();
         assertTrue(input.attack);
 
         inputs.inputAttack = false;
-        system.tick(Stream.of(player), this.world, 1.0);
+        system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();
         assertFalse(input.attack);
     }

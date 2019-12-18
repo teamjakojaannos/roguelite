@@ -1,18 +1,19 @@
 package fi.jakojaannos.roguelite.engine;
 
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.state.TimeProvider;
+import fi.jakojaannos.roguelite.engine.state.WorldProvider;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 
 import java.util.Queue;
 
-public interface Game<TState> extends AutoCloseable {
-    UpdateableTimeManager getTime();
-
+public interface Game extends AutoCloseable {
     boolean isFinished();
 
     void setFinished(boolean state);
 
     boolean isDisposed();
 
-    TState tick(TState state, Queue<InputEvent> inputEvents, double delta);
+    GameState tick(GameState state, Queue<InputEvent> inputEvents);
 }

@@ -8,7 +8,7 @@ public class SimpleTimeManager implements UpdateableTimeManager {
 
     public SimpleTimeManager(long timestepInMs) {
         this.timestep = timestepInMs;
-        this.timestepInSeconds = 1.0 / timestepInMs;
+        this.timestepInSeconds = timestepInMs / 1000.0;
     }
 
     @Override

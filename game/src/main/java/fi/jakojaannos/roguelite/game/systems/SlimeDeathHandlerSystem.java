@@ -18,10 +18,10 @@ public class SlimeDeathHandlerSystem implements ECSSystem {
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.tickAfter(HealthUpdateSystem.class)
-                .tickBefore(ReaperSystem.class)
-                .withComponent(DeadTag.class)
-                .withComponent(SlimeAI.class)
-                .withComponent(Transform.class);
+                    .tickBefore(ReaperSystem.class)
+                    .withComponent(DeadTag.class)
+                    .withComponent(SlimeAI.class)
+                    .withComponent(Transform.class);
 
     }
 
@@ -30,7 +30,8 @@ public class SlimeDeathHandlerSystem implements ECSSystem {
 
     @Override
     public void tick(
-            Stream<Entity> entities, World world, double delta
+            final Stream<Entity> entities,
+            final World world
     ) {
 
         val entityManager = world.getEntityManager();

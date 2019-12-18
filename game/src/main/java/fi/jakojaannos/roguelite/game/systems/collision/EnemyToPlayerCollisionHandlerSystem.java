@@ -26,8 +26,7 @@ public class EnemyToPlayerCollisionHandlerSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double delta
+            final World world
     ) {
         val entityManager = world.getEntityManager();
         val collisions = world.getResource(Collisions.class);

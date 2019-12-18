@@ -21,9 +21,8 @@ public class ReaperSystem implements ECSSystem {
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world
     ) {
         val entityManager = world.getEntityManager();
         entities.forEach(entity -> {

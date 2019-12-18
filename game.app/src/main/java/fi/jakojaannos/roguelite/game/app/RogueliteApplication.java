@@ -2,9 +2,9 @@ package fi.jakojaannos.roguelite.game.app;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
 import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.Roguelite;
-import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class RogueliteApplication {
     }
 
     public void run(final Path assetRoot) {
-        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider, GameState>(this.windowWidth, this.windowHeight, this.floatWindow)
+        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>(this.windowWidth, this.windowHeight, this.floatWindow)
         ) {
             try (val renderer = new RogueliteGameRenderer(assetRoot,
                                                           runner.getWindow());

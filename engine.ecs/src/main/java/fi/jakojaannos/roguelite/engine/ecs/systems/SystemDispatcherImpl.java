@@ -18,10 +18,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private final SystemStorage systems;
 
     @Override
-    public void dispatch(
-            final World world,
-            final double delta
-    ) {
+    public void dispatch(final World world) {
         val dispatchContext = new DispatchContext(this.systems.getSystems(), this.systems.getSystemGroups());
 
         Optional<Class<? extends ECSSystem>> nextEntryPoint;
@@ -39,7 +36,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                 }
 
                 if (dispatchContext.isReadyToDispatch(systemContext)) {
-                    removeFromQueueAndDispatch(world, dispatchContext, queue, systemContext, delta);
+                    removeFromQueueAndDispatch(world, dispatchContext, queue, systemContext);
                 } else {
                     queueDependenciesWithoutRemovingFromQueue(dispatchContext, queue, systemContext);
                 }
@@ -52,16 +49,14 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             final World world,
             final DispatchContext dispatchContext,
             final Deque<SystemContext> queue,
-            final SystemContext systemContext,
-            final double delta
+            final SystemContext systemContext
     ) {
         queue.removeFirst();
         systemContext.getInstance().tick(world.getEntityManager().getEntitiesWith(systemContext.getRequirements().getRequiredComponents(),
                                                                                   systemContext.getRequirements().getExcludedComponents(),
                                                                                   systemContext.getRequirements().getRequiredGroups(),
                                                                                   systemContext.getRequirements().getExcludedGroups()),
-                                         world,
-                                         delta);
+                                         world);
         dispatchContext.setDispatched(systemContext);
     }
 

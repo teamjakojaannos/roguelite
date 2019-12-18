@@ -1,8 +1,10 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.state.TimeProvider;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -21,10 +23,10 @@ public class SpawnerSystem implements ECSSystem {
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world
     ) {
+        val delta = world.getResource(Time.class).getTimeStepInSeconds();
         EntityManager cluster = world.getEntityManager();
 
         entities.forEach(entity -> {

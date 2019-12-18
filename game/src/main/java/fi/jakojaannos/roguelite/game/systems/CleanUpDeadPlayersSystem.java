@@ -23,8 +23,7 @@ public class CleanUpDeadPlayersSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double delta
+            final World world
     ) {
         val players = world.getResource(Players.class);
         if (players.player == null) {

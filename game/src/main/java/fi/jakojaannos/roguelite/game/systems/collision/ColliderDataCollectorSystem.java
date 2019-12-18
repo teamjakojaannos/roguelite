@@ -25,8 +25,7 @@ public class ColliderDataCollectorSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double delta
+            final World world
     ) {
         val colliders = world.getResource(Colliders.class);
 

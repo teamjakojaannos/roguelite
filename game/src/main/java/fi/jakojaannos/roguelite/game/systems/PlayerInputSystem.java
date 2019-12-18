@@ -33,8 +33,7 @@ public class PlayerInputSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double delta
+            final World world
     ) {
         val inputs = world.getResource(Inputs.class);
         val mouse = world.getResource(Mouse.class);

@@ -29,8 +29,7 @@ public class CollisionEventCleanupSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double delta
+            final World world
     ) {
         world.getResource(Collisions.class).clear();
         entities.forEach(entity -> world.getEntityManager().removeComponentFrom(entity, RecentCollisionTag.class));

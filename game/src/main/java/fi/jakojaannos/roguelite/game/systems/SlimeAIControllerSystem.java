@@ -4,11 +4,13 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.state.TimeProvider;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.SlimeAI;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
@@ -20,11 +22,11 @@ public class SlimeAIControllerSystem implements ECSSystem {
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
-                .requireResource(Players.class)
-                .withComponent(SlimeAI.class)
-                .withComponent(CharacterInput.class)
-                .withComponent(CharacterStats.class)
-                .withComponent(Transform.class);
+                    .requireResource(Players.class)
+                    .withComponent(SlimeAI.class)
+                    .withComponent(CharacterInput.class)
+                    .withComponent(CharacterStats.class)
+                    .withComponent(Transform.class);
     }
 
 
@@ -33,15 +35,14 @@ public class SlimeAIControllerSystem implements ECSSystem {
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world
     ) {
-
+        val delta = world.getResource(Time.class).getTimeStepInSeconds();
 
         val entityManager = world.getEntityManager();
         val player = world.getResource(Players.class).player;
-        if (player == null){
+        if (player == null) {
             return;
         }
 
@@ -79,7 +80,7 @@ public class SlimeAIControllerSystem implements ECSSystem {
 
             if (ai.jumpCoolDown < 0.0) {
                 tempDir.set(playerPos)
-                        .sub(tempPos);
+                       .sub(tempPos);
 
                 ai.jumpDir.set(tempDir);
                 ai.airTime = ai.setAirTimeCoolDown;

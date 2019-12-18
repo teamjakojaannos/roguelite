@@ -30,9 +30,8 @@ public class CharacterAIControllerSystem implements ECSSystem {
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world
     ) {
         val player = world.getResource(Players.class).player;
         if (player == null) {

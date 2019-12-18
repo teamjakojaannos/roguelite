@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine;
 
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -19,9 +20,8 @@ import java.util.function.Supplier;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class GameRunner<
-        TGame extends Game<TState>,
-        TInput extends InputProvider,
-        TState>
+        TGame extends Game,
+        TInput extends InputProvider>
         implements AutoCloseable {
     /**
      * Should the game loop continue running
@@ -45,10 +45,10 @@ public abstract class GameRunner<
      *                      provided renderer is <code>null</code>.
      */
     public void run(
-            final Supplier<TState> defaultStateSupplier,
+            final Supplier<GameState> defaultStateSupplier,
             final TGame game,
             final TInput inputProvider,
-            final BiConsumer<TState, Double> renderer
+            final BiConsumer<GameState, Double> renderer
     ) {
         if (game.isDisposed()) {
             throw new IllegalStateException("Tried running an already disposed game!");
@@ -58,15 +58,11 @@ public abstract class GameRunner<
 
         // Loop
         var state = defaultStateSupplier.get();
-        game.getTime().refresh();
         val initialTime = System.currentTimeMillis();
         var previousFrameTime = initialTime;
         var accumulator = 0L;
         var ticks = 0;
         var frames = 0;
-
-        val simulationTimestep = 20L; // 50 TPS = 20ms per tick
-        val simulationTimestepInSeconds = simulationTimestep / 1000.0;
 
         LOG.info("Entering main loop");
         while (shouldContinueLoop(game)) {
@@ -80,15 +76,14 @@ public abstract class GameRunner<
             previousFrameTime = currentFrameTime;
 
             accumulator += frameElapsedTime;
-            while (accumulator >= simulationTimestep) {
-                state = simulateTick(state, game, inputProvider.pollEvents(), simulationTimestepInSeconds);
-
-                game.getTime().refresh();
-                accumulator -= simulationTimestep;
+            while (accumulator >= state.getTime().getTimeStep()) {
+                state = simulateTick(state, game, inputProvider.pollEvents());
+                state.updateTime();
+                accumulator -= state.getTime().getTimeStep();
                 ++ticks;
             }
 
-            val partialTickAlpha = accumulator / (double) simulationTimestep;
+            val partialTickAlpha = accumulator / (double) state.getTime().getTimeStep();
             renderer.accept(state, partialTickAlpha);
             presentGameState(state, renderer, partialTickAlpha);
             frames++;
@@ -116,19 +111,17 @@ public abstract class GameRunner<
      *
      * @param game        Game to simulate
      * @param inputEvents Input events to process during this tick
-     * @param delta       Time since the last tick
      */
-    public TState simulateTick(
-            TState state,
-            TGame game,
-            Queue<InputEvent> inputEvents,
-            double delta
+    public GameState simulateTick(
+            final GameState state,
+            final TGame game,
+            final Queue<InputEvent> inputEvents
     ) {
         if (game.isDisposed()) {
             throw new IllegalStateException("Simulating tick for already disposed game!");
         }
 
-        return game.tick(state, inputEvents, delta);
+        return game.tick(state, inputEvents);
     }
 
     /**
@@ -138,8 +131,8 @@ public abstract class GameRunner<
      * @param partialTickAlpha Time blending factor between the last two frames we should render at
      */
     public void presentGameState(
-            TState state,
-            BiConsumer<TState, Double> renderer,
+            GameState state,
+            BiConsumer<GameState, Double> renderer,
             double partialTickAlpha
     ) {
         renderer.accept(state, partialTickAlpha);

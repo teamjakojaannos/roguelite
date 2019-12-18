@@ -9,8 +9,9 @@ import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
-import fi.jakojaannos.roguelite.game.data.GameState;
+import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.*;
@@ -24,7 +25,7 @@ import java.util.Arrays;
 import java.util.Queue;
 
 @Slf4j
-public class Roguelite extends GameBase<GameState> {
+public class Roguelite extends GameBase {
     private final SystemDispatcher dispatcher;
 
     public Roguelite() {
@@ -70,7 +71,7 @@ public class Roguelite extends GameBase<GameState> {
 
     public static GameState createInitialState(long seed) {
         val entities = EntityManager.createNew(256, 32);
-        val state = new GameState(World.createNew(entities));
+        val state = new GameState(World.createNew(entities), new SimpleTimeManager(20L));
 
         val player = PlayerArchetype.create(entities,
                                             new Transform(0, 0));
@@ -109,11 +110,10 @@ public class Roguelite extends GameBase<GameState> {
 
     @Override
     public GameState tick(
-            GameState state,
-            final Queue<InputEvent> inputEvents,
-            final double delta
+            final GameState state,
+            final Queue<InputEvent> inputEvents
     ) {
-        state = super.tick(state, inputEvents, delta);
+        state.getWorld().getResource(Time.class).setTimeManager(state.getTime());
         val inputs = state.getWorld().getResource(Inputs.class);
         val mouse = state.getWorld().getResource(Mouse.class);
 
@@ -145,7 +145,7 @@ public class Roguelite extends GameBase<GameState> {
             });
         }
 
-        this.dispatcher.dispatch(state.getWorld(), delta);
+        this.dispatcher.dispatch(state.getWorld());
         state.getWorld().getEntityManager().applyModifications();
 
         if (state.getWorld().getResource(GameStatus.class).shouldRestart) {

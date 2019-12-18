@@ -18,7 +18,6 @@ public interface SystemDispatcher extends AutoCloseable {
      * Call this to tick all registered systems.
      *
      * @param world ECS {@link World} to use as a data source for the systems.
-     * @param delta time elapsed since the last tick
      */
-    void dispatch(World world, double delta);
+    void dispatch(World world);
 }

@@ -88,9 +88,8 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
     @Override
     public void tick(
-            Stream<Entity> entities,
-            World world,
-            double partialTickAlpha
+            final Stream<Entity> entities,
+            final World world
     ) {
         this.shader.use();
         this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());

@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 /**
  * A single stateless logical unit, performing a data transformation procedure on collections of
  * {@link Component components} based on groupings called {@link Entity entities}. Provides a {@link
- * #tick(Stream, World, double) tick}-method for applying the state update on compatible entities.
+ * #tick(Stream, World) tick}-method for applying the state update on compatible entities.
  * <p>
  * Systems should never be manually ticked outside of a test environment. Instead, a {@link
  * SystemDispatcher dispatcher} should be used, as it automatically handles managing dependencies
@@ -46,8 +46,8 @@ public interface ECSSystem {
      * execution order with another system, provided builder can manage that, too.
      * <p>
      * Any components marked as required here are guaranteed to exist on entities during {@link
-     * #tick(Stream, World, double) tick}. Same goes the other way around for excluding components.
-     * In other words
+     * #tick(Stream, World) tick}. Same goes the other way around for excluding components. In other
+     * words
      * <pre>
      * {@code
      *  // in declareRequirements
@@ -73,29 +73,6 @@ public interface ECSSystem {
      *
      * @param entities stream of matching entities to operate on
      * @param world    world the entities belong to
-     * @param delta    time passed since the last frame
-     *
-     * @deprecated use the overload without the delta-parameter instead. Get delta from a time
-     * manager if needed
      */
-    @Deprecated
-    default void tick(
-            Stream<Entity> entities,
-            World world,
-            double delta
-    ) {
-        tick(entities, world);
-    }
-
-
-    /**
-     * Performs the state manipulation on given {@link World}. All entities are guaranteed to match
-     * requirements specified in {@link #declareRequirements(RequirementsBuilder)}.
-     *
-     * @param entities stream of matching entities to operate on
-     * @param world    world the entities belong to
-     */
-    default void tick(Stream<Entity> entities, World world) {
-        tick(entities, world, 0.02);
-    }
+    void tick(Stream<Entity> entities, World world);
 }

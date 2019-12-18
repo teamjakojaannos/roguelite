@@ -38,8 +38,7 @@ public class LevelRenderingSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double partialTickAlpha
+            final World world
     ) {
         val camera = world.getEntityManager()
                           .getComponentOf(world.getResource(CameraProperties.class).cameraEntity,

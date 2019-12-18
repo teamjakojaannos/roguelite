@@ -4,11 +4,11 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.TextRenderer;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
 import fi.jakojaannos.roguelite.game.DebugConfig;
-import fi.jakojaannos.roguelite.game.data.GameState;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.view.systems.LevelRenderingSystem;
@@ -66,7 +66,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         state.getWorld().getEntityManager().getComponentOf(cameraEntity, Camera.class)
              .ifPresent(cam -> this.camera.setPosition(cam.pos.x - this.camera.getViewportWidthInUnits() / 2.0,
                                                        cam.pos.y - this.camera.getViewportHeightInUnits() / 2.0));
-        this.rendererDispatcher.dispatch(state.getWorld(), partialTickAlpha);
+        this.rendererDispatcher.dispatch(state.getWorld());
     }
 
     @Override

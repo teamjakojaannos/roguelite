@@ -23,8 +23,7 @@ public class RestartGameSystem implements ECSSystem {
     @Override
     public void tick(
             final Stream<Entity> entities,
-            final World world,
-            final double delta
+            final World world
     ) {
         val anyPlayerAlive = entities.count() > 0;
         if (anyPlayerAlive) {

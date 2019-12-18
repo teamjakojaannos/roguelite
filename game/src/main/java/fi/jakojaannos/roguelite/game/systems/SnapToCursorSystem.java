@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class SnapToCursorSystem implements ECSSystem {
     @Override
-    public void declareRequirements( RequirementsBuilder requirements) {
+    public void declareRequirements(RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.PHYSICS_TICK)
                     .requireResource(Mouse.class)
                     .requireResource(CameraProperties.class)
@@ -29,9 +29,8 @@ public class SnapToCursorSystem implements ECSSystem {
 
     @Override
     public void tick(
-             Stream<Entity> entities,
-             World world,
-            double delta
+            final Stream<Entity> entities,
+            final World world
     ) {
         val mouse = world.getResource(Mouse.class);
         val camProps = world.getResource(CameraProperties.class);
@@ -44,8 +43,8 @@ public class SnapToCursorSystem implements ECSSystem {
                                      .orElseGet(() -> tmpCamPos.set(0.0, 0.0));
 
         entities.forEach(entity -> {
-            val transform = world.getEntityManager().getComponentOf(entity, Transform.class).get();
-            transform.setPosition(cursorPosition.x, cursorPosition.y);
+            val transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
+            transform.position.set(cursorPosition.x, cursorPosition.y);
         });
     }
 }
