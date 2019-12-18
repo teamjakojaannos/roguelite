@@ -28,6 +28,6 @@ public class SimpleTimeManager implements UpdateableTimeManager {
 
     @Override
     public void refresh() {
-        this.currentGameTime += this.timestep;
+        ++this.currentGameTime;
     }
 }

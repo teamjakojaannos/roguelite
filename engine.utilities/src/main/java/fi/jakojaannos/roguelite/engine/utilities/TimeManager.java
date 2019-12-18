@@ -18,7 +18,7 @@ public interface TimeManager {
      * @return the number of ticks the time lasts based on current {@link #getTimeStep() timestep}
      */
     default long convertToTicks(final double seconds) {
-        return (long) Math.floor(seconds * getTimeStep());
+        return (long) Math.floor(seconds * 1000.0 / getTimeStep());
     }
 
     /**
