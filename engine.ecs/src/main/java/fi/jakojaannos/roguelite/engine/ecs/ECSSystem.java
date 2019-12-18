@@ -74,10 +74,28 @@ public interface ECSSystem {
      * @param entities stream of matching entities to operate on
      * @param world    world the entities belong to
      * @param delta    time passed since the last frame
+     *
+     * @deprecated use the overload without the delta-parameter instead. Get delta from a time
+     * manager if needed
      */
-    void tick(
+    @Deprecated
+    default void tick(
             Stream<Entity> entities,
             World world,
             double delta
-    );
+    ) {
+        tick(entities, world);
+    }
+
+
+    /**
+     * Performs the state manipulation on given {@link World}. All entities are guaranteed to match
+     * requirements specified in {@link #declareRequirements(RequirementsBuilder)}.
+     *
+     * @param entities stream of matching entities to operate on
+     * @param world    world the entities belong to
+     */
+    default void tick(Stream<Entity> entities, World world) {
+        tick(entities, world, 0.02);
+    }
 }
