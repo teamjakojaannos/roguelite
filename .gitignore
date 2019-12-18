@@ -1,5 +1,7 @@
 /.gradle/
-/.idea/
+/.idea/*.xml
+/.idea/dictionaries/
+/.idea/modules/
 /build/
 /*/build/
 
