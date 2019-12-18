@@ -28,7 +28,7 @@ public class SlimeDeathHandlerSystemTest {
         entityManager.applyModifications();
 
         long amountBefore = entityManager.getEntitiesWith(SlimeAI.class).count();
-        system.tick(Stream.of(slime), world, 0.2);
+        system.tick(Stream.of(slime), world);
         entityManager.applyModifications();
         long amountAfter = entityManager.getEntitiesWith(SlimeAI.class).count();
 
@@ -60,7 +60,7 @@ public class SlimeDeathHandlerSystemTest {
         sharedAI.slimes.add(slime4);
 
         entityManager.addComponentTo(slime4, new DeadTag());
-        system.tick(Stream.of(slime4), world, 0.2);
+        system.tick(Stream.of(slime4), world);
 
         assertTrue(sharedAI.slimes.size() == 3
                 && !sharedAI.slimes.contains(slime4));

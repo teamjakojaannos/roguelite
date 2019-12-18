@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.game.data.components.SlimeAI;
 import fi.jakojaannos.roguelite.game.data.components.SlimeSharedAI;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class SlimeAIControllerSystemTest {
 
@@ -26,6 +29,10 @@ public class SlimeAIControllerSystemTest {
         SlimeAIControllerSystem system = new SlimeAIControllerSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
+
+        Time time = mock(Time.class);
+        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        world.getResource(Time.class).setTimeManager(time);
 
         world.getResource(Players.class).player =
                 PlayerArchetype.create(entityManager, new Transform(100, 100));
@@ -45,7 +52,7 @@ public class SlimeAIControllerSystemTest {
         sharedAI.regroupPos.set(0.0, 0.0);
         sharedAI.regrouping = true;
 
-        system.tick(list.stream(), world, 0.2);
+        system.tick(list.stream(), world);
         entityManager.applyModifications();
 
         List<EntityManager.EntityComponentPair<SlimeAI>> entities =
