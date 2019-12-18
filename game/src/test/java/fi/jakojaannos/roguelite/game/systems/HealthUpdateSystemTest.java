@@ -35,7 +35,7 @@ public class HealthUpdateSystemTest {
         Entity entity = entityManager.createEntity();
         Health hp = new Health(maxHp, currentHp);
         entityManager.addComponentTo(entity, hp);
-        hp.addDamageInstance(new DamageInstance(damage));
+        hp.addDamageInstance(new DamageInstance(damage), 0);
 
         system.tick(Stream.of(entity), world);
 
