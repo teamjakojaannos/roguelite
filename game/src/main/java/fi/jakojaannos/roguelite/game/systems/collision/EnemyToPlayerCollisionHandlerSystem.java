@@ -6,6 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.data.resources.Time;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class EnemyToPlayerCollisionHandlerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
+        val timeManager = world.getResource(Time.class);
         val entityManager = world.getEntityManager();
         val collisions = world.getResource(Collisions.class);
 
@@ -53,7 +55,7 @@ public class EnemyToPlayerCollisionHandlerSystem implements ECSSystem {
                         continue;
                     }
 
-                    health.addDamageInstance(new DamageInstance(stats.damage));
+                    health.addDamageInstance(new DamageInstance(stats.damage), timeManager.getCurrentGameTime());
                     abilities.attackTimer = 0.0;
                 }
             }

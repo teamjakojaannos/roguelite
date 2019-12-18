@@ -105,6 +105,7 @@ public class HealthBarRenderingSystem implements ECSSystem {
                               2 * 4);
     }
 
+
     @Override
     public void tick(
             final Stream<Entity> entities,
@@ -119,10 +120,16 @@ public class HealthBarRenderingSystem implements ECSSystem {
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
 
         val entityManager = world.getEntityManager();
+        val timeManager = world.getResource(Time.class);
+        val healthbarDurationInTicks = timeManager.convertToTicks(5.0);
 
         entities.forEach(entity -> {
             val transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
             val health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
+
+            long ticksSinceDamaged = timeManager.getCurrentGameTime() - health.lastDamageInstanceTimeStamp;
+            if (!health.healthBarAlwaysVisible
+                    && ticksSinceDamaged >= healthbarDurationInTicks) return;
 
             this.shader.setUniform1f(uniformHealth, (float) health.asPercentage());
 

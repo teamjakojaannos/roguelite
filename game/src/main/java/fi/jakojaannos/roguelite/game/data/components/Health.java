@@ -20,6 +20,9 @@ public class Health implements Component {
      */
     currentHealth = 100.0;
 
+    public long lastDamageInstanceTimeStamp = -10000L;
+    public boolean healthBarAlwaysVisible = false;
+
     public Health(double maxHp, double currentHp) {
         this.maxHealth = maxHp;
         this.currentHealth = currentHp;
@@ -30,8 +33,9 @@ public class Health implements Component {
         this.currentHealth = maxHp;
     }
 
-    public void addDamageInstance(DamageInstance dmg) {
+    public void addDamageInstance(DamageInstance dmg, long timeStamp) {
         damageInstances.add(dmg);
+        if (timeStamp >= lastDamageInstanceTimeStamp) lastDamageInstanceTimeStamp = timeStamp;
     }
 
     public double asPercentage() {
