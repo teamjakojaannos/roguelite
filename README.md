@@ -1,3 +1,5 @@
+Note: This repository has been archived, due to development continuing on a private repo.
+
 Project: Konna
 ==============
 [![CircleCI](https://circleci.com/gh/teamjakojaannos/roguelite.svg?style=svg)](https://circleci.com/gh/teamjakojaannos/roguelite)
